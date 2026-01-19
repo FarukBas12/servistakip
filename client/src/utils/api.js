@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const api = axios.create({
     baseURL: 'https://servistakip-backend.onrender.com/api',
     headers: {
