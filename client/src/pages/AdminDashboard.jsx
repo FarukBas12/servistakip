@@ -34,8 +34,6 @@ const AdminDashboard = () => {
             <div className="glass-panel" style={{ padding: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                     <h1>Yönetici Paneli</h1>
-                    <Link to="/admin/create-task" className="glass-btn" style={{ textDecoration: 'none', background: 'rgba(76, 175, 80, 0.3)', borderColor: 'rgba(76, 175, 80, 0.5)' }}>
-                        + Yeni Görev
                 </div>
 
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
