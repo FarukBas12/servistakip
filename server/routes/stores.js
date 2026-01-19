@@ -9,5 +9,6 @@ router.get('/', storeController.getAllStores);
 router.post('/', storeController.createStore);
 router.post('/bulk', storeController.bulkCreateStores);
 router.get('/:code', storeController.searchStore);
+router.delete('/:id', storeController.deleteStore);
 
 module.exports = router;

@@ -80,3 +80,14 @@ exports.getAllStores = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
+
+exports.deleteStore = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await db.query('DELETE FROM stores WHERE id = $1', [id]);
+        res.json({ message: 'Store deleted' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
