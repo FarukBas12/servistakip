@@ -46,6 +46,29 @@ const TaskCreate = () => {
         }
     };
 
+    const handleGeocode = async (addressToSearch) => {
+        if (!addressToSearch) return alert('Lütfen önce bir adres girin.');
+
+        try {
+            const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressToSearch)}`);
+            const geoData = await geoRes.json();
+
+            if (geoData && geoData.length > 0) {
+                setFormData(prev => ({
+                    ...prev,
+                    lat: geoData[0].lat,
+                    lng: geoData[0].lon,
+                    maps_link: `https://www.google.com/maps?q=${geoData[0].lat},${geoData[0].lon}`
+                }));
+            } else {
+                alert('Adres haritada bulunamadı. Lütfen daha detaylı (İlçe/Şehir ekleyerek) yazın.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Konum servisine erişilemedi.');
+        }
+    };
+
     const handleStoreCodeBlur = async (e) => {
         const code = e.target.value;
         if (!code) return;
@@ -64,21 +87,8 @@ const TaskCreate = () => {
             };
             setFormData(newFormData);
 
-            // 2. Geocode Address via OpenStreetMap (Nominatim)
-            // Note: This is a client-side call to a public API
-            const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(store.address)}`);
-            const geoData = await geoRes.json();
-
-            if (geoData && geoData.length > 0) {
-                setFormData({
-                    ...newFormData,
-                    lat: geoData[0].lat,
-                    lng: geoData[0].lon,
-                    maps_link: `https://www.google.com/maps?q=${geoData[0].lat},${geoData[0].lon}`
-                });
-            } else {
-                alert('Adres bulundu ancak haritada yeri tespit edilemedi. Lütfen konumu elle girin.');
-            }
+            // 2. Auto Geocode
+            handleGeocode(store.address);
 
         } catch (err) {
             console.error(err);
@@ -107,7 +117,10 @@ const TaskCreate = () => {
 
                     <input className="glass-input" name="title" placeholder="Görev Başlığı / Mağaza Adı" value={formData.title} onChange={handleChange} required />
                     <textarea className="glass-input" name="description" placeholder="Açıklama" value={formData.description} onChange={handleChange} rows="3" />
-                    <input className="glass-input" name="address" placeholder="Adres (Metin)" value={formData.address} onChange={handleChange} required />
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <input className="glass-input" name="address" placeholder="Adres (Metin)" value={formData.address} onChange={handleChange} required style={{ flex: 1 }} />
+                        <button type="button" onClick={() => handleGeocode(formData.address)} className="glass-btn" style={{ background: 'rgba(33, 150, 243, 0.3)', whiteSpace: 'nowrap' }}>📍 Bul</button>
+                    </div>
 
                     <label>Konum (Otomatik Hesaplanır)</label>
                     <div style={{ display: 'flex', gap: '10px' }}>
