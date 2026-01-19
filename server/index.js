@@ -39,8 +39,18 @@ app.get('/setup', async (req, res) => {
         // 1.5 FIX SCHEMA (Add missing columns if they don't exist)
         try {
             await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS maps_link TEXT");
+
+            // Create Stores Table
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS stores (
+                    id SERIAL PRIMARY KEY,
+                    code VARCHAR(50) UNIQUE NOT NULL,
+                    name VARCHAR(100) NOT NULL,
+                    address TEXT NOT NULL
+                );
+            `);
         } catch (e) {
-            console.log('Column already exists or error:', e.message);
+            console.log('Schema update error:', e.message);
         }
 
         // 2. Force Reset Admin Password (Server-Side Hash)

@@ -32,6 +32,13 @@ CREATE TABLE IF NOT EXISTS photos (
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS stores (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR(50) UNIQUE NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    address TEXT NOT NULL
+);
+
 -- Seed Data (Optional)
 -- Password is '123456' hashed with bcrypt
 INSERT INTO users (username, password_hash, role) 
