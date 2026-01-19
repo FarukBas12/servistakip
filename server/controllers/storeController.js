@@ -30,26 +30,44 @@ exports.createStore = async (req, res) => {
 
 exports.bulkCreateStores = async (req, res) => {
     try {
-        const { stores } = req.body; // Array of {code, name, address}
-        const results = [];
+        const { stores } = req.body;
+        if (!stores || stores.length === 0) return res.status(400).json({ message: 'No data' });
 
-        // Handling bulk insert usually done with a single query, but loop is safer for simple error handling per row if needed.
-        // For speed, let's do a transaction or individual inserts.
-        // Let's do individual for simplicity and error logging, but ignore duplicates (ON CONFLICT DO NOTHING)
+        // Batch processing to avoid timeout and query limits
+        const BATCH_SIZE = 500;
 
-        for (const store of stores) {
-            if (!store.code || !store.name) continue;
+        for (let i = 0; i < stores.length; i += BATCH_SIZE) {
+            const batch = stores.slice(i, i + BATCH_SIZE);
 
-            await db.query(
-                'INSERT INTO stores (code, name, address) VALUES ($1, $2, $3) ON CONFLICT (code) DO UPDATE SET name = $2, address = $3',
-                [store.code, store.name, store.address]
-            );
+            // Construct dynamic query: INSERT INTO stores ... VALUES ($1,$2,$3), ($4,$5,$6) ...
+            const values = [];
+            const placeholders = [];
+            let counter = 1;
+
+            batch.forEach(store => {
+                if (store.code && store.name) {
+                    values.push(store.code, store.name, store.address);
+                    placeholders.push(`($${counter}, $${counter + 1}, $${counter + 2})`);
+                    counter += 3;
+                }
+            });
+
+            if (placeholders.length > 0) {
+                const query = `
+                    INSERT INTO stores (code, name, address) 
+                    VALUES ${placeholders.join(', ')}
+                    ON CONFLICT (code) DO UPDATE SET 
+                        name = EXCLUDED.name, 
+                        address = EXCLUDED.address
+                `;
+                await db.query(query, values);
+            }
         }
 
-        res.json({ message: 'Success' });
+        res.json({ message: 'Success', count: stores.length });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error('Bulk Import Error:', err.message);
+        res.status(500).json({ message: err.message });
     }
 };
 

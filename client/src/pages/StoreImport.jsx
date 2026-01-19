@@ -49,7 +49,8 @@ const StoreImport = () => {
             setTimeout(() => navigate('/admin'), 2000);
         } catch (err) {
             console.error(err);
-            setStatus('❌ Hata oluştu. Verileri kontrol edin (Çok büyük veri veya geçersiz karakter).');
+            const errMsg = err.response?.data?.message || err.message || 'Bilinmeyen Hata';
+            setStatus(`❌ Hata: ${errMsg}`);
         }
     };
 
