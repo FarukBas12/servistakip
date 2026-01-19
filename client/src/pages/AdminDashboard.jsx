@@ -36,7 +36,12 @@ const AdminDashboard = () => {
                     <h1>Yönetici Paneli</h1>
                     <Link to="/admin/create-task" className="glass-btn" style={{ textDecoration: 'none', background: 'rgba(76, 175, 80, 0.3)', borderColor: 'rgba(76, 175, 80, 0.5)' }}>
                         + Yeni Görev
-                    </Link>
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+                    <Link to="/admin/create-task" className="glass-btn" style={{ background: 'rgba(76, 175, 80, 0.3)' }}>+ Yeni Görev</Link>
+                    <Link to="/admin/create-user" className="glass-btn" style={{ background: 'rgba(33, 150, 243, 0.3)' }}>+ Kullanıcı Ekle</Link>
+                    <Link to="/admin/import-stores" className="glass-btn" style={{ background: 'rgba(156, 39, 176, 0.3)' }}>📥 Mağaza Yükle</Link>
                 </div>
 
                 <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px' }}>

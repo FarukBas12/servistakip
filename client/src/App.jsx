@@ -1,3 +1,4 @@
+```javascript
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -7,6 +8,7 @@ import TechDashboard from './pages/TechDashboard';
 import TechTaskDetail from './pages/TechTaskDetail';
 import TaskCreate from './pages/TaskCreate';
 import UserCreate from './pages/UserCreate';
+import StoreImport from './pages/StoreImport';
 import TaskPool from './pages/TaskPool';
 import GlobalMap from './pages/GlobalMap';
 import Reports from './pages/Reports';
@@ -26,6 +28,7 @@ function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/create-task" element={<TaskCreate />} />
             <Route path="/admin/create-user" element={<UserCreate />} />
+            <Route path="/admin/import-stores" element={<StoreImport />} />
             <Route path="/admin/pool" element={<TaskPool />} />
             <Route path="/admin/map" element={<GlobalMap />} />
             <Route path="/admin/reports" element={<Reports />} />

@@ -7,6 +7,7 @@ router.use(auth);
 
 router.get('/', storeController.getAllStores);
 router.post('/', storeController.createStore);
+router.post('/bulk', storeController.bulkCreateStores);
 router.get('/:code', storeController.searchStore);
 
 module.exports = router;
