@@ -46,48 +46,47 @@ const TaskCreate = () => {
         }
     };
 
-    return (
     const handleStoreCodeBlur = async (e) => {
-            const code = e.target.value;
-            if (!code) return;
+        const code = e.target.value;
+        if (!code) return;
 
-            try {
-                // 1. Get Store Info from Backend
-                const res = await api.get(`/stores/${code}`);
-                const store = res.data;
+        try {
+            // 1. Get Store Info from Backend
+            const res = await api.get(`/stores/${code}`);
+            const store = res.data;
 
-                // Update form with basic info first
-                const newFormData = {
-                    ...formData,
-                    title: store.name,
-                    address: store.address,
-                    description: `Mağaza Kodu: ${store.code}`
-                };
-                setFormData(newFormData);
+            // Update form with basic info first
+            const newFormData = {
+                ...formData,
+                title: store.name,
+                address: store.address,
+                description: `Mağaza Kodu: ${store.code}`
+            };
+            setFormData(newFormData);
 
-                // 2. Geocode Address via OpenStreetMap (Nominatim)
-                // Note: This is a client-side call to a public API
-                const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(store.address)}`);
-                const geoData = await geoRes.json();
+            // 2. Geocode Address via OpenStreetMap (Nominatim)
+            // Note: This is a client-side call to a public API
+            const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(store.address)}`);
+            const geoData = await geoRes.json();
 
-                if (geoData && geoData.length > 0) {
-                    setFormData({
-                        ...newFormData,
-                        lat: geoData[0].lat,
-                        lng: geoData[0].lon,
-                        maps_link: `https://www.google.com/maps?q=${geoData[0].lat},${geoData[0].lon}`
-                    });
-                } else {
-                    alert('Adres bulundu ancak haritada yeri tespit edilemedi. Lütfen konumu elle girin.');
-                }
-
-            } catch (err) {
-                console.error(err);
-                if (err.response && err.response.status === 404) {
-                    alert('Mağaza kodu bulunamadı!');
-                }
+            if (geoData && geoData.length > 0) {
+                setFormData({
+                    ...newFormData,
+                    lat: geoData[0].lat,
+                    lng: geoData[0].lon,
+                    maps_link: `https://www.google.com/maps?q=${geoData[0].lat},${geoData[0].lon}`
+                });
+            } else {
+                alert('Adres bulundu ancak haritada yeri tespit edilemedi. Lütfen konumu elle girin.');
             }
-        };
+
+        } catch (err) {
+            console.error(err);
+            if (err.response && err.response.status === 404) {
+                alert('Mağaza kodu bulunamadı!');
+            }
+        }
+    };
 
     return (
         <div className="dashboard">
