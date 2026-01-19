@@ -36,6 +36,13 @@ app.get('/setup', async (req, res) => {
         const sql = fs.readFileSync(path.join(__dirname, 'database.sql'), 'utf8');
         await pool.query(sql);
 
+        // 1.5 FIX SCHEMA (Add missing columns if they don't exist)
+        try {
+            await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS maps_link TEXT");
+        } catch (e) {
+            console.log('Column already exists or error:', e.message);
+        }
+
         // 2. Force Reset Admin Password (Server-Side Hash)
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash('123456', salt);

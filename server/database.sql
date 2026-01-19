@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     title VARCHAR(100) NOT NULL,
     description TEXT,
     address TEXT NOT NULL,
+    maps_link TEXT,
     lat DECIMAL(9,6),
     lng DECIMAL(9,6),
     due_date TIMESTAMP,
