@@ -8,5 +8,6 @@ const authController = require('../controllers/authController');
 router.post('/login', authController.login);
 router.get('/users', authController.getUsers);
 router.post('/register', authController.createUser); // Ideally protected
+router.delete('/:id', authController.deleteUser);
 
 module.exports = router;

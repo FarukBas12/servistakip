@@ -1,22 +1,37 @@
-import React, { useEffect, useState } from 'react';
-import api from '../utils/api';
-import { Link } from 'react-router-dom';
+import { playNotificationSound } from '../utils/sound';
 
 const TechDashboard = () => {
     const [tasks, setTasks] = useState([]);
+    const [lastCount, setLastCount] = useState(0);
+
+    const fetchTasks = async (playSound = false) => {
+        try {
+            const res = await api.get('/tasks');
+            const newTasks = res.data;
+            setTasks(newTasks);
+
+            // If tasks increased, play sound!
+            if (playSound && newTasks.length > lastCount && lastCount !== 0) {
+                playNotificationSound();
+            }
+            if (newTasks.length !== lastCount) {
+                setLastCount(newTasks.length);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     useEffect(() => {
-        const fetchTasks = async () => {
-            try {
-                // api adds token automatically, backend filters by user id for technician
-                const res = await api.get('/tasks');
-                setTasks(res.data);
-            } catch (err) {
-                console.error(err);
-            }
-        };
-        fetchTasks();
-    }, []);
+        fetchTasks(false); // Initial load
+
+        // Poll every 30 seconds
+        const interval = setInterval(() => {
+            fetchTasks(true);
+        }, 30000);
+
+        return () => clearInterval(interval);
+    }, [lastCount]); // Re-run if count changes (to update closure) or just rely on state
 
     return (
         <div className="dashboard">
