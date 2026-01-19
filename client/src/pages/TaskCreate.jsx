@@ -50,7 +50,10 @@ const TaskCreate = () => {
         if (!addressToSearch) return alert('Lütfen önce bir adres girin.');
 
         try {
-            const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressToSearch)}`);
+            // Trick: Append "Türkiye" to help the geocoder focus on the country
+            const query = addressToSearch.toLowerCase().includes('türkiye') ? addressToSearch : `${addressToSearch}, Türkiye`;
+
+            const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
             const geoData = await geoRes.json();
 
             if (geoData && geoData.length > 0) {
@@ -61,11 +64,11 @@ const TaskCreate = () => {
                     maps_link: `https://www.google.com/maps?q=${geoData[0].lat},${geoData[0].lon}`
                 }));
             } else {
-                alert('Adres haritada bulunamadı. Lütfen daha detaylı (İlçe/Şehir ekleyerek) yazın.');
+                alert('Adres tam bulunamadı. Lütfen "Mahalle, İlçe, İl" sıralamasıyla yazıp tekrar deneyin.\nÖrnek: "Cumhuriyet Mah, Konak, İzmir"');
             }
         } catch (err) {
             console.error(err);
-            alert('Konum servisine erişilemedi.');
+            alert('Harita servisine erişilemedi (İnternet bağlantınızı kontrol edin).');
         }
     };
 
