@@ -87,8 +87,20 @@ const TaskCreate = () => {
         if (!addressToSearch) return alert('Lütfen önce bir adres girin.');
 
         try {
+            // Smart Clean: Remove "Pafta", "Ada", "Parsel" and complex "No:" patterns that confuse Nominatim
+            // Example: "X Mah. Y Sok. No:1/13 Pafta:53 Ada:387..." -> "X Mah. Y Sok."
+            let cleanAddr = addressToSearch
+                .replace(/Pafta\s*[:\d\.]+/gi, '')
+                .replace(/Ada\s*[:\d\.]+/gi, '')
+                .replace(/Parsel\s*[:\d\.]+/gi, '')
+                .replace(/No\s*[:\d\/]+/gi, '') // Remove door numbers if they are complex (optional, but helps generic search)
+                .replace(/\s+/g, ' ')
+                .trim();
+
             // Trick: Append "Türkiye" to help the geocoder focus on the country
-            const query = addressToSearch.toLowerCase().includes('türkiye') ? addressToSearch : `${addressToSearch}, Türkiye`;
+            const query = cleanAddr.toLowerCase().includes('türkiye') ? cleanAddr : `${cleanAddr}, Türkiye`;
+
+            console.log(`Geocoding Query: ${query}`); // Debug
 
             const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
             const geoData = await geoRes.json();
@@ -101,7 +113,7 @@ const TaskCreate = () => {
                     maps_link: `https://www.google.com/maps?q=${geoData[0].lat},${geoData[0].lon}`
                 }));
             } else {
-                alert('Adres tam bulunamadı. Lütfen "Mahalle, İlçe, İl" sıralamasıyla yazıp tekrar deneyin.\nÖrnek: "Cumhuriyet Mah, Konak, İzmir"');
+                alert(`Adres tam bulunamadı.\n\nAranan: "${cleanAddr}"\n\nİpucu: "Mahalle, İlçe, İl" olarak sadeleştirip tekrar deneyin veya aşağıdaki HARİTADAN seçin.`);
             }
         } catch (err) {
             console.error(err);
