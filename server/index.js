@@ -103,6 +103,64 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something broke!');
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// AUTO MIGRATION FUNCTION
+async function runMigrations() {
+    const pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+    });
+
+    console.log('🔄 Checking Database Schema...');
+
+    try {
+        await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS maps_link TEXT");
+        console.log(' - Checked maps_link');
+
+        await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS region VARCHAR(50) DEFAULT 'Diğer'");
+        console.log(' - Checked region');
+
+        await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS lat FLOAT");
+        console.log(' - Checked lat');
+
+        await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS lng FLOAT");
+        console.log(' - Checked lng');
+
+        // Create Photos Table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS photos (
+                id SERIAL PRIMARY KEY,
+                task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
+                url TEXT NOT NULL,
+                type VARCHAR(50),
+                gps_lat FLOAT,
+                gps_lng FLOAT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log(' - Checked photos table');
+
+        // Create Stores Table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS stores (
+                id SERIAL PRIMARY KEY,
+                code VARCHAR(50) UNIQUE NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                address TEXT NOT NULL
+            );
+        `);
+        console.log(' - Checked stores table');
+
+        console.log('✅ Database Schema Verified & Updated!');
+    } catch (e) {
+        console.error('❌ Schema update error:', e.message);
+    } finally {
+        await pool.end();
+    }
+}
+
+// Start Server AFTER Migrations
+runMigrations().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
 });
