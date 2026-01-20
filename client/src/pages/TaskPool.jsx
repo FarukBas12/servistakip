@@ -24,7 +24,77 @@ const TaskPool = () => {
         fetchUsers();
     }, []);
 
-    // ... (fetch logic remains)
+    const fetchTasks = async () => {
+        try {
+            const res = await api.get('/tasks');
+            // Filter only unassigned tasks or completed ones
+            // Also ensure we handle the new region field logic safely
+            setTasks(res.data.filter(t => !t.assigned_to || t.status === 'completed'));
+            setLoading(false);
+        } catch (err) {
+            console.error(err);
+            setLoading(false);
+        }
+    };
+
+    const fetchUsers = async () => {
+        try {
+            const res = await api.get('/auth/users');
+            setUsers(res.data.filter(u => u.role === 'technician'));
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('Bu görevi silmek istediğinize emin misiniz?')) return;
+        try {
+            await api.delete(`/tasks/${id}`);
+            setTasks(tasks.filter(t => t.id !== id));
+        } catch (err) {
+            alert('Silme işlemi başarısız');
+        }
+    };
+
+    const openEditModal = (task) => {
+        setEditingTask(task);
+        setEditForm({
+            title: task.title,
+            description: task.description || '',
+            address: task.address
+        });
+        setModalMode('edit');
+    };
+
+    const openAssignModal = (task) => {
+        setEditingTask(task);
+        setAssignId('');
+        setModalMode('assign');
+    };
+
+    const handleEditSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await api.put(`/tasks/${editingTask.id}`, editForm);
+            alert('Görev güncellendi');
+            setEditingTask(null);
+            fetchTasks(); // Refresh to see changes
+        } catch (err) {
+            alert('Güncelleme başarısız');
+        }
+    };
+
+    const handleAssignSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await api.put(`/tasks/${editingTask.id}`, { assigned_to: assignId });
+            alert('Görev atandı');
+            setEditingTask(null);
+            fetchTasks(); // It will disappear from pool
+        } catch (err) {
+            alert('Atama başarısız');
+        }
+    };
 
     // Filtered tasks
     const filteredTasks = tasks.filter(task => {
