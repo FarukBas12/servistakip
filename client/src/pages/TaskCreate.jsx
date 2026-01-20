@@ -125,11 +125,26 @@ const TaskCreate = () => {
                         <button type="button" onClick={() => handleGeocode(formData.address)} className="glass-btn" style={{ background: 'rgba(33, 150, 243, 0.3)', whiteSpace: 'nowrap' }}>📍 Bul</button>
                     </div>
 
-                    <label>Konum (Otomatik Hesaplanır)</label>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        <input className="glass-input" name="lat" value={formData.lat} type="number" step="any" placeholder="Enlem (Lat)" onChange={handleChange} />
-                        <input className="glass-input" name="lng" value={formData.lng} type="number" step="any" placeholder="Boylam (Lng)" onChange={handleChange} />
+                    <label>Konum (Haritadan Seçin)</label>
+                    <div style={{ height: '300px', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.3)', marginBottom: '1rem' }}>
+                        {formData.lat && formData.lng ? (
+                            <iframe
+                                width="100%"
+                                height="100%"
+                                style={{ border: 0 }}
+                                loading="lazy"
+                                allowFullScreen
+                                src={`https://maps.google.com/maps?q=${formData.lat},${formData.lng}&z=15&output=embed`}
+                            ></iframe>
+                        ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: 'rgba(0,0,0,0.2)', color: '#aaa' }}>
+                                Önce Adresi "Bul" butonuna tıklayın veya <br /> (Harita entegrasyonu sonraki adımda tam eklenecek)
+                            </div>
+                        )}
                     </div>
+                    {/* Hidden inputs for form submission */}
+                    <input type="hidden" name="lat" value={formData.lat} />
+                    <input type="hidden" name="lng" value={formData.lng} />
 
                     <input className="glass-input" name="maps_link" value={formData.maps_link} placeholder="Google Maps Linki" onChange={handleChange} />
 
