@@ -34,7 +34,7 @@ const Sidebar = () => {
             className="sidebar"
         >
             <div style={{ marginBottom: '40px', opacity: 0.8 }}>
-                <img src="/logo.png" alt="Logo" style={{ width: '32px', filter: 'grayscale(100%) brightness(200%)' }} />
+                <img src="/logo.png" alt="Logo" style={{ width: '56px', filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.4))' }} />
             </div>
 
             <nav style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
