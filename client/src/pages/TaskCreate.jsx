@@ -150,6 +150,30 @@ const TaskCreate = () => {
         }
     };
 
+    const handleLinkChange = (e) => {
+        const link = e.target.value;
+        setFormData({ ...formData, maps_link: link });
+
+        // Try to extract Lat/Lng from link
+        // Supports: "q=38.4,27.1" OR "@38.4,27.1"
+        const regex = /[@?&]q=([-0-9.]+),([-0-9.]+)|@([-0-9.]+),([-0-9.]+)/;
+        const match = link.match(regex);
+
+        if (match) {
+            const newLat = parseFloat(match[1] || match[3]);
+            const newLng = parseFloat(match[2] || match[4]);
+
+            if (!isNaN(newLat) && !isNaN(newLng)) {
+                setFormData(prev => ({
+                    ...prev,
+                    maps_link: link,
+                    lat: newLat,
+                    lng: newLng
+                }));
+            }
+        }
+    };
+
     return (
         <div className="dashboard">
             <button onClick={() => navigate('/admin')} className="glass-btn" style={{ marginBottom: '1rem' }}>&larr; Geri</button>
@@ -199,7 +223,7 @@ const TaskCreate = () => {
                     <input type="hidden" name="lat" value={formData.lat} />
                     <input type="hidden" name="lng" value={formData.lng} />
 
-                    <input className="glass-input" name="maps_link" value={formData.maps_link} placeholder="Google Maps Linki" onChange={handleChange} />
+                    <input className="glass-input" name="maps_link" value={formData.maps_link} placeholder="Google Maps Linki Yapıştır -> Otomatik Pinler" onChange={handleLinkChange} />
 
                     <label>Son Tarih</label>
                     <input className="glass-input" name="due_date" type="datetime-local" onChange={handleChange} />
