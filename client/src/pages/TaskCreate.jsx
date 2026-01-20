@@ -134,6 +134,24 @@ const TaskCreate = () => {
                 <h2 style={{ marginTop: 0 }}>Yeni Görev Oluştur (v3 - FOTO MODU)</h2>
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
+                    <div style={{ background: 'rgba(255,255,255,0.1)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', marginBottom: '10px' }}>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#90caf9' }}>📍 Bölge Seçimi</label>
+                        <select
+                            className="glass-input"
+                            name="region"
+                            value={formData.region || 'Diğer'}
+                            onChange={handleChange}
+                            style={{ background: 'rgba(0,0,0,0.3)', color: 'white' }}
+                        >
+                            <option value="Diğer" style={{ color: 'black' }}>Bölge Seçiniz (Varsayılan: Diğer)</option>
+                            <option value="Kemalpaşa" style={{ color: 'black' }}>Kemalpaşa</option>
+                            <option value="Manisa" style={{ color: 'black' }}>Manisa</option>
+                            <option value="Güzelbahçe" style={{ color: 'black' }}>Güzelbahçe</option>
+                            <option value="Torbalı" style={{ color: 'black' }}>Torbalı</option>
+                            <option value="Menemen" style={{ color: 'black' }}>Menemen</option>
+                        </select>
+                    </div>
+
                     <div style={{ background: 'rgba(255,255,255,0.1)', padding: '10px', borderRadius: '8px', border: '1px dashed rgba(255,255,255,0.3)' }}>
                         <small style={{ display: 'block', marginBottom: '5px' }}>🚀 Otomatik Doldurma</small>
                         <input
