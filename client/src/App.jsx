@@ -16,32 +16,34 @@ import Navbar from './components/Navbar';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 
-<AuthProvider>
-  <Router>
-    <Navbar />
-    <PWAInstallPrompt />
-    <Routes>
-      <Route path="/login" element={<Login />} />
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <Navbar />
+        <PWAInstallPrompt />
+        <Routes>
+          <Route path="/login" element={<Login />} />
 
-      <Route element={<PrivateRoute allowedRoles={['admin']} />}>
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/create-task" element={<TaskCreate />} />
-        <Route path="/admin/create-user" element={<UserCreate />} />
-        <Route path="/admin/import-stores" element={<StoreImport />} />
-        <Route path="/admin/pool" element={<TaskPool />} />
-        <Route path="/admin/map" element={<GlobalMap />} />
-        <Route path="/admin/reports" element={<Reports />} />
-      </Route>
+          <Route element={<PrivateRoute allowedRoles={['admin']} />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/create-task" element={<TaskCreate />} />
+            <Route path="/admin/create-user" element={<UserCreate />} />
+            <Route path="/admin/import-stores" element={<StoreImport />} />
+            <Route path="/admin/pool" element={<TaskPool />} />
+            <Route path="/admin/map" element={<GlobalMap />} />
+            <Route path="/admin/reports" element={<Reports />} />
+          </Route>
 
-      <Route element={<PrivateRoute allowedRoles={['technician']} />}>
-        <Route path="/tech" element={<TechDashboard />} />
-        <Route path="/tech/task/:id" element={<TechTaskDetail />} />
-      </Route>
+          <Route element={<PrivateRoute allowedRoles={['technician']} />}>
+            <Route path="/tech" element={<TechDashboard />} />
+            <Route path="/tech/task/:id" element={<TechTaskDetail />} />
+          </Route>
 
-      <Route path="/" element={<Navigate to="/login" />} />
-    </Routes>
-  </Router>
-</AuthProvider>
+          <Route path="/" element={<Navigate to="/login" />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
