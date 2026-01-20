@@ -9,7 +9,6 @@ const Sidebar = () => {
         { path: '/admin', icon: '🏠', label: 'İşler', exact: true },
         { path: '/admin/pool', icon: '📥', label: 'Havuz' },
         { path: '/admin/map', icon: '🗺️', label: 'Harita' },
-        { path: '/admin/materials', icon: '🧱', label: 'Malzemeler' },
         { path: '/admin/reports', icon: '📊', label: 'Raporlar' },
         { path: '/admin/create-user', icon: '👥', label: 'Personel' },
     ];

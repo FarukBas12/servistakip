@@ -8,7 +8,6 @@ import StoreImport from '../pages/StoreImport';
 import TaskPool from '../pages/TaskPool';
 import GlobalMap from '../pages/GlobalMap';
 import Reports from '../pages/Reports';
-import Materials from '../pages/Materials';
 
 const AdminLayout = () => {
     return (
@@ -23,7 +22,6 @@ const AdminLayout = () => {
                     <Route path="/pool" element={<TaskPool />} />
                     <Route path="/map" element={<GlobalMap />} />
                     <Route path="/reports" element={<Reports />} />
-                    <Route path="/materials" element={<Materials />} />
                 </Routes>
             </div>
         </div>

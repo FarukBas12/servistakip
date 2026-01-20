@@ -24,7 +24,6 @@ const Navbar = () => {
                             <Link to="/admin" className="nav-link">İşler</Link>
                             <Link to="/admin/pool" className="nav-link">İş Havuzu</Link>
                             <Link to="/admin/map" className="nav-link">Harita</Link>
-                            <Link to="/admin/materials" className="nav-link">Malzemeler</Link>
                             <Link to="/admin/reports" className="nav-link">Raporlar</Link>
                             <Link to="/admin/create-user" className="nav-link">Personel Ekle</Link>
                         </div>
