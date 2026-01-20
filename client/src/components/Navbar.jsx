@@ -21,10 +21,11 @@ const Navbar = () => {
                 <span style={{ marginLeft: '20px' }}>
                     {user.role === 'admin' ? (
                         <>
-                            <Link to="/admin" style={{ color: 'white', marginRight: '15px' }}>Panel</Link>
+                            <Link to="/admin" className="nav-link">İşler</Link>
                             <Link to="/admin/pool" style={{ color: 'white', marginRight: '15px' }}>İş Havuzu</Link>
-                            <Link to="/admin/map" style={{ color: 'white', marginRight: '15px' }}>Harita</Link>
-                            <Link to="/admin/reports" style={{ color: 'white', marginRight: '15px' }}>Raporlar</Link>
+                            <Link to="/admin/map" className="nav-link">Harita</Link>
+                            <Link to="/admin/materials" className="nav-link">Malzemeler</Link>
+                            <Link to="/admin/reports" className="nav-link">Raporlar</Link>
                             <Link to="/admin/create-user" style={{ color: 'white' }}>Personel Ekle</Link>
                         </>
                     ) : (

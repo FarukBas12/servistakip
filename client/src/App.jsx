@@ -11,6 +11,7 @@ import StoreImport from './pages/StoreImport';
 import TaskPool from './pages/TaskPool';
 import GlobalMap from './pages/GlobalMap';
 import Reports from './pages/Reports';
+import Materials from './pages/Materials';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
@@ -33,6 +34,7 @@ function App() {
             <Route path="/admin/pool" element={<TaskPool />} />
             <Route path="/admin/map" element={<GlobalMap />} />
             <Route path="/admin/reports" element={<Reports />} />
+            <Route path="/admin/materials" element={<Materials />} /> {/* Added Materials route */}
           </Route>
 
           <Route element={<PrivateRoute allowedRoles={['technician']} />}>
