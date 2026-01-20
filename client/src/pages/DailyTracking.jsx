@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import api from '../utils/api';
 import L from 'leaflet';
-import { Clock, CheckCircle2, AlertCircle, PlayCircle } from 'lucide-react';
+import { Clock, CheckCircle2, PlayCircle } from 'lucide-react';
 
 // Leaflet Icon Fix
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -16,9 +16,12 @@ let DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-const ChangeView = ({ center }) => {
+// Internal component to handle view bounds
+const ChangeView = ({ bounds }) => {
     const map = useMap();
-    if (center) map.setView(center, map.getZoom());
+    if (bounds && bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [50, 50] });
+    }
     return null;
 };
 
@@ -26,11 +29,15 @@ const DailyTracking = () => {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({ total: 0, completed: 0, active: 0 });
+    const [bounds, setBounds] = useState([]);
 
     const fetchTodayTasks = async () => {
         try {
             const res = await api.get('/tasks');
-            const today = new Date().toISOString().split('T')[0];
+
+            // Fix: Use local date for Turkey (UTC+3 friendly calculation)
+            const now = new Date();
+            const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
             const todayTasks = res.data.filter(t => {
                 if (!t.due_date) return false;
@@ -38,6 +45,13 @@ const DailyTracking = () => {
             });
 
             setTasks(todayTasks);
+
+            // Calculate bounds
+            const validBounds = todayTasks
+                .filter(t => t.lat && t.lng)
+                .map(t => [parseFloat(t.lat), parseFloat(t.lng)]);
+
+            setBounds(validBounds);
 
             const total = todayTasks.length;
             const completed = todayTasks.filter(t => t.status === 'completed').length;
@@ -63,12 +77,6 @@ const DailyTracking = () => {
             case 'in_progress': return <PlayCircle size={18} color="#2196f3" />;
             default: return <Clock size={18} color="#ffb300" />;
         }
-    };
-
-    const getMarkerColor = (status) => {
-        if (status === 'completed') return 'red'; // Leaflet default is blue, but we can customize or use standard for now
-        if (status === 'in_progress') return 'green';
-        return 'orange';
     };
 
     if (loading) return <div className="dashboard">Yükleniyor...</div>;
@@ -107,8 +115,14 @@ const DailyTracking = () => {
                                     borderRadius: '12px',
                                     background: 'rgba(255,255,255,0.03)',
                                     marginBottom: '10px',
-                                    borderLeft: `4px solid ${task.status === 'completed' ? '#4caf50' : task.status === 'in_progress' ? '#2196f3' : '#ffb300'}`
-                                }}>
+                                    borderLeft: `4px solid ${task.status === 'completed' ? '#4caf50' : task.status === 'in_progress' ? '#2196f3' : '#ffb300'}`,
+                                    cursor: 'pointer'
+                                }}
+                                    onClick={() => {
+                                        // Could center map on this task if clicked
+                                        if (task.lat && task.lng) setBounds([[parseFloat(task.lat), parseFloat(task.lng)]]);
+                                    }}
+                                >
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                                         <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{task.title}</span>
                                         <span>{getStatusIcon(task.status)}</span>
@@ -135,6 +149,7 @@ const DailyTracking = () => {
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                             attribution='&copy; OpenStreetMap'
                         />
+                        <ChangeView bounds={bounds} />
                         {tasks.filter(t => t.lat && t.lng).map(task => (
                             <Marker key={task.id} position={[parseFloat(task.lat), parseFloat(task.lng)]}>
                                 <Popup>
