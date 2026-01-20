@@ -17,7 +17,7 @@ const Navbar = () => {
         <nav className="glass-panel" style={{ margin: '1rem', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
                 <img src="/logo.png" alt="Logo" style={{ height: '40px', marginRight: '15px' }} />
-                <strong style={{ fontSize: '1.2rem', marginRight: '20px' }}>ServisTakip App</strong>
+                <strong style={{ fontSize: '1.2rem', marginRight: '20px' }}>APPnov</strong>
                 <span style={{ marginLeft: '20px' }}>
                     {user.role === 'admin' ? (
                         <>
