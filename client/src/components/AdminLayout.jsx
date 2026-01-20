@@ -9,6 +9,7 @@ import TaskPool from '../pages/TaskPool';
 import GlobalMap from '../pages/GlobalMap';
 import Reports from '../pages/Reports';
 import DailyTracking from '../pages/DailyTracking';
+import CompletedTasks from '../pages/CompletedTasks';
 
 const AdminLayout = () => {
     return (
@@ -23,6 +24,7 @@ const AdminLayout = () => {
                     <Route path="/pool" element={<TaskPool />} />
                     <Route path="/map" element={<GlobalMap />} />
                     <Route path="/daily" element={<DailyTracking />} />
+                    <Route path="/archive" element={<CompletedTasks />} />
                     <Route path="/reports" element={<Reports />} />
                 </Routes>
             </div>

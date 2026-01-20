@@ -27,9 +27,8 @@ const TaskPool = () => {
     const fetchTasks = async () => {
         try {
             const res = await api.get('/tasks');
-            // Filter only unassigned tasks or completed ones
-            // We keep completed ones to show history, but unassigned are the main pool
-            setTasks(res.data.filter(t => !t.assigned_to || t.status === 'completed'));
+            // Filter only unassigned tasks that are NOT completed
+            setTasks(res.data.filter(t => !t.assigned_to && t.status !== 'completed'));
             setLoading(false);
         } catch (err) {
             console.error(err);
