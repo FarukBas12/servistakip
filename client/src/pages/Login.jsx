@@ -21,7 +21,7 @@ const Login = () => {
 
     return (
         <div className="login-container" style={{ background: 'var(--bg-color)' }}>
-            <div className="glass-panel login-form">
+            <form onSubmit={handleSubmit} className="glass-panel login-form">
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                     <img src="/logo.png" alt="App Logo" style={{ width: '80px', marginBottom: '1rem' }} />
                     <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>Giriş Yap</h2>
@@ -44,7 +44,6 @@ const Login = () => {
                 <button type="submit" className="glass-btn" style={{ marginTop: '10px' }}>Giriş Yap</button>
             </form>
         </div>
-    </div >
     );
 };
 
