@@ -20,15 +20,14 @@ const Navbar = () => {
                 <strong style={{ fontSize: '1.2rem', marginRight: '20px' }}>APPnov</strong>
                 <span style={{ marginLeft: '20px' }}>
                     {user.role === 'admin' ? (
-                            <div style={{ display: 'flex', gap: '15px' }}>
-                                <Link to="/admin" className="nav-link">İşler</Link>
-                                <Link to="/admin/pool" className="nav-link">İş Havuzu</Link>
-                                <Link to="/admin/map" className="nav-link">Harita</Link>
-                                <Link to="/admin/materials" className="nav-link">Malzemeler</Link>
-                                <Link to="/admin/reports" className="nav-link">Raporlar</Link>
-                                <Link to="/admin/create-user" className="nav-link">Personel Ekle</Link>
-                            </div>
-                        </>
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                            <Link to="/admin" className="nav-link">İşler</Link>
+                            <Link to="/admin/pool" className="nav-link">İş Havuzu</Link>
+                            <Link to="/admin/map" className="nav-link">Harita</Link>
+                            <Link to="/admin/materials" className="nav-link">Malzemeler</Link>
+                            <Link to="/admin/reports" className="nav-link">Raporlar</Link>
+                            <Link to="/admin/create-user" className="nav-link">Personel Ekle</Link>
+                        </div>
                     ) : (
                         <>
                             <Link to="/tech" style={{ color: 'white', marginRight: '15px' }}>Görevlerim</Link>
