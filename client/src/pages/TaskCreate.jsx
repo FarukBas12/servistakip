@@ -12,9 +12,11 @@ const TaskCreate = () => {
         due_date: '',
         assigned_to: '',
         maps_link: '',
+        region: 'Diğer'
     });
     // New state for file attachments
     const [files, setFiles] = useState([]);
+    const [error, setError] = useState(null); // UI Error state
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -40,8 +42,18 @@ const TaskCreate = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            setError(null); // Reset error
+            // 1. Prepare Payload (Sanitize)
+            const payload = {
+                ...formData,
+                due_date: formData.due_date ? formData.due_date : null, // Handle empty date string
+                assigned_to: formData.assigned_to ? formData.assigned_to : null,
+                lat: 0,
+                lng: 0
+            };
+
             // 1. Create Task
-            const res = await api.post('/tasks', formData);
+            const res = await api.post('/tasks', payload);
             const taskId = res.data.id;
 
             // 2. Upload Photos (if any)
@@ -64,7 +76,9 @@ const TaskCreate = () => {
             navigate('/admin');
         } catch (err) {
             console.error(err);
-            alert('Failed to create task');
+            const msg = err.response?.data?.message || err.message || 'Failed to create task';
+            setError(msg);
+            alert(`Hata: ${msg}`); // Also alert for immediate feedback
         }
     };
 
@@ -132,6 +146,7 @@ const TaskCreate = () => {
             <button onClick={() => navigate('/admin')} className="glass-btn" style={{ marginBottom: '1rem' }}>&larr; Geri</button>
             <div className="glass-panel" style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
                 <h2 style={{ marginTop: 0 }}>Yeni Görev Oluştur (v3 - FOTO MODU)</h2>
+                {error && <div style={{ background: '#ff5252', color: 'white', padding: '10px', borderRadius: '5px', marginBottom: '15px' }}>🚨 {error}</div>}
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
                     <div style={{ background: 'rgba(255,255,255,0.1)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', marginBottom: '10px' }}>

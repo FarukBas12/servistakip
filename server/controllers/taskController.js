@@ -32,7 +32,7 @@ exports.createTask = async (req, res) => {
 
         const { rows } = await db.query(
             'INSERT INTO tasks (title, description, address, maps_link, due_date, assigned_to, lat, lng, region) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
-            [title, description, address, maps_link, due_date, assigned_to || null, req.body.lat || null, req.body.lng || null, req.body.region || 'Diğer']
+            [title, description, address, maps_link, due_date || null, assigned_to || null, req.body.lat || null, req.body.lng || null, req.body.region || 'Diğer']
         );
 
         res.json(rows[0]);

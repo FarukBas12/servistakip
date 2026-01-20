@@ -23,8 +23,14 @@ app.get('/', (req, res) => {
     res.send('Field Service API Running');
 });
 
-// WEB SETUP & REPAIR ROUTE
+// Ensure Uploads Directory Exists
 const fs = require('fs');
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
+// WEB SETUP & REPAIR ROUTE
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 
@@ -41,6 +47,7 @@ app.get('/setup', async (req, res) => {
         // 1.5 FIX SCHEMA (Add missing columns if they don't exist)
         try {
             await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS maps_link TEXT");
+            await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS region VARCHAR(50) DEFAULT 'Diğer'");
 
             // Create Stores Table
             await pool.query(`
