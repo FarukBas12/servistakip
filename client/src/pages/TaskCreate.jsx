@@ -1,6 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix Leaflet Default Icon
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+// Component to fly to new location when address is found
+const MapRecenter = ({ lat, lng }) => {
+    const map = useMap();
+    useEffect(() => {
+        if (lat && lng) map.flyTo([lat, lng], 15);
+    }, [lat, lng, map]);
+    return null;
+};
+
+// Component to handle map clicks
+const LocationMarker = ({ position, setPosition }) => {
+    useMapEvents({
+        click(e) {
+            setPosition(e.latlng.lat, e.latlng.lng);
+        },
+    });
+
+    return position ? <Marker position={position}></Marker> : null;
+};
 
 const TaskCreate = () => {
     const navigate = useNavigate();
@@ -11,12 +42,9 @@ const TaskCreate = () => {
         address: '',
         due_date: '',
         assigned_to: '',
-        address: '',
-        due_date: '',
-        assigned_to: '',
         maps_link: '',
-        lat: '',
-        lng: ''
+        lat: 38.4192, // Default Izmir
+        lng: 27.1287
     });
 
     useEffect(() => {
@@ -44,6 +72,15 @@ const TaskCreate = () => {
         } catch (err) {
             alert('Failed to create task');
         }
+    };
+
+    const handleMapClick = (lat, lng) => {
+        setFormData(prev => ({
+            ...prev,
+            lat: lat,
+            lng: lng,
+            maps_link: `https://www.google.com/maps?q=${lat},${lng}`
+        }));
     };
 
     const handleGeocode = async (addressToSearch) => {
@@ -125,24 +162,28 @@ const TaskCreate = () => {
                         <button type="button" onClick={() => handleGeocode(formData.address)} className="glass-btn" style={{ background: 'rgba(33, 150, 243, 0.3)', whiteSpace: 'nowrap' }}>📍 Bul</button>
                     </div>
 
-                    <label>Konum (Haritadan Seçin)</label>
+                    <label>Konum (Pini Düzeltmek İçin Haritaya Tıklayın)</label>
                     <div style={{ height: '300px', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.3)', marginBottom: '1rem' }}>
-                        {formData.lat && formData.lng ? (
-                            <iframe
-                                width="100%"
-                                height="100%"
-                                style={{ border: 0 }}
-                                loading="lazy"
-                                allowFullScreen
-                                src={`https://maps.google.com/maps?q=${formData.lat},${formData.lng}&z=15&output=embed`}
-                            ></iframe>
-                        ) : (
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: 'rgba(0,0,0,0.2)', color: '#aaa' }}>
-                                Önce Adresi "Bul" butonuna tıklayın veya <br /> (Harita entegrasyonu sonraki adımda tam eklenecek)
-                            </div>
-                        )}
+                        <MapContainer
+                            center={[parseFloat(formData.lat) || 38.4237, parseFloat(formData.lng) || 27.1428]}
+                            zoom={13}
+                            style={{ height: '100%', width: '100%' }}
+                        >
+                            <TileLayer
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                attribution='&copy; OpenStreetMap contributors'
+                            />
+                            {/* Update center when form data changes */}
+                            <MapRecenter lat={formData.lat} lng={formData.lng} />
+
+                            {/* Handle clicks */}
+                            <LocationMarker
+                                position={formData.lat && formData.lng ? [formData.lat, formData.lng] : null}
+                                setPosition={handleMapClick}
+                            />
+                        </MapContainer>
                     </div>
-                    {/* Hidden inputs for form submission */}
+                    {/* Hidden Coordinates */}
                     <input type="hidden" name="lat" value={formData.lat} />
                     <input type="hidden" name="lng" value={formData.lng} />
 
