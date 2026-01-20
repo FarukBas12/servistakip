@@ -156,7 +156,7 @@ const TechTaskDetail = () => {
                     {(!task.photos || task.photos.length === 0) && <p style={{ opacity: 0.5, fontStyle: 'italic' }}>Fotoğraf yok.</p>}
                 </div>
 
-                {task.status === 'pending' && (
+                {task.status === 'pending' ? (
                     <button
                         onClick={handleStart}
                         className="glass-btn"
@@ -165,77 +165,77 @@ const TechTaskDetail = () => {
                         🚀 Görevi Başlat
                     </button>
                 ) : (
-                task.status !== 'completed' && (
-                <div style={{ marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
-                    <div style={{ marginBottom: '20px', background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '12px' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginBottom: '15px', fontWeight: 'bold', color: '#64b5f6' }}>
-                            <input
-                                type="checkbox"
-                                checked={isQuoted}
-                                onChange={(e) => setIsQuoted(e.target.checked)}
-                                style={{ transform: 'scale(1.3)' }}
-                            />
-                            🛠️ Teklifli İş (Form Zorunlu Değil)
-                        </label>
+                    task.status !== 'completed' && (
+                        <div style={{ marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
+                            <div style={{ marginBottom: '20px', background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '12px' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginBottom: '15px', fontWeight: 'bold', color: '#64b5f6' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={isQuoted}
+                                        onChange={(e) => setIsQuoted(e.target.checked)}
+                                        style={{ transform: 'scale(1.3)' }}
+                                    />
+                                    🛠️ Teklifli İş (Form Zorunlu Değil)
+                                </label>
 
-                        {!isQuoted && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                <label>Servis Formu Numarası:</label>
-                                <input
-                                    type="text"
-                                    className="glass-input"
-                                    placeholder="Örn: 12345"
-                                    value={serviceFormNo}
-                                    onChange={(e) => setServiceFormNo(e.target.value)}
-                                />
+                                {!isQuoted && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <label>Servis Formu Numarası:</label>
+                                        <input
+                                            type="text"
+                                            className="glass-input"
+                                            placeholder="Örn: 12345"
+                                            value={serviceFormNo}
+                                            onChange={(e) => setServiceFormNo(e.target.value)}
+                                        />
 
-                                <label style={{ marginTop: '10px' }}>Servis Formu Fotoğrafı:</label>
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                    <input type="file" onChange={handleFileChange} accept="image/*" capture="environment" className="glass-input" />
-                                    <button
-                                        onClick={() => handleUpload('service_form')}
-                                        disabled={!file || uploading}
-                                        className="glass-btn"
-                                        style={{ background: 'rgba(33, 150, 243, 0.3)' }}
-                                    >
-                                        {uploading ? '...' : 'Formu Yükle'}
-                                    </button>
-                                </div>
+                                        <label style={{ marginTop: '10px' }}>Servis Formu Fotoğrafı:</label>
+                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                            <input type="file" onChange={handleFileChange} accept="image/*" capture="environment" className="glass-input" />
+                                            <button
+                                                onClick={() => handleUpload('service_form')}
+                                                disabled={!file || uploading}
+                                                className="glass-btn"
+                                                style={{ background: 'rgba(33, 150, 243, 0.3)' }}
+                                            >
+                                                {uploading ? '...' : 'Formu Yükle'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
 
-                    <h4>Diğer Fotoğraflar / Kanıtlar</h4>
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                        <input type="file" onChange={handleFileChange} accept="image/*" capture="environment" className="glass-input" />
-                        <button
-                            onClick={() => handleUpload('completion')}
-                            disabled={!file || uploading}
-                            className="glass-btn"
-                            style={{ whiteSpace: 'nowrap' }}
-                        >
-                            {uploading ? '...' : 'Yükle'}
-                        </button>
-                    </div>
+                            <h4>Diğer Fotoğraflar / Kanıtlar</h4>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                <input type="file" onChange={handleFileChange} accept="image/*" capture="environment" className="glass-input" />
+                                <button
+                                    onClick={() => handleUpload('completion')}
+                                    disabled={!file || uploading}
+                                    className="glass-btn"
+                                    style={{ whiteSpace: 'nowrap' }}
+                                >
+                                    {uploading ? '...' : 'Yükle'}
+                                </button>
+                            </div>
 
-                    <br />
-                    <button
-                        onClick={handleComplete}
-                        className="glass-btn"
-                        style={{ width: '100%', background: 'rgba(33, 150, 243, 0.4)', fontSize: '1.1rem', padding: '15px', marginBottom: '15px' }}
-                    >
-                        ✅ Görevi Tamamla
-                    </button>
+                            <br />
+                            <button
+                                onClick={handleComplete}
+                                className="glass-btn"
+                                style={{ width: '100%', background: 'rgba(33, 150, 243, 0.4)', fontSize: '1.1rem', padding: '15px', marginBottom: '15px' }}
+                            >
+                                ✅ Görevi Tamamla
+                            </button>
 
-                    <button
-                        onClick={() => setShowReturnModal(true)}
-                        className="glass-btn"
-                        style={{ width: '100%', background: 'rgba(244, 67, 54, 0.3)', fontSize: '1rem', padding: '12px' }}
-                    >
-                        ⚠️ İşi İade Et / Yapılamadı
-                    </button>
-                </div>
-                )
+                            <button
+                                onClick={() => setShowReturnModal(true)}
+                                className="glass-btn"
+                                style={{ width: '100%', background: 'rgba(244, 67, 54, 0.3)', fontSize: '1rem', padding: '12px' }}
+                            >
+                                ⚠️ İşi İade Et / Yapılamadı
+                            </button>
+                        </div>
+                    )
                 )}
             </div>
 
