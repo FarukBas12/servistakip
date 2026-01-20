@@ -2,7 +2,14 @@ const db = require('../db');
 
 exports.getTasks = async (req, res) => {
     try {
-        let query = 'SELECT t.*, u.username as assigned_user FROM tasks t LEFT JOIN users u ON t.assigned_to = u.id';
+        // Enlanced Query: Get Task + Assigned User + Last Cancellation info
+        let query = `
+            SELECT t.*, u.username as assigned_user,
+            (SELECT description FROM task_logs tl WHERE tl.task_id = t.id AND tl.action = 'cancelled' ORDER BY tl.created_at DESC LIMIT 1) as last_cancel_reason,
+            (SELECT COUNT(*) FROM task_logs tl WHERE tl.task_id = t.id AND tl.action = 'cancelled') as cancel_count
+            FROM tasks t 
+            LEFT JOIN users u ON t.assigned_to = u.id
+        `;
         const params = [];
 
         // If technician, only show assigned tasks
@@ -17,7 +24,7 @@ exports.getTasks = async (req, res) => {
         res.json(rows);
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ message: err.message });
     }
 };
 
@@ -95,7 +102,7 @@ exports.updateTask = async (req, res) => {
         res.json(rows[0]);
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ message: err.message });
     }
 };
 
@@ -111,7 +118,7 @@ exports.deleteTask = async (req, res) => {
         res.json({ message: 'Task deleted' });
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ message: err.message });
     }
 };
 
@@ -155,6 +162,34 @@ exports.getTaskById = async (req, res) => {
         res.json(task);
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ message: err.message });
     }
-}
+};
+
+// NEW: Cancel / Return Task to Pool
+exports.cancelTask = async (req, res) => {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const userId = req.user.id; // From auth middleware
+
+    try {
+        // 1. Log to task_logs
+        await db.query(
+            'INSERT INTO task_logs (task_id, user_id, action, description) VALUES ($1, $2, $3, $4)',
+            [id, userId, 'cancelled', reason]
+        );
+
+        // 2. Reset Task (Status: pending, Assigned: null)
+        const { rows } = await db.query(
+            'UPDATE tasks SET status = $1, assigned_to = $2 WHERE id = $3 RETURNING *',
+            ['pending', null, id]
+        );
+
+        if (rows.length === 0) return res.status(404).json({ message: 'Task not found' });
+
+        res.json({ message: 'Task returned to pool', task: rows[0] });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: err.message });
+    }
+};

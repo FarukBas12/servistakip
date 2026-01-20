@@ -28,7 +28,7 @@ const TaskPool = () => {
         try {
             const res = await api.get('/tasks');
             // Filter only unassigned tasks or completed ones
-            // Also ensure we handle the new region field logic safely
+            // We keep completed ones to show history, but unassigned are the main pool
             setTasks(res.data.filter(t => !t.assigned_to || t.status === 'completed'));
             setLoading(false);
         } catch (err) {
@@ -99,7 +99,6 @@ const TaskPool = () => {
     // Filtered tasks
     const filteredTasks = tasks.filter(task => {
         if (selectedRegion === 'Hepsi') return true;
-        // Standardize: if region is null/undefined in DB, treat as 'Diğer'
         const region = task.region || 'Diğer';
         return region === selectedRegion;
     });
@@ -136,14 +135,35 @@ const TaskPool = () => {
                         <div key={task.id} className="glass-panel" style={{
                             padding: '20px',
                             position: 'relative',
-                            borderLeft: task.status === 'completed' ? '5px solid #f44336' : '5px solid #2196f3'
+                            borderLeft: task.status === 'completed' ? '5px solid #4caf50' : '5px solid #2196f3'
                         }}>
+                            {/* CANCELLED WARNING BANNER */}
+                            {task.cancel_count > 0 && task.status !== 'completed' && (
+                                <div style={{
+                                    background: 'rgba(255, 193, 7, 0.9)',
+                                    color: '#000',
+                                    padding: '5px 10px',
+                                    borderRadius: '5px',
+                                    marginBottom: '10px',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.85rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px'
+                                }}>
+                                    ⚠️ Bu iş {task.cancel_count} kez iade edildi!
+                                    <span style={{ fontWeight: 'normal', opacity: 0.8, fontSize: '0.8rem', marginLeft: 'auto' }}>
+                                        Son: {task.last_cancel_reason?.substring(0, 15)}...
+                                    </span>
+                                </div>
+                            )}
+
                             <div style={{ position: 'absolute', top: 15, right: 15, display: 'flex', gap: '5px' }}>
-                                <button onClick={() => handleDelete(task.id)} style={{ background: 'rgba(255, 0, 0, 0.4)', border: 'none', color: 'white', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer' }}>Sil</button>
+                                <button onClick={() => handleDelete(task.id)} style={{ background: 'rgba(244, 67, 54, 0.3)', border: '1px solid rgba(255,0,0,0.3)', color: 'white', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer' }}>Sil</button>
                             </div>
 
                             <span style={{
-                                background: task.status === 'completed' ? 'rgba(244, 67, 54, 0.2)' : 'rgba(33, 150, 243, 0.2)',
+                                background: task.status === 'completed' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(33, 150, 243, 0.2)',
                                 padding: '2px 8px',
                                 borderRadius: '4px',
                                 fontSize: '0.8rem',
@@ -162,12 +182,16 @@ const TaskPool = () => {
                             {task.description && <p style={{ background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '5px' }}>{task.description}</p>}
 
                             <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                                <button onClick={() => openAssignModal(task)} className="glass-btn" style={{ flex: 1, background: 'rgba(33, 150, 243, 0.3)' }}>
-                                    👤 Personele Ata
-                                </button>
-                                <button onClick={() => openEditModal(task)} className="glass-btn" style={{ flex: 1, background: 'rgba(255, 193, 7, 0.3)' }}>
-                                    ✏️ Düzenle
-                                </button>
+                                {task.status !== 'completed' && (
+                                    <>
+                                        <button onClick={() => openAssignModal(task)} className="glass-btn" style={{ flex: 1, background: 'rgba(33, 150, 243, 0.3)' }}>
+                                            👤 Personele Ata
+                                        </button>
+                                        <button onClick={() => openEditModal(task)} className="glass-btn" style={{ flex: 1, background: 'rgba(255, 193, 7, 0.3)' }}>
+                                            ✏️ Düzenle
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
                     ))}
@@ -181,7 +205,7 @@ const TaskPool = () => {
                     background: 'rgba(0,0,0,0.8)', zIndex: 1000,
                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>
-                    <div className="glass-panel" style={{ width: '90%', maxWidth: '500px', padding: '30px' }}>
+                    <div className="glass-panel" style={{ width: '90%', maxWidth: '500px', padding: '30px', background: '#1e1e1e' }}>
                         <h3>{modalMode === 'edit' ? 'Görevi Düzenle' : 'Personel Ata'}</h3>
 
                         {modalMode === 'edit' ? (

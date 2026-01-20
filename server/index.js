@@ -158,6 +158,19 @@ async function runMigrations() {
         `);
         console.log(' - Checked stores table');
 
+        // Create Task Logs Table (For Return System)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS task_logs (
+                id SERIAL PRIMARY KEY,
+                task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
+                user_id INTEGER REFERENCES users(id),
+                action VARCHAR(50) NOT NULL,
+                description TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log(' - Checked task_logs table');
+
         console.log('✅ Database Schema Verified & Updated!');
     } catch (e) {
         console.error('❌ Schema update error:', e.message);

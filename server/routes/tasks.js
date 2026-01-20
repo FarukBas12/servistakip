@@ -50,5 +50,6 @@ router.get('/:id', taskController.getTaskById);
 router.put('/:id', taskController.updateTask);
 router.delete('/:id', taskController.deleteTask);
 router.post('/:id/photos', upload, taskController.addPhoto);
+router.post('/:id/cancel', taskController.cancelTask); // NEW: Return task to pool
 
 module.exports = router;
