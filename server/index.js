@@ -139,6 +139,14 @@ async function runMigrations() {
         `);
         console.log(' - Checked photos table');
 
+        // FIX: Drop restrictive Check Constraint on photos type if exists
+        try {
+            await pool.query('ALTER TABLE photos DROP CONSTRAINT IF EXISTS photos_type_check');
+            console.log(' - Dropped constraint photos_type_check');
+        } catch (e) {
+            // Ignore error
+        }
+
         // Create Stores Table
         await pool.query(`
             CREATE TABLE IF NOT EXISTS stores (
