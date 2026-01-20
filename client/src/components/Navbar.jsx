@@ -20,13 +20,14 @@ const Navbar = () => {
                 <strong style={{ fontSize: '1.2rem', marginRight: '20px' }}>APPnov</strong>
                 <span style={{ marginLeft: '20px' }}>
                     {user.role === 'admin' ? (
-                        <>
-                            <Link to="/admin" className="nav-link">İşler</Link>
-                            <Link to="/admin/pool" style={{ color: 'white', marginRight: '15px' }}>İş Havuzu</Link>
-                            <Link to="/admin/map" className="nav-link">Harita</Link>
-                            <Link to="/admin/materials" className="nav-link">Malzemeler</Link>
-                            <Link to="/admin/reports" className="nav-link">Raporlar</Link>
-                            <Link to="/admin/create-user" style={{ color: 'white' }}>Personel Ekle</Link>
+                            <div style={{ display: 'flex', gap: '15px' }}>
+                                <Link to="/admin" className="nav-link">İşler</Link>
+                                <Link to="/admin/pool" className="nav-link">İş Havuzu</Link>
+                                <Link to="/admin/map" className="nav-link">Harita</Link>
+                                <Link to="/admin/materials" className="nav-link">Malzemeler</Link>
+                                <Link to="/admin/reports" className="nav-link">Raporlar</Link>
+                                <Link to="/admin/create-user" className="nav-link">Personel Ekle</Link>
+                            </div>
                         </>
                     ) : (
                         <>
@@ -39,7 +40,7 @@ const Navbar = () => {
                 <span style={{ marginRight: '1rem', opacity: 0.8 }}>{user.role}</span>
                 <button onClick={handleLogout} className="glass-btn" style={{ background: 'rgba(255, 107, 107, 0.3)', borderColor: 'rgba(255,107,107,0.5)' }}>Çıkış</button>
             </div>
-        </nav>
+        </nav >
     );
 };
 
