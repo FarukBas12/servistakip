@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Inbox, Map, FileBarChart, Users, LogOut } from 'lucide-react';
+import { LayoutDashboard, Inbox, Map, FileBarChart, Users, LogOut, Activity } from 'lucide-react';
 
 const Sidebar = () => {
     const { logout } = useAuth();
@@ -10,6 +10,7 @@ const Sidebar = () => {
         { path: '/admin', icon: <LayoutDashboard size={24} />, label: 'Panel', exact: true },
         { path: '/admin/pool', icon: <Inbox size={24} />, label: 'Havuz' },
         { path: '/admin/map', icon: <Map size={24} />, label: 'Harita' },
+        { path: '/admin/daily', icon: <Activity size={24} />, label: 'Takip' },
         { path: '/admin/reports', icon: <FileBarChart size={24} />, label: 'Raporlar' },
         { path: '/admin/create-user', icon: <Users size={24} />, label: 'Personel' },
     ];
