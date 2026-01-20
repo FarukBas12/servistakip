@@ -131,7 +131,7 @@ const TaskCreate = () => {
         <div className="dashboard">
             <button onClick={() => navigate('/admin')} className="glass-btn" style={{ marginBottom: '1rem' }}>&larr; Geri</button>
             <div className="glass-panel" style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
-                <h2 style={{ marginTop: 0 }}>Yeni Görev Oluştur</h2>
+                <h2 style={{ marginTop: 0 }}>Yeni Görev Oluştur (v3 - FOTO MODU)</h2>
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
                     <div style={{ background: 'rgba(255,255,255,0.1)', padding: '10px', borderRadius: '8px', border: '1px dashed rgba(255,255,255,0.3)' }}>
@@ -154,15 +154,17 @@ const TaskCreate = () => {
 
                     <input className="glass-input" name="maps_link" value={formData.maps_link} placeholder="Google Maps Linki (Opsiyonel)" onChange={handleLinkChange} />
 
-                    <label>Ekler / Fotoğraflar (Kroki, Arıza Fotosu vb.)</label>
-                    <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="glass-input"
-                        style={{ padding: '10px' }}
-                    />
+                    <div style={{ background: 'rgba(255,255,255,0.1)', padding: '15px', borderRadius: '8px', border: '2px solid #ff9800' }}>
+                        <label style={{ color: '#ff9800', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>📸 FOTOĞRAF EKLEME BÖLÜMÜ</label>
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            style={{ padding: '10px', background: 'white', color: 'black', width: '100%', borderRadius: '4px' }}
+                        />
+                        <small style={{ display: 'block', marginTop: '5px', color: '#ddd' }}>Kroki, Arıza, Kapı Girişi vb. (Çoklu Seçim)</small>
+                    </div>
                     <small style={{ opacity: 0.7 }}>Birden fazla dosya seçebilirsiniz.</small>
 
                     <label>Son Tarih</label>
