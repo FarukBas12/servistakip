@@ -48,6 +48,21 @@ app.get('/setup', async (req, res) => {
         try {
             await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS maps_link TEXT");
             await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS region VARCHAR(50) DEFAULT 'Diğer'");
+            await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS lat FLOAT");
+            await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS lng FLOAT");
+
+            // Create Photos Table
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS photos (
+                    id SERIAL PRIMARY KEY,
+                    task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
+                    url TEXT NOT NULL,
+                    type VARCHAR(50),
+                    gps_lat FLOAT,
+                    gps_lng FLOAT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            `);
 
             // Create Stores Table
             await pool.query(`
