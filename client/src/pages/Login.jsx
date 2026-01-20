@@ -44,6 +44,7 @@ const Login = () => {
                 <button type="submit" className="glass-btn" style={{ marginTop: '10px' }}>Giriş Yap</button>
             </form>
         </div>
+    </div >
     );
 };
 
