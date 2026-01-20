@@ -20,11 +20,11 @@ const Login = () => {
     };
 
     return (
-        <div className="login-container">
-            <form onSubmit={handleSubmit} className="login-form glass-panel">
-                <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                    <img src="/logo.png" alt="Logo" style={{ height: '60px', marginBottom: '10px' }} />
-                    <h2 style={{ margin: 0 }}>ServisTakip App</h2>
+        <div className="login-container" style={{ background: 'var(--bg-color)' }}>
+            <div className="glass-panel login-form">
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                    <img src="/logo.png" alt="App Logo" style={{ width: '80px', marginBottom: '1rem' }} />
+                    <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>Giriş Yap</h2>
                 </div>
                 {error && <p className="error" style={{ color: '#ff6b6b', textAlign: 'center' }}>{error}</p>}
                 <input
