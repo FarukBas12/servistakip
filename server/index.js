@@ -125,6 +125,10 @@ async function runMigrations() {
         await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS lng FLOAT");
         console.log(' - Checked lng');
 
+        await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS service_form_no TEXT");
+        await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS is_quoted BOOLEAN DEFAULT FALSE");
+        console.log(' - Checked service form columns');
+
         // Create Photos Table
         await pool.query(`
             CREATE TABLE IF NOT EXISTS photos (

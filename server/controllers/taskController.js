@@ -86,6 +86,16 @@ exports.updateTask = async (req, res) => {
             params.push(req.body.region);
             counter++;
         }
+        if (req.body.service_form_no) {
+            updates.push(`service_form_no = $${counter}`);
+            params.push(req.body.service_form_no);
+            counter++;
+        }
+        if (req.body.is_quoted !== undefined) {
+            updates.push(`is_quoted = $${counter}`);
+            params.push(req.body.is_quoted);
+            counter++;
+        }
 
         if (updates.length === 0) {
             return res.json({ message: 'No updates provided' });
