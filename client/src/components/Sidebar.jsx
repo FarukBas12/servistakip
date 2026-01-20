@@ -1,29 +1,30 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { LayoutDashboard, Inbox, Map, FileBarChart, Users, LogOut } from 'lucide-react';
 
 const Sidebar = () => {
     const { logout } = useAuth();
 
     const menuItems = [
-        { path: '/admin', icon: '🏠', label: 'İşler', exact: true },
-        { path: '/admin/pool', icon: '📥', label: 'Havuz' },
-        { path: '/admin/map', icon: '🗺️', label: 'Harita' },
-        { path: '/admin/reports', icon: '📊', label: 'Raporlar' },
-        { path: '/admin/create-user', icon: '👥', label: 'Personel' },
+        { path: '/admin', icon: <LayoutDashboard size={24} />, label: 'Panel', exact: true },
+        { path: '/admin/pool', icon: <Inbox size={24} />, label: 'Havuz' },
+        { path: '/admin/map', icon: <Map size={24} />, label: 'Harita' },
+        { path: '/admin/reports', icon: <FileBarChart size={24} />, label: 'Raporlar' },
+        { path: '/admin/create-user', icon: <Users size={24} />, label: 'Personel' },
     ];
 
     return (
         <div style={{
             width: '80px',
             height: '100vh',
-            background: 'rgba(255, 255, 255, 0.1)',
+            background: 'rgba(255, 255, 255, 0.02)',
             backdropFilter: 'blur(10px)',
-            borderRight: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRight: '1px solid rgba(255, 255, 255, 0.08)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            paddingTop: '20px',
+            paddingTop: '30px',
             position: 'fixed',
             left: 0,
             top: 0,
@@ -32,11 +33,11 @@ const Sidebar = () => {
         }}
             className="sidebar"
         >
-            <div style={{ marginBottom: '30px', textAlign: 'center' }}>
-                <img src="/logo.png" alt="Logo" style={{ width: '40px' }} />
+            <div style={{ marginBottom: '40px', opacity: 0.8 }}>
+                <img src="/logo.png" alt="Logo" style={{ width: '32px', filter: 'grayscale(100%) brightness(200%)' }} />
             </div>
 
-            <nav style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'center' }}>
+            <nav style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
                 {menuItems.map((item) => (
                     <NavLink
                         key={item.path}
@@ -48,16 +49,16 @@ const Sidebar = () => {
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            width: '60px',
-                            height: '60px',
+                            width: '50px',
+                            height: '50px',
                             textDecoration: 'none',
-                            color: 'white',
-                            borderRadius: '12px',
+                            color: '#e0e0e0',
+                            borderRadius: '10px',
                             transition: 'all 0.2s'
                         }}
                     >
-                        <span style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{item.icon}</span>
-                        <span style={{ fontSize: '0.6rem', opacity: 0.8 }}>{item.label}</span>
+                        <span style={{ marginBottom: '4px', opacity: 0.8 }}>{item.icon}</span>
+                        <span style={{ fontSize: '0.65rem', fontWeight: 500, letterSpacing: '0.5px' }}>{item.label}</span>
                     </NavLink>
                 ))}
             </nav>
@@ -65,30 +66,36 @@ const Sidebar = () => {
             <button
                 onClick={logout}
                 style={{
-                    marginBottom: '20px',
+                    marginBottom: '30px',
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
-                    fontSize: '1.5rem',
-                    padding: '10px'
+                    color: '#e0e0e0',
+                    opacity: 0.5,
+                    padding: '10px',
+                    transition: 'opacity 0.2s'
                 }}
                 title="Çıkış Yap"
             >
-                🚪
+                <LogOut size={24} />
             </button>
 
             <style>{`
                 .sidebar:hover {
-                    width: 100px;
+                    background: rgba(255, 255, 255, 0.04);
                 }
                 .sidebar-link:hover {
-                    background: rgba(255, 255, 255, 0.2);
-                    transform: scale(1.05);
+                    background: rgba(255, 255, 255, 0.08);
+                    color: white;
                 }
                 .sidebar-link.active {
-                    background: rgba(33, 150, 243, 0.4);
-                    border: 1px solid rgba(33, 150, 243, 0.6);
-                    box-shadow: 0 0 15px rgba(33, 150, 243, 0.3);
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+                }
+                button:hover {
+                    opacity: 1 !important;
                 }
             `}</style>
         </div>
