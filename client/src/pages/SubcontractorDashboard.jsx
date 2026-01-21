@@ -12,6 +12,10 @@ const SubcontractorDashboard = () => {
     const [selectedSub, setSelectedSub] = useState(null);
     const [payData, setPayData] = useState({ amount: '', description: '', date: new Date().toISOString().split('T')[0] });
 
+    // Create Modal State
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [newSub, setNewSub] = useState({ name: '', phone: '' });
+
     useEffect(() => { fetchSubs(); }, []);
 
     const fetchSubs = async () => {
@@ -29,6 +33,17 @@ const SubcontractorDashboard = () => {
             alert('Ödeme Kaydedildi');
             setShowPayModal(false);
             setPayData({ amount: '', description: '', date: new Date().toISOString().split('T')[0] });
+            fetchSubs();
+        } catch (err) { alert('Hata'); }
+    };
+
+    const handleCreateSub = async () => {
+        if (!newSub.name) return alert('İsim Giriniz');
+        try {
+            await api.post('/subs', newSub);
+            alert('Taşeron Eklendi');
+            setShowCreateModal(false);
+            setNewSub({ name: '', phone: '' });
             fetchSubs();
         } catch (err) { alert('Hata'); }
     };
@@ -81,7 +96,11 @@ const SubcontractorDashboard = () => {
                 ))}
 
                 {/* New Sub Button */}
-                <button className="glass-panel" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed rgba(255,255,255,0.2)', cursor: 'pointer', minHeight: '200px' }}>
+                <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="glass-panel"
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed rgba(255,255,255,0.2)', cursor: 'pointer', minHeight: '200px' }}
+                >
                     <PlusCircle size={40} style={{ marginBottom: '10px', opacity: 0.5 }} />
                     <span>Yeni Taşeron</span>
                 </button>
@@ -98,6 +117,21 @@ const SubcontractorDashboard = () => {
                         <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
                             <button onClick={handleCashPayload} className="glass-btn" style={{ flex: 1, background: '#4caf50' }}>Kaydet</button>
                             <button onClick={() => setShowPayModal(false)} className="glass-btn" style={{ flex: 1, background: '#f44336' }}>İptal</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Create Sub Modal */}
+            {showCreateModal && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                    <div className="glass-panel" style={{ width: '350px', padding: '25px' }}>
+                        <h3>Yeni Taşeron Ekle</h3>
+                        <input className="glass-input" placeholder="Taşeron Adı ve Soyadı" value={newSub.name} onChange={e => setNewSub({ ...newSub, name: e.target.value })} />
+                        <input className="glass-input" placeholder="Telefon (İsteğe bağlı)" value={newSub.phone} onChange={e => setNewSub({ ...newSub, phone: e.target.value })} style={{ marginTop: '10px' }} />
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                            <button onClick={handleCreateSub} className="glass-btn" style={{ flex: 1, background: '#4caf50' }}>Ekle</button>
+                            <button onClick={() => setShowCreateModal(false)} className="glass-btn" style={{ flex: 1, background: '#f44336' }}>İptal</button>
                         </div>
                     </div>
                 </div>
