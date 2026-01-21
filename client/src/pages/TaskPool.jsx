@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
-import { Map, Activity, FolderArchive, Plus } from 'lucide-react';
+import { Map, Activity, FolderArchive, Plus, FileBarChart } from 'lucide-react';
 
 const TaskPool = () => {
     const [tasks, setTasks] = useState([]);
@@ -139,6 +139,9 @@ const TaskPool = () => {
                     </button>
                     <button onClick={() => navigate('/admin/create-task')} className="glass-btn" style={{ background: 'rgba(76, 175, 80, 0.3)' }}>
                         <Plus size={18} style={{ marginRight: '5px' }} /> Yeni Görev
+                    </button>
+                    <button onClick={() => navigate('/admin/reports')} className="glass-btn" title="İstatistikler">
+                        <FileBarChart size={18} style={{ marginRight: '5px' }} /> İstatistik
                     </button>
                 </div>
             </div>
