@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Inbox, Map, FileBarChart, Users, LogOut, Activity, FolderArchive, Wallet, Database } from 'lucide-react'; // Added Wallet
+import { LayoutDashboard, Inbox, Map, FileBarChart, Users, LogOut, Activity, FolderArchive, Wallet, Database, Shield } from 'lucide-react'; // Added Wallet
 
 const Sidebar = () => {
     const { logout } = useAuth();
@@ -14,6 +14,7 @@ const Sidebar = () => {
         { path: '/admin/archive', icon: <FolderArchive size={24} />, label: 'Arşiv' },
         { path: '/admin/subs', icon: <Users size={24} />, label: 'Taşeronlar' },
         { path: '/admin/reports', icon: <FileBarChart size={24} />, label: 'Raporlar' },
+        { path: '/admin/settings', icon: <Shield size={24} />, label: 'Ayarlar' },
         { path: '/admin/create-user', icon: <Users size={24} />, label: 'Yöneticiler' }, // Rename to avoid confusion
     ];
 
