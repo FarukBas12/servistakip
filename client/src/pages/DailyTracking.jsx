@@ -143,10 +143,10 @@ const DailyTracking = () => {
                         </div>
                     </div>
                     <div style={{ flex: 1, overflowY: 'auto', padding: '10px' }}>
-                        {tasks.length === 0 ? (
-                            <p style={{ textAlign: 'center', opacity: 0.5, marginTop: '20px' }}>Bugün için planlanmış iş yok.</p>
+                        {tasks.filter(t => t.status !== 'completed').length === 0 ? (
+                            <p style={{ textAlign: 'center', opacity: 0.5, marginTop: '20px' }}>Aktif iş kalmadı.</p>
                         ) : (
-                            tasks.map(task => {
+                            tasks.filter(t => t.status !== 'completed').map(task => {
                                 const statusColor = getStatusColor(task.status);
                                 const statusText = getStatusText(task.status);
                                 return (
