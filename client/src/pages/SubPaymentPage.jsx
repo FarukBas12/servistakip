@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { ArrowLeft, Upload, Plus, Save, FileText, Paperclip, PlusCircle, Camera } from 'lucide-react';
+import { ArrowLeft, Upload, Plus, Save, FileText, Paperclip, PlusCircle, Camera, Trash2 } from 'lucide-react';
 
 const SubPaymentPage = () => {
     const { id } = useParams();
@@ -22,6 +22,8 @@ const SubPaymentPage = () => {
     const [prices, setPrices] = useState([]); // Available items
     const [quantities, setQuantities] = useState({}); // Entered metraj
     const [customPrices, setCustomPrices] = useState({}); // Overridden prices
+    const [customNames, setCustomNames] = useState({}); // Overridden names
+    const [deletedItemIds, setDeletedItemIds] = useState(new Set()); // Hidden items
 
     // Modals
     const [showDataModal, setShowDataModal] = useState(false);
@@ -35,6 +37,7 @@ const SubPaymentPage = () => {
         try {
             const res = await api.get(`/subs/prices?subId=${id}`);
             setPrices(res.data);
+            setDeletedItemIds(new Set()); // Reset deletes on reload? Or keep? Reset seems safer.
         } catch (err) { console.error(err); }
     };
 
@@ -71,8 +74,11 @@ const SubPaymentPage = () => {
     const handleSave = async () => {
         if (!header.store_name || !header.title) return alert('Mağaza ve Hakediş Adı giriniz');
 
-        const items = prices.filter(p => quantities[p.id] > 0).map(p => ({
-            work_item: p.work_item,
+        // Filter out deleted items and items with 0 quantity
+        const activeItems = prices.filter(p => !deletedItemIds.has(p.id) && quantities[p.id] > 0);
+
+        const items = activeItems.map(p => ({
+            work_item: customNames[p.id] !== undefined ? customNames[p.id] : p.work_item, // Use custom name if exists
             unit_price: customPrices[p.id] !== undefined ? customPrices[p.id] : p.unit_price,
             quantity: quantities[p.id]
         }));
@@ -95,6 +101,12 @@ const SubPaymentPage = () => {
             alert('Hakediş Kaydedildi');
             navigate('/admin/subs');
         } catch (err) { alert('Hata'); }
+    };
+
+    const deleteItem = (id) => {
+        const newSet = new Set(deletedItemIds);
+        newSet.add(id);
+        setDeletedItemIds(newSet);
     };
 
     return (
@@ -155,20 +167,28 @@ const SubPaymentPage = () => {
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr style={{ background: 'rgba(255,255,255,0.1)', textAlign: 'left' }}>
-                            <th style={{ padding: '12px' }}>Kalem</th>
-                            <th style={{ padding: '12px' }}>Birim Fiyat (Düzenlenebilir)</th>
+                            <th style={{ padding: '12px' }}>Kalem (Düzenlenebilir)</th>
+                            <th style={{ padding: '12px' }}>Birim Fiyat</th>
                             <th style={{ padding: '12px' }}>Metraj</th>
                             <th style={{ padding: '12px', textAlign: 'right' }}>Tutar</th>
+                            <th style={{ padding: '12px', width: '50px' }}></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {prices.map(p => {
+                        {prices.filter(p => !deletedItemIds.has(p.id)).map(p => {
                             const qty = parseFloat(quantities[p.id]) || 0;
                             const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);
                             const total = qty * unitPrice;
                             return (
                                 <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: qty > 0 ? 'rgba(76, 175, 80, 0.1)' : 'transparent' }}>
-                                    <td style={{ padding: '12px' }}>{p.work_item}</td>
+                                    <td style={{ padding: '8px' }}>
+                                        <input
+                                            className="glass-input"
+                                            value={customNames[p.id] !== undefined ? customNames[p.id] : p.work_item}
+                                            onChange={e => setCustomNames({ ...customNames, [p.id]: e.target.value })}
+                                            style={{ width: '100%' }}
+                                        />
+                                    </td>
                                     <td style={{ padding: '8px' }}>
                                         <input
                                             type="number"
@@ -192,14 +212,20 @@ const SubPaymentPage = () => {
                                     <td style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>
                                         {total > 0 ? total.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) + ' ₺' : '-'}
                                     </td>
+                                    <td style={{ padding: '8px', textAlign: 'center' }}>
+                                        <button onClick={() => deleteItem(p.id)} className="glass-btn" style={{ padding: '5px', color: '#f44336' }} title="Listeden Çıkar">
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </td>
                                 </tr>
                             )
                         })}
                     </tbody>
                 </table>
 
+                {/* Totals */}
                 <div style={{ marginTop: '30px', textAlign: 'right' }}>
-                    <h3 style={{ color: '#4caf50' }}>GENEL TOPLAM: {prices.reduce((acc, p) => {
+                    <h3 style={{ color: '#4caf50' }}>GENEL TOPLAM: {prices.filter(p => !deletedItemIds.has(p.id)).reduce((acc, p) => {
                         const qty = parseFloat(quantities[p.id]) || 0;
                         const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);
                         return acc + (qty * unitPrice);
