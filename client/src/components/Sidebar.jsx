@@ -12,6 +12,7 @@ const Sidebar = () => {
         { path: '/admin/map', icon: <Map size={24} />, label: 'Harita' },
         { path: '/admin/daily', icon: <Activity size={24} />, label: 'Takip' },
         { path: '/admin/archive', icon: <FolderArchive size={24} />, label: 'Arşiv' },
+        { path: '/admin/subs', icon: <Users size={24} />, label: 'Taşeronlar' },
         { path: '/admin/reports', icon: <FileBarChart size={24} />, label: 'Raporlar' },
         { path: '/admin/create-user', icon: <Users size={24} />, label: 'Yöneticiler' }, // Rename to avoid confusion
     ];
