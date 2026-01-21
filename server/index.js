@@ -16,6 +16,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/stores', require('./routes/stores'));
 app.use('/api/payments', require('./routes/payments'));
+app.use('/api/definitions', require('./routes/definitions'));
 
 // Static Folder for Uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -202,6 +203,46 @@ async function runMigrations() {
             );
         `);
         console.log(' - Checked payment_items table');
+
+        // Create Subcontractors Table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS subcontractors (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                phone VARCHAR(20),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log(' - Checked subcontractors table');
+
+        // Create Price Definitions Table (Master List)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS price_definitions (
+                id SERIAL PRIMARY KEY,
+                work_item VARCHAR(255) NOT NULL,
+                detail VARCHAR(255),
+                unit_price NUMERIC(12, 2) DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log(' - Checked price_definitions table');
+
+        // Add subcontractor_id to payments
+        await pool.query("ALTER TABLE payments ADD COLUMN IF NOT EXISTS subcontractor_id INTEGER REFERENCES subcontractors(id) ON DELETE SET NULL");
+        console.log(' - Checked payments subcontractor_id');
+
+        // Create Cash Transactions Table (Ödemeler)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS cash_transactions (
+                id SERIAL PRIMARY KEY,
+                subcontractor_id INTEGER REFERENCES subcontractors(id) ON DELETE CASCADE,
+                amount NUMERIC(12, 2) NOT NULL,
+                transaction_date DATE DEFAULT CURRENT_DATE,
+                description VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log(' - Checked cash_transactions table');
 
         console.log('✅ Database Schema Verified & Updated!');
     } catch (e) {

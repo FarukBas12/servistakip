@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import * as XLSX from 'xlsx';
-import { ArrowLeft, Upload, Save, Trash2, Plus } from 'lucide-react';
+import { ArrowLeft, Upload, Save, Trash2, Search, Plus } from 'lucide-react';
 
 const PaymentCreate = () => {
     const navigate = useNavigate();
-    const [step, setStep] = useState(1);
+    const [searchParams] = useSearchParams();
 
     // Header Data
     const [header, setHeader] = useState({
         title: '',
-        payment_date: new Date().toISOString().split('T')[0]
+        payment_date: new Date().toISOString().split('T')[0],
+        subcontractor_id: searchParams.get('subId') || ''
     });
 
     // Items Data

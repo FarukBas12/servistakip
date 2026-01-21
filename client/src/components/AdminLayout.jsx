@@ -10,8 +10,10 @@ import GlobalMap from '../pages/GlobalMap';
 import Reports from '../pages/Reports';
 import DailyTracking from '../pages/DailyTracking';
 import CompletedTasks from '../pages/CompletedTasks';
-import PaymentPool from '../pages/PaymentPool'; // NEW
-import PaymentCreate from '../pages/PaymentCreate'; // NEW
+import PaymentPool from '../pages/PaymentPool';
+import PaymentCreate from '../pages/PaymentCreate';
+import PriceList from '../pages/PriceList';
+import SubcontractorDashboard from '../pages/SubcontractorDashboard'; // NEW
 
 const AdminLayout = () => {
     return (
@@ -27,8 +29,10 @@ const AdminLayout = () => {
                     <Route path="/map" element={<GlobalMap />} />
                     <Route path="/daily" element={<DailyTracking />} />
                     <Route path="/archive" element={<CompletedTasks />} />
-                    <Route path="/payments" element={<PaymentPool />} /> {/* NEW */}
-                    <Route path="/create-payment" element={<PaymentCreate />} /> {/* NEW */}
+                    <Route path="/payments" element={<PaymentPool />} />
+                    <Route path="/create-payment" element={<PaymentCreate />} />
+                    <Route path="/data" element={<PriceList />} />
+                    <Route path="/subs" element={<SubcontractorDashboard />} /> {/* NEW */}
                     <Route path="/reports" element={<Reports />} />
                 </Routes>
             </div>
