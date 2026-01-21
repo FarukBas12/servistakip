@@ -13,7 +13,8 @@ import CompletedTasks from '../pages/CompletedTasks';
 import PaymentPool from '../pages/PaymentPool';
 import PaymentCreate from '../pages/PaymentCreate';
 import PriceList from '../pages/PriceList';
-import SubcontractorDashboard from '../pages/SubcontractorDashboard'; // NEW
+import SubcontractorDashboard from '../pages/SubcontractorDashboard';
+import SubcontractorDetail from '../pages/SubcontractorDetail'; // NEW
 
 const AdminLayout = () => {
     return (
@@ -32,7 +33,8 @@ const AdminLayout = () => {
                     <Route path="/payments" element={<PaymentPool />} />
                     <Route path="/create-payment" element={<PaymentCreate />} />
                     <Route path="/data" element={<PriceList />} />
-                    <Route path="/subs" element={<SubcontractorDashboard />} /> {/* NEW */}
+                    <Route path="/subs" element={<SubcontractorDashboard />} />
+                    <Route path="/admin/subs/:id" element={<SubcontractorDetail />} /> {/* NEW */}
                     <Route path="/reports" element={<Reports />} />
                 </Routes>
             </div>

@@ -13,8 +13,9 @@ router.delete('/subs/:id', subcontractorController.delete);
 router.post('/subs/transaction', subcontractorController.addTransaction); // New
 
 // Prices
-router.get('/prices', priceController.list); // ?q=search
-router.post('/prices/import', priceController.importPrices);
+router.get('/prices', priceController.list); // ?q=search&subId=X
+router.post('/prices', priceController.create);
+router.post('/prices/import', upload.single('file'), priceController.importPrices); // Supports subId in body
 router.delete('/prices/:id', priceController.delete);
 
 module.exports = router;

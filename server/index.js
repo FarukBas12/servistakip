@@ -106,33 +106,30 @@ app.use((err, req, res, next) => {
 });
 
 // AUTO MIGRATION FUNCTION
-async function runMigrations() {
-    const pool = new Pool({
-        connectionString: process.env.DATABASE_URL,
-        ssl: { rejectUnauthorized: false }
-    });
+const db = require('./db');
 
+async function runMigrations() {
     console.log('🔄 Checking Database Schema...');
 
     try {
-        await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS maps_link TEXT");
+        await db.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS maps_link TEXT");
         console.log(' - Checked maps_link');
 
-        await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS region VARCHAR(50) DEFAULT 'Diğer'");
+        await db.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS region VARCHAR(50) DEFAULT 'Diğer'");
         console.log(' - Checked region');
 
-        await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS lat FLOAT");
+        await db.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS lat FLOAT");
         console.log(' - Checked lat');
 
-        await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS lng FLOAT");
+        await db.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS lng FLOAT");
         console.log(' - Checked lng');
 
-        await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS service_form_no TEXT");
-        await pool.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS is_quoted BOOLEAN DEFAULT FALSE");
+        await db.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS service_form_no TEXT");
+        await db.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS is_quoted BOOLEAN DEFAULT FALSE");
         console.log(' - Checked service form columns');
 
         // Create Photos Table
-        await pool.query(`
+        await db.query(`
             CREATE TABLE IF NOT EXISTS photos (
                 id SERIAL PRIMARY KEY,
                 task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
@@ -147,14 +144,14 @@ async function runMigrations() {
 
         // FIX: Drop restrictive Check Constraint on photos type if exists
         try {
-            await pool.query('ALTER TABLE photos DROP CONSTRAINT IF EXISTS photos_type_check');
+            await db.query('ALTER TABLE photos DROP CONSTRAINT IF EXISTS photos_type_check');
             console.log(' - Dropped constraint photos_type_check');
         } catch (e) {
             // Ignore error
         }
 
         // Create Stores Table
-        await pool.query(`
+        await db.query(`
             CREATE TABLE IF NOT EXISTS stores (
                 id SERIAL PRIMARY KEY,
                 code VARCHAR(50) UNIQUE NOT NULL,
@@ -165,7 +162,7 @@ async function runMigrations() {
         console.log(' - Checked stores table');
 
         // Create Task Logs Table (For Return System)
-        await pool.query(`
+        await db.query(`
             CREATE TABLE IF NOT EXISTS task_logs (
                 id SERIAL PRIMARY KEY,
                 task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
@@ -178,7 +175,7 @@ async function runMigrations() {
         console.log(' - Checked task_logs table');
 
         // Create Payments Table (Hakediş Header)
-        await pool.query(`
+        await db.query(`
             CREATE TABLE IF NOT EXISTS payments (
                 id SERIAL PRIMARY KEY,
                 title VARCHAR(150),
@@ -191,7 +188,7 @@ async function runMigrations() {
         console.log(' - Checked payments table');
 
         // Create Payment Items Table (Hakediş Rows)
-        await pool.query(`
+        await db.query(`
             CREATE TABLE IF NOT EXISTS payment_items (
                 id SERIAL PRIMARY KEY,
                 payment_id INTEGER REFERENCES payments(id) ON DELETE CASCADE,
@@ -205,7 +202,7 @@ async function runMigrations() {
         console.log(' - Checked payment_items table');
 
         // Create Subcontractors Table
-        await pool.query(`
+        await db.query(`
             CREATE TABLE IF NOT EXISTS subcontractors (
                 id SERIAL PRIMARY KEY,
                 name VARCHAR(100) NOT NULL,
@@ -216,7 +213,7 @@ async function runMigrations() {
         console.log(' - Checked subcontractors table');
 
         // Create Price Definitions Table (Master List)
-        await pool.query(`
+        await db.query(`
             CREATE TABLE IF NOT EXISTS price_definitions (
                 id SERIAL PRIMARY KEY,
                 work_item VARCHAR(255) NOT NULL,
@@ -227,12 +224,16 @@ async function runMigrations() {
         `);
         console.log(' - Checked price_definitions table');
 
+        // Add subcontractor_id to price_definitions (Unified System)
+        await db.query("ALTER TABLE price_definitions ADD COLUMN IF NOT EXISTS subcontractor_id INTEGER REFERENCES subcontractors(id) ON DELETE CASCADE");
+        console.log(' - Checked price_definitions subcontractor_id');
+
         // Add subcontractor_id to payments
-        await pool.query("ALTER TABLE payments ADD COLUMN IF NOT EXISTS subcontractor_id INTEGER REFERENCES subcontractors(id) ON DELETE SET NULL");
+        await db.query("ALTER TABLE payments ADD COLUMN IF NOT EXISTS subcontractor_id INTEGER REFERENCES subcontractors(id) ON DELETE SET NULL");
         console.log(' - Checked payments subcontractor_id');
 
         // Create Cash Transactions Table (Ödemeler)
-        await pool.query(`
+        await db.query(`
             CREATE TABLE IF NOT EXISTS cash_transactions (
                 id SERIAL PRIMARY KEY,
                 subcontractor_id INTEGER REFERENCES subcontractors(id) ON DELETE CASCADE,
@@ -247,8 +248,6 @@ async function runMigrations() {
         console.log('✅ Database Schema Verified & Updated!');
     } catch (e) {
         console.error('❌ Schema update error:', e.message);
-    } finally {
-        await pool.end();
     }
 }
 

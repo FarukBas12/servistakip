@@ -1,18 +1,23 @@
 const db = require('../db');
+const XLSX = require('xlsx');
 
-// List (Search or All)
 exports.list = async (req, res) => {
-    const { q } = req.query; // Search query
+    const { q, subId } = req.query; // Added subId support
     try {
-        let query = 'SELECT * FROM price_definitions';
+        let query = 'SELECT * FROM price_definitions WHERE 1=1';
         const params = [];
 
-        if (q) {
-            query += ' WHERE work_item ILIKE $1 ORDER BY work_item LIMIT 20';
-            params.push(`%${q}%`);
-        } else {
-            query += ' ORDER BY work_item'; // Might want limit for performance if large
+        if (subId) {
+            query += ' AND subcontractor_id = $1';
+            params.push(subId);
         }
+
+        if (q) {
+            query += ` AND (work_item ILIKE $${params.length + 1})`;
+            params.push(`%${q}%`);
+        }
+
+        query += ' ORDER BY work_item';
 
         const { rows } = await db.query(query, params);
         res.json(rows);
@@ -22,54 +27,19 @@ exports.list = async (req, res) => {
     }
 };
 
-// Import / Bulk Create
-exports.importPrices = async (req, res) => {
-    const { items } = req.body; // Array of { work_item, detail, unit_price }
-    const client = await db.pool.connect();
-
+exports.create = async (req, res) => {
+    const { work_item, detail, unit_price, subcontractor_id } = req.body;
     try {
-        if (!items || !Array.isArray(items)) return res.status(400).json({ message: 'Invalid data' });
-
-        await client.query('BEGIN');
-
-        // Strategy: We can delete all and replace, OR upsert.
-        // For simplicity and "Master List" nature, let's Upsert based on Work Item? 
-        // Or just Insert. Let's do simple Insert, user can clear list if needed (future).
-        // Actually, user might upload same file again. 
-        // Let's check if exists, update price. Else insert.
-
-        for (const item of items) {
-            const { work_item, detail, unit_price } = item;
-            if (!work_item) continue;
-
-            // Upsert Logic (Postgres 9.5+)
-            // Check if exists
-            const check = await client.query('SELECT id FROM price_definitions WHERE work_item = $1', [work_item]);
-
-            if (check.rows.length > 0) {
-                // Update
-                await client.query(
-                    'UPDATE price_definitions SET unit_price = $1, detail = $2 WHERE id = $3',
-                    [unit_price, detail, check.rows[0].id]
-                );
-            } else {
-                // Insert
-                await client.query(
-                    'INSERT INTO price_definitions (work_item, detail, unit_price) VALUES ($1, $2, $3)',
-                    [work_item, detail, unit_price]
-                );
-            }
-        }
-
-        await client.query('COMMIT');
-        res.json({ message: 'Prices imported successfully' });
-
+        // Upsert based on (work_item, subcontractor_id) ideally, but for now simple insert/update
+        // If subId is present, we scope it.
+        const { rows } = await db.query(
+            'INSERT INTO price_definitions (work_item, detail, unit_price, subcontractor_id) VALUES ($1, $2, $3, $4) RETURNING *',
+            [work_item, detail, unit_price || 0, subcontractor_id]
+        );
+        res.json(rows[0]);
     } catch (err) {
-        await client.query('ROLLBACK');
         console.error(err);
-        res.status(500).json({ message: 'Import failed' });
-    } finally {
-        client.release();
+        res.status(500).json({ message: 'Creation failed' });
     }
 };
 
@@ -80,6 +50,49 @@ exports.delete = async (req, res) => {
         res.json({ message: 'Deleted' });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: 'Error' });
+        res.status(500).json({ message: 'Deletion failed' });
+    }
+};
+
+exports.importPrices = async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).send('No file uploaded');
+        const { subId } = req.body; // Target Subcontractor
+
+        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const data = XLSX.utils.sheet_to_json(sheet);
+
+        for (const row of data) {
+            const workItem = row['İş Kalemi'] || row['Kalem'] || row['Is Kalemi'];
+            const detail = row['Detay'] || '';
+            const price = row['Birim Fiyat'] || row['Fiyat'] || 0;
+
+            if (workItem) {
+                // If subId provided, insert specifically for them
+                if (subId) {
+                    await db.query(
+                        `INSERT INTO price_definitions (work_item, detail, unit_price, subcontractor_id)
+                         VALUES ($1, $2, $3, $4)
+                         ON CONFLICT (id) DO NOTHING`, // TODO: Better conflict handling? For now, just insert.
+                        [workItem, detail, price, subId]
+                    );
+                } else {
+                    // Global (Old behavior - keep for compatibility if needed, or disable)
+                    await db.query(
+                        `INSERT INTO price_definitions (work_item, detail, unit_price)
+                         VALUES ($1, $2, $3)
+                         ON CONFLICT (id) DO NOTHING`,
+                        [workItem, detail, price]
+                    );
+                }
+            }
+        }
+
+        res.json({ message: 'Import successful' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Import failed' });
     }
 };

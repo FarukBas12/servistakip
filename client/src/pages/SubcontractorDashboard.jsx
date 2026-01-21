@@ -84,14 +84,14 @@ const SubcontractorDashboard = () => {
                         {/* Actions */}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                             <button
-                                onClick={() => navigate(`/admin/create-payment?subId=${sub.id}`)}
+                                onClick={(e) => { e.stopPropagation(); navigate(`/admin/subs/${sub.id}`); }}
                                 className="glass-btn"
                                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.9rem' }}
                             >
-                                <PlusCircle size={16} /> Hakediş Ekle
+                                <FileText size={16} /> Detay / Hakediş
                             </button>
                             <button
-                                onClick={() => openPayModal(sub)}
+                                onClick={(e) => { e.stopPropagation(); openPayModal(sub); }}
                                 className="glass-btn"
                                 style={{ background: 'rgba(76, 175, 80, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.9rem' }}
                             >
