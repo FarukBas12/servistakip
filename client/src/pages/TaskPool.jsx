@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
+import { Map, Activity, FolderArchive, Plus } from 'lucide-react';
 
 const TaskPool = () => {
     const [tasks, setTasks] = useState([]);
@@ -124,9 +125,22 @@ const TaskPool = () => {
     return (
         <div className="dashboard">
             <button onClick={() => navigate('/admin')} className="glass-btn" style={{ marginBottom: '1rem' }}>&larr; Panela Dön</button>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
                 <h2 style={{ margin: 0 }}>İş Yönetimi</h2>
-                <button onClick={() => navigate('/admin/create-task')} className="glass-btn" style={{ background: 'rgba(76, 175, 80, 0.3)' }}>+ Yeni Görev</button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <button onClick={() => navigate('/admin/map')} className="glass-btn" title="Harita">
+                        <Map size={18} style={{ marginRight: '5px' }} /> Harita
+                    </button>
+                    <button onClick={() => navigate('/admin/daily')} className="glass-btn" title="Günlük Takip">
+                        <Activity size={18} style={{ marginRight: '5px' }} /> Takip
+                    </button>
+                    <button onClick={() => navigate('/admin/archive')} className="glass-btn" title="Arşiv">
+                        <FolderArchive size={18} style={{ marginRight: '5px' }} /> Arşiv
+                    </button>
+                    <button onClick={() => navigate('/admin/create-task')} className="glass-btn" style={{ background: 'rgba(76, 175, 80, 0.3)' }}>
+                        <Plus size={18} style={{ marginRight: '5px' }} /> Yeni Görev
+                    </button>
+                </div>
             </div>
 
             {/* Main Tabs */}
