@@ -3,6 +3,8 @@ const router = express.Router();
 const subcontractorController = require('../controllers/subcontractorController');
 const priceController = require('../controllers/priceController');
 const auth = require('../middleware/auth');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.use(auth);
 
