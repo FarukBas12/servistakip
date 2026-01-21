@@ -2,24 +2,44 @@ import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
-import { Download, Eye, ArrowLeft } from 'lucide-react';
+import { Download, Eye, ArrowLeft, Search } from 'lucide-react';
 
 const CompletedTasks = () => {
     const [tasks, setTasks] = useState([]);
+    const [filteredTasks, setFilteredTasks] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
     const [selectedTask, setSelectedTask] = useState(null);
-    const [detailLoading, setDetailLoading] = useState(false); // New state for modal loading
+    const [detailLoading, setDetailLoading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
         fetchCompletedTasks();
     }, []);
 
+    // Filter effect
+    useEffect(() => {
+        if (!searchTerm.trim()) {
+            setFilteredTasks(tasks);
+        } else {
+            const lowerTerm = searchTerm.toLowerCase();
+            const filtered = tasks.filter(task =>
+                (task.title && task.title.toLowerCase().includes(lowerTerm)) ||
+                (task.address && task.address.toLowerCase().includes(lowerTerm)) ||
+                (task.description && task.description.toLowerCase().includes(lowerTerm)) ||
+                (task.service_form_no && task.service_form_no.toLowerCase().includes(lowerTerm)) ||
+                (task.assigned_user && task.assigned_user.toLowerCase().includes(lowerTerm))
+            );
+            setFilteredTasks(filtered);
+        }
+    }, [searchTerm, tasks]);
+
     const fetchCompletedTasks = async () => {
         try {
             const res = await api.get('/tasks');
-            // Filter only completed tasks
-            setTasks(res.data.filter(t => t.status === 'completed'));
+            const completed = res.data.filter(t => t.status === 'completed');
+            setTasks(completed);
+            setFilteredTasks(completed);
             setLoading(false);
         } catch (err) {
             console.error(err);
@@ -29,8 +49,6 @@ const CompletedTasks = () => {
 
     const handleOpenDetail = async (taskId) => {
         setDetailLoading(true);
-        // Show modal immediately with partial data if we wanted, 
-        // but fetching fresh ensures we get photos and latest info.
         try {
             const res = await api.get(`/tasks/${taskId}`);
             setSelectedTask(res.data);
@@ -43,7 +61,8 @@ const CompletedTasks = () => {
     };
 
     const exportToExcel = () => {
-        const dataToExport = tasks.map(task => ({
+        // Export filtered tasks if search is active, otherwise all? Usually users expect to export what they see.
+        const dataToExport = filteredTasks.map(task => ({
             'İş Başlığı': task.title,
             'Adres': task.address,
             'Bölge': task.region || 'Diğer',
@@ -60,7 +79,6 @@ const CompletedTasks = () => {
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Biten İşler");
 
-        // Generate buffer and save
         XLSX.writeFile(workbook, `Biten_Isler_Raporu_${new Date().toLocaleDateString()}.xlsx`);
     };
 
@@ -68,16 +86,30 @@ const CompletedTasks = () => {
 
     return (
         <div className="dashboard">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '15px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <button onClick={() => navigate('/admin')} className="glass-btn" style={{ padding: '8px' }}>
                         <ArrowLeft size={20} />
                     </button>
                     <h2 style={{ margin: 0 }}>Biten İşler Arşivi</h2>
                 </div>
-                <button onClick={exportToExcel} className="glass-btn" style={{ background: 'rgba(76, 175, 80, 0.3)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Download size={18} /> Excel Olarak İndir
-                </button>
+
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <div style={{ position: 'relative' }}>
+                        <Search size={18} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
+                        <input
+                            type="text"
+                            placeholder="Mağaza, Adres, Form No..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="glass-input"
+                            style={{ paddingLeft: '35px', width: '250px', margin: 0 }}
+                        />
+                    </div>
+                    <button onClick={exportToExcel} className="glass-btn" style={{ background: 'rgba(76, 175, 80, 0.3)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Download size={18} /> Excel
+                    </button>
+                </div>
             </div>
 
             <div className="glass-panel" style={{ overflowX: 'auto' }}>
@@ -92,12 +124,14 @@ const CompletedTasks = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {tasks.length === 0 ? (
+                        {filteredTasks.length === 0 ? (
                             <tr>
-                                <td colSpan="5" style={{ padding: '30px', textAlign: 'center', opacity: 0.5 }}>Henüz tamamlanmış iş bulunmuyor.</td>
+                                <td colSpan="5" style={{ padding: '30px', textAlign: 'center', opacity: 0.5 }}>
+                                    {searchTerm ? 'Aranan kriterlere uygun iş bulunamadı.' : 'Henüz tamamlanmış iş bulunmuyor.'}
+                                </td>
                             </tr>
                         ) : (
-                            tasks.map(task => (
+                            filteredTasks.map(task => (
                                 <tr key={task.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                     <td style={{ padding: '15px' }}>
                                         <div style={{ fontWeight: '500' }}>{task.title}</div>
