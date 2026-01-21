@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, PlusCircle, Edit2, FileText, DollarSign, X, Trash2 } from 'lucide-react';
+import { ArrowLeft, User, PlusCircle, Edit2, FileText, DollarSign, X, Trash2, ScrollText } from 'lucide-react';
 
 const SubcontractorDashboard = () => {
     const navigate = useNavigate();
@@ -105,12 +105,7 @@ const SubcontractorDashboard = () => {
                             </button>
                         </div>
 
-                        <button
-                            onClick={(e) => { e.stopPropagation(); navigate(`/admin/subs/${sub.id}/ledger`); }}
-                            style={{ position: 'absolute', top: '15px', right: '80px', background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: '0.8rem', border: '1px solid rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '4px' }}
-                        >
-                            Detay / Ekstre
-                        </button>
+
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
                             <div style={{ background: 'rgba(255,255,255,0.1)', padding: '15px', borderRadius: '50%' }}>
@@ -125,22 +120,30 @@ const SubcontractorDashboard = () => {
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
                             <button
                                 onClick={() => navigate(`/admin/subs/${sub.id}/payment`)}
                                 className="glass-btn"
-                                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '15px' }}
+                                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '15px', fontSize: '0.8rem' }}
                             >
-                                <FileText size={24} style={{ marginBottom: '5px' }} />
-                                <span>Hakediş Ekle</span>
+                                <FileText size={20} style={{ marginBottom: '5px' }} />
+                                <span>Hakediş</span>
+                            </button>
+                            <button
+                                onClick={() => navigate(`/admin/subs/${sub.id}/ledger`)}
+                                className="glass-btn"
+                                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '15px', background: 'rgba(33, 150, 243, 0.2)', fontSize: '0.8rem' }}
+                            >
+                                <ScrollText size={20} style={{ marginBottom: '5px' }} />
+                                <span>Ekstre</span>
                             </button>
                             <button
                                 onClick={() => { setSelectedSub(sub); setShowPayModal(true); }}
                                 className="glass-btn"
-                                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '15px', background: 'rgba(76, 175, 80, 0.2)' }}
+                                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '15px', background: 'rgba(76, 175, 80, 0.2)', fontSize: '0.8rem' }}
                             >
-                                <DollarSign size={24} style={{ marginBottom: '5px' }} />
-                                <span>Ödeme Ekle</span>
+                                <DollarSign size={20} style={{ marginBottom: '5px' }} />
+                                <span>Ödeme</span>
                             </button>
                         </div>
                     </div>
