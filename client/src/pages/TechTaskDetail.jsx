@@ -104,7 +104,8 @@ const TechTaskDetail = () => {
             await api.put(`/tasks/${id}`, {
                 status: 'completed',
                 service_form_no: serviceFormNo,
-                is_quoted: isQuoted
+                is_quoted: isQuoted,
+                due_date: new Date().toISOString() // Set completion date to NOW
             });
             alert('Görev başarıyla tamamlandı!');
             navigate('/tech');
