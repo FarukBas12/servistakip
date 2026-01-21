@@ -3,7 +3,21 @@ const router = express.Router();
 const controller = require('../controllers/subController');
 const auth = require('../middleware/auth');
 const multer = require('multer');
-const upload = multer({ storage: multer.memoryStorage() });
+const path = require('path');
+
+// Disk Storage for Images
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/')
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname)) // Append extension
+    }
+});
+const upload = multer({ storage: storage });
+
+// Memory Storage for Excel
+const uploadMemory = multer({ storage: multer.memoryStorage() });
 
 router.use(auth);
 
@@ -20,7 +34,7 @@ router.post('/cash', controller.addCash);
 // Prices
 router.get('/prices', controller.listPrices); // ?subId=
 router.post('/prices', controller.addPrice);
-router.post('/prices/import', upload.single('file'), controller.importPrices);
+router.post('/prices/import', uploadMemory.single('file'), controller.importPrices);
 
 // Payments
 router.post('/payments', upload.single('waybill'), controller.createPayment);
