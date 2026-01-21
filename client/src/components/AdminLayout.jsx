@@ -10,6 +10,8 @@ import GlobalMap from '../pages/GlobalMap';
 import Reports from '../pages/Reports';
 import DailyTracking from '../pages/DailyTracking';
 import CompletedTasks from '../pages/CompletedTasks';
+import PaymentPool from '../pages/PaymentPool'; // NEW
+import PaymentCreate from '../pages/PaymentCreate'; // NEW
 
 const AdminLayout = () => {
     return (
@@ -25,6 +27,8 @@ const AdminLayout = () => {
                     <Route path="/map" element={<GlobalMap />} />
                     <Route path="/daily" element={<DailyTracking />} />
                     <Route path="/archive" element={<CompletedTasks />} />
+                    <Route path="/payments" element={<PaymentPool />} /> {/* NEW */}
+                    <Route path="/create-payment" element={<PaymentCreate />} /> {/* NEW */}
                     <Route path="/reports" element={<Reports />} />
                 </Routes>
             </div>

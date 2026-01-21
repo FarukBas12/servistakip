@@ -15,6 +15,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/stores', require('./routes/stores'));
+app.use('/api/payments', require('./routes/payments'));
 
 // Static Folder for Uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -174,6 +175,33 @@ async function runMigrations() {
             );
         `);
         console.log(' - Checked task_logs table');
+
+        // Create Payments Table (Hakediş Header)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS payments (
+                id SERIAL PRIMARY KEY,
+                title VARCHAR(150),
+                payment_date DATE,
+                total_amount NUMERIC(12, 2) DEFAULT 0,
+                status VARCHAR(20) DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log(' - Checked payments table');
+
+        // Create Payment Items Table (Hakediş Rows)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS payment_items (
+                id SERIAL PRIMARY KEY,
+                payment_id INTEGER REFERENCES payments(id) ON DELETE CASCADE,
+                work_item VARCHAR(255),
+                detail VARCHAR(255),
+                quantity NUMERIC(10, 2),
+                unit_price NUMERIC(12, 2),
+                total_price NUMERIC(12, 2)
+            );
+        `);
+        console.log(' - Checked payment_items table');
 
         console.log('✅ Database Schema Verified & Updated!');
     } catch (e) {
