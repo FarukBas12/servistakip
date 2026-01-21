@@ -13,6 +13,7 @@ import SubPaymentPage from '../pages/SubPaymentPage'; // NEW
 import SubLedger from '../pages/SubLedger'; // NEW
 import DailyTracking from '../pages/DailyTracking';
 import CompletedTasks from '../pages/CompletedTasks';
+import Settings from '../pages/Settings';
 
 
 const AdminLayout = () => {
@@ -33,6 +34,7 @@ const AdminLayout = () => {
                     <Route path="subs/:id/payment" element={<SubPaymentPage />} />
                     <Route path="subs/:id/ledger" element={<SubLedger />} />
                     <Route path="/reports" element={<Reports />} />
+                    <Route path="/settings" element={<Settings />} />
                 </Routes>
             </div>
         </div>

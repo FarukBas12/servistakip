@@ -21,25 +21,26 @@ function App() {
           <Route element={<PrivateRoute allowedRoles={['admin']} />}>
             <Route path="/admin/*" element={<AdminLayout />} />
           </Route>
+        </Route>
 
-          {/* Technician Routes */}
-          <Route element={<PrivateRoute allowedRoles={['technician']} />}>
-            <Route path="/tech/*" element={
-              <>
-                <Navbar />
-                <Routes>
-                  <Route path="/" element={<TechDashboard />} />
-                  <Route path="/task/:id" element={<TechTaskDetail />} />
-                </Routes>
-              </>
-            } />
-          </Route>
+        {/* Technician Routes */}
+        <Route element={<PrivateRoute allowedRoles={['technician']} />}>
+          <Route path="/tech/*" element={
+            <>
+              <Navbar />
+              <Routes>
+                <Route path="/" element={<TechDashboard />} />
+                <Route path="/task/:id" element={<TechTaskDetail />} />
+              </Routes>
+            </>
+          } />
+        </Route>
 
-          <Route path="/" element={<Navigate to="/login" />} />
-        </Routes>
-        <PWAInstallPrompt />
-      </Router>
-    </AuthProvider>
+        <Route path="/" element={<Navigate to="/login" />} />
+      </Routes>
+      <PWAInstallPrompt />
+    </Router>
+    </AuthProvider >
   );
 }
 

@@ -25,7 +25,12 @@ router.use(auth);
 router.get('/', controller.listSubs);
 router.post('/', controller.createSub);
 router.put('/:id', controller.updateSub);
+router.post('/:id/delete', controller.deleteSub); // POST to send body with password
 router.get('/:id/ledger', controller.getLedger);
+
+// Settings
+router.get('/settings/all', controller.getSettings);
+router.put('/settings/all', controller.updateSettings);
 router.delete('/transaction/:type/:id', controller.deleteTransaction);
 
 // Cash

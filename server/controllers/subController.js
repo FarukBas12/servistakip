@@ -31,6 +31,39 @@ exports.updateSub = async (req, res) => {
     } catch (err) { console.error(err); res.status(500).send('Server Error'); }
 };
 
+exports.deleteSub = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { password } = req.body;
+
+        // Verify Password
+        const settingRes = await db.query('SELECT delete_password FROM app_settings WHERE id = 1');
+        const correctPassword = settingRes.rows[0]?.delete_password || '123456';
+
+        if (password !== correctPassword) {
+            return res.status(403).json({ message: 'Hatalı Şifre!' });
+        }
+
+        await db.query('DELETE FROM subcontractors WHERE id = $1', [id]);
+        res.json({ message: 'Deleted' });
+    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+};
+
+exports.getSettings = async (req, res) => {
+    try {
+        const { rows } = await db.query('SELECT delete_password FROM app_settings WHERE id = 1');
+        res.json(rows[0] || { delete_password: '123456' });
+    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+};
+
+exports.updateSettings = async (req, res) => {
+    try {
+        const { delete_password } = req.body;
+        await db.query('UPDATE app_settings SET delete_password = $1 WHERE id = 1', [delete_password]);
+        res.json({ message: 'Settings Updated' });
+    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+};
+
 // --- CASH TRANSACTIONS ---
 exports.addCash = async (req, res) => {
     try {

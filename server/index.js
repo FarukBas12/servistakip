@@ -246,6 +246,17 @@ async function runMigrations() {
         `);
         console.log(' - Checked cash_transactions table');
 
+        // Create App Settings Table
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS app_settings (
+                id SERIAL PRIMARY KEY,
+                delete_password VARCHAR(255) DEFAULT '123456'
+            );
+        `);
+        // Ensure one row exists
+        await db.query("INSERT INTO app_settings (id, delete_password) VALUES (1, '123456') ON CONFLICT (id) DO NOTHING");
+        console.log(' - Checked app_settings table');
+
         console.log('✅ Database Schema Verified & Updated!');
     } catch (e) {
         console.error('❌ Schema update error:', e.message);
