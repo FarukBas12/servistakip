@@ -20,25 +20,14 @@ const TaskPool = () => {
     const [assignId, setAssignId] = useState('');
 
     const [selectedRegion, setSelectedRegion] = useState('Hepsi');
-    const [regions, setRegions] = useState(['Hepsi', 'Diğer']); // dynamic list
+    const regions = ['Hepsi', 'Kemalpaşa', 'Manisa', 'Güzelbahçe', 'Torbalı', 'Menemen', 'Diğer'];
 
     useEffect(() => {
         fetchTasks();
         fetchUsers();
-        fetchRegions();
     }, []);
 
-    const fetchRegions = async () => {
-        try {
-            const res = await api.get('/tasks/regions/list');
-            if (res.data && res.data.length > 0) {
-                // Add 'Hepsi' to the beginning if not present
-                setRegions(['Hepsi', ...res.data]);
-            }
-        } catch (err) {
-            console.error('Region fetch error', err);
-        }
-    };
+
 
     const fetchTasks = async () => {
         try {
