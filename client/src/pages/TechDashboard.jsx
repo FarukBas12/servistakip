@@ -10,7 +10,8 @@ const TechDashboard = () => {
     const fetchTasks = async (playSound = false) => {
         try {
             const res = await api.get('/tasks');
-            const newTasks = res.data;
+            // Filter: Only show pending or in_progress tasks
+            const newTasks = res.data.filter(t => t.status !== 'completed');
             setTasks(newTasks);
 
             // If tasks increased, play sound!
