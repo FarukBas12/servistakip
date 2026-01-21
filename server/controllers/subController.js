@@ -142,7 +142,7 @@ exports.createPayment = async (req, res) => {
 
         let waybill_image = null;
         if (req.file) {
-            waybill_image = `/uploads/${req.file.filename}`;
+            waybill_image = req.file.path;
         }
 
         // Calculate total

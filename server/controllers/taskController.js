@@ -146,10 +146,8 @@ exports.addPhoto = async (req, res) => {
 
     const { type, gps_lat, gps_lng } = req.body;
 
-    // In a real app, upload to S3/Cloudinary here.
-    // Currently file is saved specific folder by multer.
-    // We construct a URL (assuming static file serving).
-    const url = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    // Cloudinary returns the full SSL URL in req.file.path
+    const url = req.file.path;
 
     try {
         const { rows } = await db.query(

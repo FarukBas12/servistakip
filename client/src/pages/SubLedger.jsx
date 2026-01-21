@@ -119,7 +119,7 @@ const SubLedger = () => {
                         </div>
                         <div>
                             <p><strong>İrsaliye:</strong> ${detailData.waybill_info || '-'}</p>
-                            ${detailData.waybill_image ? `<img src="${api.defaults.baseURL.replace('/api', '') + detailData.waybill_image}" />` : ''}
+                            ${detailData.waybill_image ? `<img src="${detailData.waybill_image.startsWith('http') ? detailData.waybill_image : api.defaults.baseURL.replace('/api', '') + detailData.waybill_image}" />` : ''}
                         </div>
                     </div>
 
@@ -260,9 +260,9 @@ const SubLedger = () => {
                                 {detailData.waybill_image && (
                                     <div style={{ marginTop: '10px' }}>
                                         <p><strong>İrsaliye Fotoğrafı:</strong></p>
-                                        <a href={api.defaults.baseURL.replace('/api', '') + detailData.waybill_image} target="_blank" rel="noreferrer">
+                                        <a href={detailData.waybill_image.startsWith('http') ? detailData.waybill_image : api.defaults.baseURL.replace('/api', '') + detailData.waybill_image} target="_blank" rel="noreferrer">
                                             <img
-                                                src={api.defaults.baseURL.replace('/api', '') + detailData.waybill_image}
+                                                src={detailData.waybill_image.startsWith('http') ? detailData.waybill_image : api.defaults.baseURL.replace('/api', '') + detailData.waybill_image}
                                                 alt="İrsaliye"
                                                 style={{ maxWidth: '100%', maxHeight: '150px', borderRadius: '5px', border: '1px solid #555' }}
                                             />

@@ -5,23 +5,12 @@ const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 
-// Multer Storage Engine
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, '../uploads/'));
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
+const { storage } = require('../utils/cloudinary');
 
 // Init Upload
 const upload = multer({
     storage: storage,
     limits: { fileSize: 10000000 }, // 10MB
-    fileFilter: function (req, file, cb) {
-        checkFileType(file, cb);
-    }
 }).single('photo'); // 'photo' is the form field name
 
 function checkFileType(file, cb) {

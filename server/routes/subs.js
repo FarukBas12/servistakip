@@ -5,15 +5,8 @@ const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 
-// Disk Storage for Images
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/')
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname)) // Append extension
-    }
-});
+// Cloudinary Storage for Images
+const { storage } = require('../utils/cloudinary');
 const upload = multer({ storage: storage });
 
 // Memory Storage for Excel
