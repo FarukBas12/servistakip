@@ -113,3 +113,25 @@ exports.createPayment = async (req, res) => {
         client.release();
     }
 };
+
+exports.getLedger = async (req, res) => {
+    try {
+        const { id } = req.params;
+        // Fetch Payments (Credit)
+        const paymentsRes = await db.query(`
+            SELECT id, title as description, total_amount as amount, payment_date as date, 'hakedis' as type 
+            FROM payments WHERE subcontractor_id = $1 AND status != 'cancelled'
+        `, [id]);
+
+        // Fetch Cash Transactions (Debit)
+        const cashRes = await db.query(`
+            SELECT id, description, amount, transaction_date as date, 'odeme' as type 
+            FROM cash_transactions WHERE subcontractor_id = $1
+        `, [id]);
+
+        // Combine and Sort
+        const all = [...paymentsRes.rows, ...cashRes.rows].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        res.json(all);
+    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+};

@@ -12,8 +12,9 @@ const SubcontractorDashboard = () => {
     const [selectedSub, setSelectedSub] = useState(null);
     const [payData, setPayData] = useState({ amount: '', description: '', date: new Date().toISOString().split('T')[0] });
 
-    // Create Modal State
+    // Create/Edit Modal State
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [newSub, setNewSub] = useState({ name: '', phone: '' });
 
     useEffect(() => { fetchSubs(); }, []);
@@ -48,6 +49,16 @@ const SubcontractorDashboard = () => {
         } catch (err) { alert('Hata'); }
     };
 
+    const handleEditSub = async () => {
+        if (!newSub.name) return alert('İsim Giriniz');
+        try {
+            await api.put(`/subs/${selectedSub.id}`, newSub);
+            alert('Güncellendi');
+            setShowEditModal(false);
+            fetchSubs();
+        } catch (err) { alert('Hata'); }
+    };
+
     return (
         <div className="dashboard">
             <h2 style={{ marginBottom: '20px' }}>Taşeron Listesi</h2>
@@ -57,8 +68,18 @@ const SubcontractorDashboard = () => {
                 {subs.map(sub => (
                     <div key={sub.id} className="glass-panel" style={{ padding: '20px', position: 'relative' }}>
                         {/* Edit Button (Top Right) */}
-                        <button style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
+                        <button
+                            onClick={() => { setSelectedSub(sub); setNewSub({ name: sub.name, phone: sub.phone }); setShowEditModal(true); }}
+                            style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}
+                        >
                             <Edit2 size={18} />
+                        </button>
+
+                        <button
+                            onClick={(e) => { e.stopPropagation(); navigate(`/admin/subs/${sub.id}/ledger`); }}
+                            style={{ position: 'absolute', top: '15px', right: '50px', background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: '0.8rem', border: '1px solid rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '4px' }}
+                        >
+                            Detay / Ekstre
                         </button>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
@@ -132,6 +153,19 @@ const SubcontractorDashboard = () => {
                         <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
                             <button onClick={handleCreateSub} className="glass-btn" style={{ flex: 1, background: '#4caf50' }}>Ekle</button>
                             <button onClick={() => setShowCreateModal(false)} className="glass-btn" style={{ flex: 1, background: '#f44336' }}>İptal</button>
+                        </div>
+                    </div>
+                </div>
+            {/* Edit Sub Modal */}
+            {showEditModal && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                    <div className="glass-panel" style={{ width: '350px', padding: '25px' }}>
+                        <h3>Düzenle: {selectedSub?.name}</h3>
+                        <input className="glass-input" value={newSub.name} onChange={e => setNewSub({ ...newSub, name: e.target.value })} />
+                        <input className="glass-input" value={newSub.phone} onChange={e => setNewSub({ ...newSub, phone: e.target.value })} style={{ marginTop: '10px' }} />
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                            <button onClick={handleEditSub} className="glass-btn" style={{ flex: 1, background: '#4caf50' }}>Güncelle</button>
+                            <button onClick={() => setShowEditModal(false)} className="glass-btn" style={{ flex: 1, background: '#f44336' }}>İptal</button>
                         </div>
                     </div>
                 </div>

@@ -10,6 +10,7 @@ import GlobalMap from '../pages/GlobalMap';
 import Reports from '../pages/Reports';
 import SubcontractorDashboard from '../pages/SubcontractorDashboard'; // NEW
 import SubPaymentPage from '../pages/SubPaymentPage'; // NEW
+import SubLedger from '../pages/SubLedger'; // NEW
 import DailyTracking from '../pages/DailyTracking';
 import CompletedTasks from '../pages/CompletedTasks';
 
@@ -29,7 +30,8 @@ const AdminLayout = () => {
                     <Route path="/daily" element={<DailyTracking />} />
                     <Route path="/archive" element={<CompletedTasks />} />
                     <Route path="/subs" element={<SubcontractorDashboard />} />
-                    <Route path="/admin/subs/:id/payment" element={<SubPaymentPage />} /> {/* New Page */}
+                    <Route path="/admin/subs/:id/payment" element={<SubPaymentPage />} />
+                    <Route path="/admin/subs/:id/ledger" element={<SubLedger />} /> {/* Ledger Page */} {/* New Page */}
                     <Route path="/reports" element={<Reports />} />
                 </Routes>
             </div>

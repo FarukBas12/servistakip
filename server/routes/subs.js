@@ -11,6 +11,7 @@ router.use(auth);
 router.get('/', controller.listSubs);
 router.post('/', controller.createSub);
 router.put('/:id', controller.updateSub);
+router.get('/:id/ledger', controller.getLedger);
 
 // Cash
 router.post('/cash', controller.addCash);
