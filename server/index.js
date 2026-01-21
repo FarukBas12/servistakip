@@ -15,8 +15,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/stores', require('./routes/stores'));
-// app.use('/api/payments', require('./routes/payments'));
-// app.use('/api/definitions', require('./routes/definitions'));
+
 
 // Static Folder for Uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -174,76 +173,9 @@ async function runMigrations() {
         `);
         console.log(' - Checked task_logs table');
 
-        // Create Payments Table (Hakediş Header)
-        await db.query(`
-            CREATE TABLE IF NOT EXISTS payments (
-                id SERIAL PRIMARY KEY,
-                title VARCHAR(150),
-                payment_date DATE,
-                total_amount NUMERIC(12, 2) DEFAULT 0,
-                status VARCHAR(20) DEFAULT 'pending',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
-        console.log(' - Checked payments table');
+        console.log(' - Checked task_logs table');
 
-        // Create Payment Items Table (Hakediş Rows)
-        await db.query(`
-            CREATE TABLE IF NOT EXISTS payment_items (
-                id SERIAL PRIMARY KEY,
-                payment_id INTEGER REFERENCES payments(id) ON DELETE CASCADE,
-                work_item VARCHAR(255),
-                detail VARCHAR(255),
-                quantity NUMERIC(10, 2),
-                unit_price NUMERIC(12, 2),
-                total_price NUMERIC(12, 2)
-            );
-        `);
-        console.log(' - Checked payment_items table');
-
-        // Create Subcontractors Table
-        await db.query(`
-            CREATE TABLE IF NOT EXISTS subcontractors (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
-                phone VARCHAR(20),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
-        console.log(' - Checked subcontractors table');
-
-        // Create Price Definitions Table (Master List)
-        await db.query(`
-            CREATE TABLE IF NOT EXISTS price_definitions (
-                id SERIAL PRIMARY KEY,
-                work_item VARCHAR(255) NOT NULL,
-                detail VARCHAR(255),
-                unit_price NUMERIC(12, 2) DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
-        console.log(' - Checked price_definitions table');
-
-        // Add subcontractor_id to price_definitions (Unified System)
-        await db.query("ALTER TABLE price_definitions ADD COLUMN IF NOT EXISTS subcontractor_id INTEGER REFERENCES subcontractors(id) ON DELETE CASCADE");
-        console.log(' - Checked price_definitions subcontractor_id');
-
-        // Add subcontractor_id to payments
-        await db.query("ALTER TABLE payments ADD COLUMN IF NOT EXISTS subcontractor_id INTEGER REFERENCES subcontractors(id) ON DELETE SET NULL");
-        console.log(' - Checked payments subcontractor_id');
-
-        // Create Cash Transactions Table (Ödemeler)
-        await db.query(`
-            CREATE TABLE IF NOT EXISTS cash_transactions (
-                id SERIAL PRIMARY KEY,
-                subcontractor_id INTEGER REFERENCES subcontractors(id) ON DELETE CASCADE,
-                amount NUMERIC(12, 2) NOT NULL,
-                transaction_date DATE DEFAULT CURRENT_DATE,
-                description VARCHAR(255),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
-        console.log(' - Checked cash_transactions table');
+        console.log('✅ Database Schema Verified & Updated!');
 
         console.log('✅ Database Schema Verified & Updated!');
     } catch (e) {
