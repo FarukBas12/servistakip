@@ -30,11 +30,7 @@ const AdminLayout = () => {
                     <Route path="/map" element={<GlobalMap />} />
                     <Route path="/daily" element={<DailyTracking />} />
                     <Route path="/archive" element={<CompletedTasks />} />
-                    <Route path="/payments" element={<PaymentPool />} />
-                    <Route path="/create-payment" element={<PaymentCreate />} />
-                    <Route path="/data" element={<PriceList />} />
-                    <Route path="/subs" element={<SubcontractorDashboard />} />
-                    <Route path="/subs/:id" element={<SubcontractorDetail />} /> {/* NEW */}
+                    <Route path="/archive" element={<CompletedTasks />} />
                     <Route path="/reports" element={<Reports />} />
                 </Routes>
             </div>
