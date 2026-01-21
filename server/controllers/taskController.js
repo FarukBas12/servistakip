@@ -66,6 +66,11 @@ exports.updateTask = async (req, res) => {
             params.push(status);
             counter++;
         }
+        if (req.body.due_date !== undefined) {
+            updates.push(`due_date = $${counter}`);
+            params.push(req.body.due_date ? req.body.due_date : null);
+            counter++;
+        }
         if (assigned_to !== undefined) { // Check undefined because null is valid (unassign)
             updates.push(`assigned_to = $${counter}`);
             params.push(assigned_to);

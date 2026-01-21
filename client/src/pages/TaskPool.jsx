@@ -8,12 +8,15 @@ const TaskPool = () => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
+    // Tab State: 'pool' (Pending/Unassigned) vs 'active' (Assigned/In Progress)
+    const [activeTab, setActiveTab] = useState('pool');
+
     // Modal States
     const [editingTask, setEditingTask] = useState(null); // For Edit & Assign
     const [modalMode, setModalMode] = useState(null); // 'edit' or 'assign'
 
     // Form Data
-    const [editForm, setEditForm] = useState({ title: '', description: '', address: '' });
+    const [editForm, setEditForm] = useState({ title: '', description: '', address: '', due_date: '' });
     const [assignId, setAssignId] = useState('');
 
     const [selectedRegion, setSelectedRegion] = useState('Hepsi');
@@ -27,8 +30,9 @@ const TaskPool = () => {
     const fetchTasks = async () => {
         try {
             const res = await api.get('/tasks');
-            // Filter only unassigned tasks that are NOT completed
-            setTasks(res.data.filter(t => !t.assigned_to && t.status !== 'completed'));
+            // We fetch ALL tasks, excluding completed ones (they go to archive)
+            // Filtering happens in render based on activeTab
+            setTasks(res.data.filter(t => t.status !== 'completed'));
             setLoading(false);
         } catch (err) {
             console.error(err);
@@ -60,14 +64,17 @@ const TaskPool = () => {
         setEditForm({
             title: task.title,
             description: task.description || '',
-            address: task.address
+            address: task.address,
+            // Format date for datetime-local input (YYYY-MM-DDTHH:mm)
+            due_date: task.due_date ? new Date(task.due_date).toISOString().slice(0, 16) : ''
         });
         setModalMode('edit');
     };
 
     const openAssignModal = (task) => {
         setEditingTask(task);
-        setAssignId('');
+        // Pre-select current user if re-assigning
+        setAssignId(task.assigned_to || '');
         setModalMode('assign');
     };
 
@@ -77,7 +84,7 @@ const TaskPool = () => {
             await api.put(`/tasks/${editingTask.id}`, editForm);
             alert('Görev güncellendi');
             setEditingTask(null);
-            fetchTasks(); // Refresh to see changes
+            fetchTasks(); // Refresh
         } catch (err) {
             alert('Güncelleme başarısız');
         }
@@ -87,16 +94,26 @@ const TaskPool = () => {
         e.preventDefault();
         try {
             await api.put(`/tasks/${editingTask.id}`, { assigned_to: assignId });
-            alert('Görev atandı');
+            alert(activeTab === 'pool' ? 'Görev atandı' : 'Personel değiştirildi');
             setEditingTask(null);
-            fetchTasks(); // It will disappear from pool
+            fetchTasks();
         } catch (err) {
-            alert('Atama başarısız');
+            alert('İşlem başarısız');
         }
     };
 
-    // Filtered tasks
+    // Filter Logic
     const filteredTasks = tasks.filter(task => {
+        // Tab Filter
+        if (activeTab === 'pool') {
+            // Pool: Unassigned only
+            if (task.assigned_to) return false;
+        } else {
+            // Active: Assigned only
+            if (!task.assigned_to) return false;
+        }
+
+        // Region Filter
         if (selectedRegion === 'Hepsi') return true;
         const region = task.region || 'Diğer';
         return region === selectedRegion;
@@ -106,8 +123,42 @@ const TaskPool = () => {
         <div className="dashboard">
             <button onClick={() => navigate('/admin')} className="glass-btn" style={{ marginBottom: '1rem' }}>&larr; Panela Dön</button>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ margin: 0 }}>İş Havuzu</h2>
+                <h2 style={{ margin: 0 }}>İş Yönetimi</h2>
                 <button onClick={() => navigate('/admin/create-task')} className="glass-btn" style={{ background: 'rgba(76, 175, 80, 0.3)' }}>+ Yeni Görev</button>
+            </div>
+
+            {/* Main Tabs */}
+            <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                <button
+                    onClick={() => setActiveTab('pool')}
+                    style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: activeTab === 'pool' ? '#64b5f6' : 'white',
+                        borderBottom: activeTab === 'pool' ? '2px solid #64b5f6' : 'none',
+                        padding: '10px 20px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        fontSize: '1rem'
+                    }}
+                >
+                    Havuz (Bekleyenler)
+                </button>
+                <button
+                    onClick={() => setActiveTab('active')}
+                    style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: activeTab === 'active' ? '#64b5f6' : 'white',
+                        borderBottom: activeTab === 'active' ? '2px solid #64b5f6' : 'none',
+                        padding: '10px 20px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        fontSize: '1rem'
+                    }}
+                >
+                    Saha (Atanmış İşler)
+                </button>
             </div>
 
             {/* Region Tabs */}
@@ -130,14 +181,14 @@ const TaskPool = () => {
 
             {loading ? <p>Yükleniyor...</p> : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
-                    {filteredTasks.length === 0 ? <p style={{ opacity: 0.7 }}>Bu bölgede bekleyen iş yok.</p> : filteredTasks.map(task => (
+                    {filteredTasks.length === 0 ? <p style={{ opacity: 0.7 }}>Bu kategoride iş yok.</p> : filteredTasks.map(task => (
                         <div key={task.id} className="glass-panel" style={{
                             padding: '20px',
                             position: 'relative',
-                            borderLeft: task.status === 'completed' ? '5px solid #4caf50' : '5px solid #2196f3'
+                            borderLeft: task.status === 'in_progress' ? '5px solid #2196f3' : '5px solid #ffb300'
                         }}>
                             {/* CANCELLED WARNING BANNER */}
-                            {task.cancel_count > 0 && task.status !== 'completed' && (
+                            {task.cancel_count > 0 && (
                                 <div style={{
                                     background: 'rgba(255, 193, 7, 0.9)',
                                     color: '#000',
@@ -150,9 +201,9 @@ const TaskPool = () => {
                                     alignItems: 'center',
                                     gap: '5px'
                                 }}>
-                                    ⚠️ Bu iş {task.cancel_count} kez iade edildi!
+                                    ⚠️ {task.cancel_count} kez iade!
                                     <span style={{ fontWeight: 'normal', opacity: 0.8, fontSize: '0.8rem', marginLeft: 'auto' }}>
-                                        Son: {task.last_cancel_reason?.substring(0, 15)}...
+                                        Son: {task.last_cancel_reason?.substring(0, 10)}...
                                     </span>
                                 </div>
                             )}
@@ -162,7 +213,7 @@ const TaskPool = () => {
                             </div>
 
                             <span style={{
-                                background: task.status === 'completed' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(33, 150, 243, 0.2)',
+                                background: task.status === 'in_progress' ? 'rgba(33, 150, 243, 0.2)' : 'rgba(255, 193, 7, 0.2)',
                                 padding: '2px 8px',
                                 borderRadius: '4px',
                                 fontSize: '0.8rem',
@@ -170,27 +221,29 @@ const TaskPool = () => {
                                 marginBottom: '5px',
                                 display: 'inline-block'
                             }}>
-                                {task.status === 'completed' ? 'TAMAMLANDI' : 'BEKLİYOR'}
+                                {task.status === 'in_progress' ? 'SAHADA / DEVAM EDİYOR' : 'BEKLİYOR'}
                             </span>
 
                             <h3 style={{ marginTop: 5, paddingRight: '50px' }}>{task.title}</h3>
                             <p style={{ opacity: 0.8, fontSize: '0.9rem' }}>{task.address}</p>
-                            {task.assigned_user && task.status === 'completed' && (
-                                <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>Tamamlayan: {task.assigned_user}</p>
+
+                            {activeTab === 'active' && (
+                                <div style={{ background: 'rgba(255,255,255,0.1)', padding: '8px', borderRadius: '5px', marginBottom: '10px' }}>
+                                    👤 <strong>{task.assigned_user}</strong> üzerinde
+                                </div>
                             )}
+
                             {task.description && <p style={{ background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '5px' }}>{task.description}</p>}
 
+                            {task.due_date && <div style={{ fontSize: '0.8rem', opacity: 0.6, marginBottom: '10px' }}>📅 {new Date(task.due_date).toLocaleString()}</div>}
+
                             <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                                {task.status !== 'completed' && (
-                                    <>
-                                        <button onClick={() => openAssignModal(task)} className="glass-btn" style={{ flex: 1, background: 'rgba(33, 150, 243, 0.3)' }}>
-                                            👤 Personele Ata
-                                        </button>
-                                        <button onClick={() => openEditModal(task)} className="glass-btn" style={{ flex: 1, background: 'rgba(255, 193, 7, 0.3)' }}>
-                                            ✏️ Düzenle
-                                        </button>
-                                    </>
-                                )}
+                                <button onClick={() => openAssignModal(task)} className="glass-btn" style={{ flex: 1, background: 'rgba(33, 150, 243, 0.3)' }}>
+                                    {activeTab === 'pool' ? '👤 Personele Ata' : '🔄 Personel Değiştir'}
+                                </button>
+                                <button onClick={() => openEditModal(task)} className="glass-btn" style={{ flex: 1, background: 'rgba(255, 193, 7, 0.3)' }}>
+                                    ✏️ Düzenle
+                                </button>
                             </div>
                         </div>
                     ))}
@@ -205,30 +258,37 @@ const TaskPool = () => {
                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>
                     <div className="glass-panel" style={{ width: '90%', maxWidth: '500px', padding: '30px', background: '#1e1e1e' }}>
-                        <h3>{modalMode === 'edit' ? 'Görevi Düzenle' : 'Personel Ata'}</h3>
+                        <h3>{modalMode === 'edit' ? 'Görevi Düzenle' : (activeTab === 'pool' ? 'Personel Ata' : 'Personel Transfer Et')}</h3>
 
                         {modalMode === 'edit' ? (
                             <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Başlık</label>
                                 <input
                                     className="glass-input"
                                     value={editForm.title}
                                     onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                                    placeholder="Başlık"
                                     required
                                 />
+                                <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Adres</label>
                                 <input
                                     className="glass-input"
                                     value={editForm.address}
                                     onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                                    placeholder="Adres"
                                     required
                                 />
+                                <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Tarih ve Saat</label>
+                                <input
+                                    type="datetime-local"
+                                    className="glass-input"
+                                    value={editForm.due_date}
+                                    onChange={(e) => setEditForm({ ...editForm, due_date: e.target.value })}
+                                />
+                                <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Açıklama</label>
                                 <textarea
                                     className="glass-input"
                                     rows="4"
                                     value={editForm.description}
                                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                                    placeholder="Açıklama / Detaylar"
                                 />
                                 <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                                     <button type="submit" className="glass-btn" style={{ flex: 1, background: 'rgba(76, 175, 80, 0.3)' }}>Kaydet</button>
@@ -237,7 +297,7 @@ const TaskPool = () => {
                             </form>
                         ) : (
                             <form onSubmit={handleAssignSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <p>"{editingTask.title}" görevi için teknisyen seçin:</p>
+                                <p>"{editingTask.title}" görevi için işlem yapıyorsunuz:</p>
                                 <select
                                     className="glass-input"
                                     value={assignId}
@@ -251,7 +311,9 @@ const TaskPool = () => {
                                     ))}
                                 </select>
                                 <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                                    <button type="submit" className="glass-btn" style={{ flex: 1, background: 'rgba(33, 150, 243, 0.3)' }}>Atamayı Yap</button>
+                                    <button type="submit" className="glass-btn" style={{ flex: 1, background: 'rgba(33, 150, 243, 0.3)' }}>
+                                        {activeTab === 'pool' ? 'Atamayı Yap' : 'Transfer Et'}
+                                    </button>
                                     <button type="button" onClick={() => setEditingTask(null)} className="glass-btn" style={{ flex: 1, background: 'rgba(255, 0, 0, 0.3)' }}>İptal</button>
                                 </div>
                             </form>
