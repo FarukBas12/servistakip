@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, PlusCircle, Wallet, X, DollarSign } from 'lucide-react';
+import { ArrowLeft, User, PlusCircle, Wallet, X, DollarSign, FileText } from 'lucide-react';
 
 const SubcontractorDashboard = () => {
     const navigate = useNavigate();
