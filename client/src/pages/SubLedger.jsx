@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { ArrowLeft, Download, Trash2, CheckSquare, Square, Eye, X } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'; // Not used here but good to keep imports consistent if needed later
 
 const SubLedger = () => {
     const { id } = useParams();
@@ -92,6 +91,71 @@ const SubLedger = () => {
         } catch (e) { console.error(e); alert('Detay alınamadı'); }
     }
 
+    const handlePrint = () => {
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Hakediş Detayı Yazdır</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+                        .header { margin-bottom: 20px; display: flex; justify-content: space-between; }
+                        .total { text-align: right; font-size: 1.2rem; font-weight: bold; margin-top: 20px; }
+                        img { max-width: 300px; margin-top: 10px; border: 1px solid #ddd; }
+                        @media print {
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <div>
+                            <h2>${sub?.name || 'Taşeron'} - Hakediş Detayı</h2>
+                            <p><strong>Mağaza:</strong> ${detailData.store_name}</p>
+                            <p><strong>Başlık:</strong> ${detailData.title}</p>
+                            <p><strong>Tarih:</strong> ${new Date(detailData.payment_date).toLocaleDateString('tr-TR')}</p>
+                        </div>
+                        <div>
+                            <p><strong>İrsaliye:</strong> ${detailData.waybill_info || '-'}</p>
+                            ${detailData.waybill_image ? `<img src="${api.defaults.baseURL.replace('/api', '') + detailData.waybill_image}" />` : ''}
+                        </div>
+                    </div>
+
+                    <h3>Kalemler</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>İş Kalemi</th>
+                                <th>Birim Fiyat</th>
+                                <th>Metraj</th>
+                                <th>Toplam</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${detailData.items.map(item => `
+                                <tr>
+                                    <td>${item.work_item}</td>
+                                    <td>${parseFloat(item.unit_price).toLocaleString('tr-TR')} ₺</td>
+                                    <td>${item.quantity}</td>
+                                    <td style="text-align: right">${parseFloat(item.total_price).toLocaleString('tr-TR')} ₺</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+
+                    <div class="total">GENEL TOPLAM: ${parseFloat(detailData.total_amount).toLocaleString('tr-TR')} ₺</div>
+
+                    <script>
+                        window.onload = function() { window.print(); }
+                    </script>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+    };
+
     const totalBalance = transactions.reduce((acc, t) => {
         return acc + (t.type === 'hakedis' ? parseFloat(t.amount) : -parseFloat(t.amount));
     }, 0);
@@ -178,7 +242,10 @@ const SubLedger = () => {
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 1000, overflowY: 'auto', padding: '20px' }}>
                     <div style={{ maxWidth: '800px', margin: '0 auto', background: '#1e1e1e', borderRadius: '10px', padding: '20px', border: '1px solid #333' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '1px solid #333', paddingBottom: '10px' }}>
-                            <h2 style={{ margin: 0 }}>Hakediş Detayı</h2>
+                            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                                <h2 style={{ margin: 0 }}>Hakediş Detayı</h2>
+                                <button onClick={handlePrint} className="glass-btn" style={{ fontSize: '0.8rem', padding: '5px 15px' }}>Yazdır</button>
+                            </div>
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
                         </div>
 
