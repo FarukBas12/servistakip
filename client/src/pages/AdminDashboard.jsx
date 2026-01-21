@@ -36,6 +36,19 @@ const AdminDashboard = () => {
                         <span>Personel Ekle</span>
                     </Link>
 
+                    <Link to="/admin/import-tasks" className="glass-btn" style={{
+                        padding: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '10px',
+                        width: '150px',
+                        background: 'rgba(156, 39, 176, 0.2)'
+                    }}>
+                        <PlusCircle size={32} />
+                        <span>Toplu İş Yükle</span>
+                    </Link>
+
                     <Link to="/admin/import-stores" className="glass-btn" style={{
                         padding: '20px',
                         display: 'flex',

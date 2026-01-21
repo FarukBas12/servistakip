@@ -8,6 +8,7 @@ import TechTaskDetail from './pages/TechTaskDetail';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
+import TaskImport from './pages/TaskImport'; // NEW
 
 function App() {
   return (

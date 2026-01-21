@@ -51,5 +51,7 @@ router.put('/:id', taskController.updateTask);
 router.delete('/:id', taskController.deleteTask);
 router.post('/:id/photos', upload, taskController.addPhoto);
 router.post('/:id/cancel', taskController.cancelTask); // NEW: Return task to pool
+router.post('/bulk', taskController.createBulkTasks); // Bulk Import
+router.get('/regions/list', taskController.getUniqueRegions); // Dynamic Regions
 
 module.exports = router;

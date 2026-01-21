@@ -208,3 +208,61 @@ exports.cancelTask = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+// Bulk Create Tasks
+exports.createBulkTasks = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const { tasks } = req.body; // Expects array of { title, address, description, region, due_date }
+        if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
+            return res.status(400).json({ message: 'No tasks provided' }); // client.release handled in finally
+        }
+
+        await client.query('BEGIN');
+
+        const insertedTasks = [];
+        const queryText = `
+            INSERT INTO tasks (title, address, description, region, due_date, status, created_at)
+            VALUES ($1, $2, $3, $4, $5, 'pending', NOW())
+            RETURNING id, title
+        `;
+
+        for (const task of tasks) {
+            // Basic validation
+            if (!task.title || !task.address) continue; // Skip invalid rows
+
+            const values = [
+                task.title,
+                task.address,
+                task.description || '',
+                task.region || 'Diğer',
+                task.due_date ? new Date(task.due_date) : null
+            ];
+
+            const result = await client.query(queryText, values);
+            insertedTasks.push(result.rows[0]);
+        }
+
+        await client.query('COMMIT');
+        res.status(201).json({ message: 'Bulk tasks created', count: insertedTasks.length, tasks: insertedTasks });
+
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error(err);
+        res.status(500).json({ message: 'Bulk create failed' });
+    } finally {
+        client.release();
+    }
+};
+
+// Get Unique Regions
+exports.getUniqueRegions = async (req, res) => {
+    try {
+        const result = await pool.query('SELECT DISTINCT region FROM tasks WHERE region IS NOT NULL AND region != \'\' ORDER BY region ASC');
+        const regions = result.rows.map(r => r.region);
+        res.json(regions);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Failed to fetch regions' });
+    }
+};
