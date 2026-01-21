@@ -52,22 +52,42 @@ exports.listPrices = async (req, res) => {
 
 exports.importPrices = async (req, res) => {
     try {
-        if (!req.file) return res.status(400).send('No file');
-        const { subId } = req.body;
-        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
-        const data = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+        if (!req.file) return res.status(400).send('Dosya yüklenmedi/seçilmedi.');
 
+        const { subId } = req.body;
+        if (!subId) return res.status(400).send('Taşeron ID eksik.');
+
+        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+        const firstSheetName = workbook.SheetNames[0];
+        const data = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName]);
+
+        console.log(`Importing ${data.length} rows for sub ${subId} from sheet ${firstSheetName}`);
+
+        let count = 0;
         for (const row of data) {
-            const item = row['İş Kalemi'] || row['Kalem'] || row['item'];
-            const price = row['Birim Fiyat'] || row['Fiyat'] || 0;
+            // Flexible Column Matching (Case Insensitive + Trimming)
+            const keys = Object.keys(row);
+
+            // Find 'Kalem' column
+            const itemKey = keys.find(k => /kalem/i.test(k) || /item/i.test(k) || /açıklama/i.test(k) || /iş/i.test(k));
+            // Find 'Fiyat' column
+            const priceKey = keys.find(k => /fiyat/i.test(k) || /price/i.test(k) || /tutar/i.test(k));
+
+            const item = itemKey ? row[itemKey] : null;
+            const price = priceKey ? row[priceKey] : 0;
+
             if (item) {
                 await db.query(`
                     INSERT INTO price_definitions (subcontractor_id, work_item, unit_price) 
-                    VALUES ($1, $2, $3)`, [subId, item, price]);
+                    VALUES ($1, $2, $3)`, [subId, String(item).trim(), parseFloat(price) || 0]);
+                count++;
             }
         }
-        res.json({ message: 'Imported' });
-    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+        res.json({ message: `${count} kalem başarıyla yüklendi.` });
+    } catch (err) {
+        console.error('Import Error:', err);
+        res.status(500).send('Sunucu Hatası: Excel okunamadı. ' + err.message);
+    }
 };
 
 exports.addPrice = async (req, res) => {
