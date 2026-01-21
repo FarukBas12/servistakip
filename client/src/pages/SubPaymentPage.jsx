@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { ArrowLeft, Upload, Plus, Save, FileText, Paperclip } from 'lucide-react';
+import { ArrowLeft, Upload, Plus, Save, FileText, Paperclip, PlusCircle } from 'lucide-react';
 
 const SubPaymentPage = () => {
     const { id } = useParams();
@@ -18,15 +18,20 @@ const SubPaymentPage = () => {
     // Data
     const [prices, setPrices] = useState([]); // Available items
     const [quantities, setQuantities] = useState({}); // Entered metraj
+    const [customPrices, setCustomPrices] = useState({}); // Overridden prices
 
     // Modals
     const [showDataModal, setShowDataModal] = useState(false);
+    const [showItemModal, setShowItemModal] = useState(false);
+    const [newItem, setNewItem] = useState({ work_item: '', unit_price: '' });
 
     useEffect(() => { loadPrices(); }, []);
 
     const loadPrices = async () => {
-        const res = await api.get(`/subs/prices?subId=${id}`);
-        setPrices(res.data);
+        try {
+            const res = await api.get(`/subs/prices?subId=${id}`);
+            setPrices(res.data);
+        } catch (err) { console.error(err); }
     };
 
     const handleImport = async (e) => {
@@ -40,12 +45,23 @@ const SubPaymentPage = () => {
         setShowDataModal(false);
     };
 
+    const handleAddItem = async () => {
+        if (!newItem.work_item) return alert('Kalem adı giriniz');
+        try {
+            await api.post('/subs/prices', { subId: id, ...newItem });
+            alert('Kalem Eklendi');
+            setNewItem({ work_item: '', unit_price: '' });
+            setShowItemModal(false);
+            loadPrices();
+        } catch (err) { alert('Hata'); }
+    }
+
     const handleSave = async () => {
         if (!header.store_name || !header.title) return alert('Mağaza ve Hakediş Adı giriniz');
 
         const items = prices.filter(p => quantities[p.id] > 0).map(p => ({
             work_item: p.work_item,
-            unit_price: p.unit_price,
+            unit_price: customPrices[p.id] !== undefined ? customPrices[p.id] : p.unit_price,
             quantity: quantities[p.id]
         }));
 
@@ -83,14 +99,18 @@ const SubPaymentPage = () => {
                     </div>
                 </div>
 
-                {/* Actions Row (Sketch Based) */}
-                <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
+                {/* Actions Row */}
+                <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', flexWrap: 'wrap' }}>
                     <button className="glass-btn" style={{ display: 'flex', gap: '5px', alignItems: 'center' }} onClick={() => {
                         const val = prompt('İrsaliye No / Bilgisi Giriniz:');
                         if (val) setHeader({ ...header, waybill: val });
                     }}>
                         <Paperclip size={18} />
                         {header.waybill ? `İrsaliye: ${header.waybill}` : 'İrsaliye Ekle'}
+                    </button>
+
+                    <button className="glass-btn" style={{ display: 'flex', gap: '5px', alignItems: 'center' }} onClick={() => setShowItemModal(true)}>
+                        <PlusCircle size={18} /> Manuel Kalem Ekle
                     </button>
 
                     <button className="glass-btn" style={{ display: 'flex', gap: '5px', alignItems: 'center' }} onClick={() => setShowDataModal(true)}>
@@ -108,7 +128,7 @@ const SubPaymentPage = () => {
                     <thead>
                         <tr style={{ background: 'rgba(255,255,255,0.1)', textAlign: 'left' }}>
                             <th style={{ padding: '12px' }}>Kalem</th>
-                            <th style={{ padding: '12px' }}>Datadaki Tutar (Birim)</th>
+                            <th style={{ padding: '12px' }}>Birim Fiyat (Düzenlenebilir)</th>
                             <th style={{ padding: '12px' }}>Metraj</th>
                             <th style={{ padding: '12px', textAlign: 'right' }}>Tutar</th>
                         </tr>
@@ -116,11 +136,21 @@ const SubPaymentPage = () => {
                     <tbody>
                         {prices.map(p => {
                             const qty = parseFloat(quantities[p.id]) || 0;
-                            const total = qty * parseFloat(p.unit_price);
+                            const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);
+                            const total = qty * unitPrice;
                             return (
                                 <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: qty > 0 ? 'rgba(76, 175, 80, 0.1)' : 'transparent' }}>
                                     <td style={{ padding: '12px' }}>{p.work_item}</td>
-                                    <td style={{ padding: '12px' }}>{parseFloat(p.unit_price).toLocaleString('tr-TR')} ₺</td>
+                                    <td style={{ padding: '8px' }}>
+                                        <input
+                                            type="number"
+                                            className="glass-input"
+                                            value={customPrices[p.id] !== undefined ? customPrices[p.id] : p.unit_price}
+                                            onChange={e => setCustomPrices({ ...customPrices, [p.id]: e.target.value })}
+                                            style={{ width: '120px' }}
+                                        />
+                                        <span style={{ marginLeft: '5px', fontSize: '0.8rem', opacity: 0.6 }}>₺</span>
+                                    </td>
                                     <td style={{ padding: '8px' }}>
                                         <input
                                             type="number"
@@ -141,7 +171,11 @@ const SubPaymentPage = () => {
                 </table>
 
                 <div style={{ marginTop: '30px', textAlign: 'right' }}>
-                    <h3 style={{ color: '#4caf50' }}>GENEL TOPLAM: {prices.reduce((acc, p) => acc + ((parseFloat(quantities[p.id]) || 0) * parseFloat(p.unit_price)), 0).toLocaleString('tr-TR')} ₺</h3>
+                    <h3 style={{ color: '#4caf50' }}>GENEL TOPLAM: {prices.reduce((acc, p) => {
+                        const qty = parseFloat(quantities[p.id]) || 0;
+                        const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);
+                        return acc + (qty * unitPrice);
+                    }, 0).toLocaleString('tr-TR')} ₺</h3>
                     <button onClick={handleSave} className="glass-btn" style={{ background: '#4caf50', marginTop: '10px', padding: '10px 30px' }}>Kaydet</button>
                 </div>
             </div>
@@ -154,6 +188,21 @@ const SubPaymentPage = () => {
                         <p style={{ opacity: 0.7, fontSize: '0.9rem' }}>Format: "Kalem", "Birim Fiyat" sütunları olmalı.</p>
                         <input type="file" onChange={handleImport} style={{ display: 'block', margin: '20px 0' }} />
                         <button onClick={() => setShowDataModal(false)} className="glass-btn" style={{ width: '100%', background: '#f44336' }}>Vazgeç</button>
+                    </div>
+                </div>
+            )}
+
+            {/* Manual Item Modal */}
+            {showItemModal && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                    <div className="glass-panel" style={{ width: '350px', padding: '25px' }}>
+                        <h3>Yeni Kalem Ekle</h3>
+                        <input className="glass-input" placeholder="İş Kalemi Adı" value={newItem.work_item} onChange={e => setNewItem({ ...newItem, work_item: e.target.value })} />
+                        <input type="number" className="glass-input" placeholder="Birim Fiyat" value={newItem.unit_price} onChange={e => setNewItem({ ...newItem, unit_price: e.target.value })} style={{ marginTop: '10px' }} />
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                            <button onClick={handleAddItem} className="glass-btn" style={{ flex: 1, background: '#4caf50' }}>Ekle</button>
+                            <button onClick={() => setShowItemModal(false)} className="glass-btn" style={{ flex: 1, background: '#f44336' }}>İptal</button>
+                        </div>
                     </div>
                 </div>
             )}
