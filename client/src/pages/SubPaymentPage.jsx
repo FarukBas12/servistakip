@@ -22,6 +22,7 @@ const SubPaymentPage = () => {
 
     // Modals
     const [showDataModal, setShowDataModal] = useState(false);
+    const [importFile, setImportFile] = useState(null); // New State
     const [showItemModal, setShowItemModal] = useState(false);
     const [newItem, setNewItem] = useState({ work_item: '', unit_price: '' });
 
@@ -34,15 +35,23 @@ const SubPaymentPage = () => {
         } catch (err) { console.error(err); }
     };
 
-    const handleImport = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+    const handleImportSubmit = async () => {
+        if (!importFile) return alert('Lütfen bir dosya seçin');
+
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', importFile);
         formData.append('subId', id);
-        await api.post('/subs/prices/import', formData);
-        loadPrices();
-        setShowDataModal(false);
+
+        try {
+            await api.post('/subs/prices/import', formData);
+            alert('Veriler Yüklendi');
+            loadPrices();
+            setShowDataModal(false);
+            setImportFile(null);
+        } catch (err) {
+            console.error(err);
+            alert('Yükleme Başarısız');
+        }
     };
 
     const handleAddItem = async () => {
@@ -186,8 +195,11 @@ const SubPaymentPage = () => {
                     <div className="glass-panel" style={{ width: '400px', padding: '30px' }}>
                         <h3>Excel'den Veri Yükle</h3>
                         <p style={{ opacity: 0.7, fontSize: '0.9rem' }}>Format: "Kalem", "Birim Fiyat" sütunları olmalı.</p>
-                        <input type="file" onChange={handleImport} style={{ display: 'block', margin: '20px 0' }} />
-                        <button onClick={() => setShowDataModal(false)} className="glass-btn" style={{ width: '100%', background: '#f44336' }}>Vazgeç</button>
+                        <input type="file" onChange={(e) => setImportFile(e.target.files[0])} style={{ display: 'block', margin: '20px 0' }} />
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button onClick={handleImportSubmit} className="glass-btn" style={{ flex: 1, background: '#4caf50' }}>Yükle</button>
+                            <button onClick={() => setShowDataModal(false)} className="glass-btn" style={{ flex: 1, background: '#f44336' }}>Vazgeç</button>
+                        </div>
                     </div>
                 </div>
             )}
