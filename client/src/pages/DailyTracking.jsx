@@ -200,7 +200,7 @@ const DailyTracking = () => {
                             attribution='&copy; OpenStreetMap'
                         />
                         <ChangeView bounds={bounds} />
-                        {tasks.filter(t => t.lat && t.lng).map(task => (
+                        {tasks.filter(t => t.lat && t.lng && t.status !== 'completed').map(task => (
                             <Marker key={task.id} position={[parseFloat(task.lat), parseFloat(task.lng)]}>
                                 <Popup>
                                     <div style={{ color: '#000' }}>
