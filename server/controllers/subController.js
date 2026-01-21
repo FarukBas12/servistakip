@@ -103,15 +103,22 @@ exports.createPayment = async (req, res) => {
     const client = await db.pool.connect();
     try {
         await client.query('BEGIN');
-        const { subcontractor_id, title, store_name, waybill_info, payment_date, items } = req.body;
+        // Parse items if sent as string (Multipart/form-data)
+        let { subcontractor_id, title, store_name, waybill_info, payment_date, items } = req.body;
+        if (typeof items === 'string') items = JSON.parse(items);
+
+        let waybill_image = null;
+        if (req.file) {
+            waybill_image = `/uploads/${req.file.filename}`;
+        }
 
         // Calculate total
         const total = items.reduce((acc, item) => acc + (parseFloat(item.quantity) * parseFloat(item.unit_price)), 0);
 
         const resHeader = await client.query(`
-            INSERT INTO payments (subcontractor_id, title, store_name, waybill_info, payment_date, total_amount, status)
-            VALUES ($1, $2, $3, $4, $5, $6, 'pending') RETURNING id`,
-            [subcontractor_id, title, store_name, waybill_info, payment_date, total]
+            INSERT INTO payments (subcontractor_id, title, store_name, waybill_info, waybill_image, payment_date, total_amount, status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending') RETURNING id`,
+            [subcontractor_id, title, store_name, waybill_info, waybill_image, payment_date, total]
         );
         const paymentId = resHeader.rows[0].id;
 
@@ -132,6 +139,18 @@ exports.createPayment = async (req, res) => {
     } finally {
         client.release();
     }
+};
+
+exports.getPaymentDetails = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const headerRes = await db.query('SELECT * FROM payments WHERE id = $1', [id]);
+        if (headerRes.rows.length === 0) return res.status(404).json({ message: 'NotFound' });
+
+        const itemsRes = await db.query('SELECT * FROM payment_items WHERE payment_id = $1', [id]);
+
+        res.json({ ...headerRes.rows[0], items: itemsRes.rows });
+    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
 };
 
 exports.getLedger = async (req, res) => {

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { ArrowLeft, Download, Trash2, CheckSquare, Square } from 'lucide-react';
+import { ArrowLeft, Download, Trash2, CheckSquare, Square, Eye, X } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'; // Not used here but good to keep imports consistent if needed later
 
 const SubLedger = () => {
     const { id } = useParams();
@@ -11,6 +12,10 @@ const SubLedger = () => {
 
     // Selection State
     const [selectedIds, setSelectedIds] = useState(new Set());
+
+    // Detail Modal State
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [detailData, setDetailData] = useState(null);
 
     useEffect(() => {
         fetchData();
@@ -29,7 +34,7 @@ const SubLedger = () => {
         try {
             const res = await api.get(`/subs/${id}/ledger`);
             setTransactions(res.data);
-            setSelectedIds(new Set()); // Reset selection on refresh
+            setSelectedIds(new Set());
         } catch (e) { console.error(e); }
     };
 
@@ -78,6 +83,15 @@ const SubLedger = () => {
         fetchData();
     };
 
+    const handleShowDetail = async (trans) => {
+        if (trans.type !== 'hakedis') return;
+        try {
+            const res = await api.get(`/subs/payment/${trans.id}`);
+            setDetailData(res.data);
+            setShowDetailModal(true);
+        } catch (e) { console.error(e); alert('Detay alınamadı'); }
+    }
+
     const totalBalance = transactions.reduce((acc, t) => {
         return acc + (t.type === 'hakedis' ? parseFloat(t.amount) : -parseFloat(t.amount));
     }, 0);
@@ -123,6 +137,7 @@ const SubLedger = () => {
                             <th style={{ padding: '10px' }}>Açıklama</th>
                             <th style={{ padding: '10px' }}>Borç (Ödeme)</th>
                             <th style={{ padding: '10px' }}>Alacak (Hakediş)</th>
+                            <th style={{ padding: '10px', width: '50px' }}></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -144,12 +159,80 @@ const SubLedger = () => {
                                     <td style={{ padding: '10px', color: '#4caf50' }}>
                                         {t.type === 'hakedis' ? parseFloat(t.amount).toLocaleString('tr-TR') + ' ₺' : '-'}
                                     </td>
+                                    <td style={{ padding: '10px' }}>
+                                        {t.type === 'hakedis' && (
+                                            <button onClick={() => handleShowDetail(t)} className="glass-btn" style={{ padding: '5px' }} title="Detay">
+                                                <Eye size={18} />
+                                            </button>
+                                        )}
+                                    </td>
                                 </tr>
                             );
                         })}
                     </tbody>
                 </table>
             </div>
+
+            {/* Detail Modal */}
+            {showDetailModal && detailData && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 1000, overflowY: 'auto', padding: '20px' }}>
+                    <div style={{ maxWidth: '800px', margin: '0 auto', background: '#1e1e1e', borderRadius: '10px', padding: '20px', border: '1px solid #333' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '1px solid #333', paddingBottom: '10px' }}>
+                            <h2 style={{ margin: 0 }}>Hakediş Detayı</h2>
+                            <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                            <div>
+                                <p><strong>Mağaza:</strong> {detailData.store_name}</p>
+                                <p><strong>Başlık:</strong> {detailData.title}</p>
+                                <p><strong>Tarih:</strong> {new Date(detailData.payment_date).toLocaleDateString('tr-TR')}</p>
+                            </div>
+                            <div>
+                                <p><strong>İrsaliye Bilgisi:</strong> {detailData.waybill_info || '-'}</p>
+                                {detailData.waybill_image && (
+                                    <div style={{ marginTop: '10px' }}>
+                                        <p><strong>İrsaliye Fotoğrafı:</strong></p>
+                                        <a href={api.defaults.baseURL.replace('/api', '') + detailData.waybill_image} target="_blank" rel="noreferrer">
+                                            <img
+                                                src={api.defaults.baseURL.replace('/api', '') + detailData.waybill_image}
+                                                alt="İrsaliye"
+                                                style={{ maxWidth: '100%', maxHeight: '150px', borderRadius: '5px', border: '1px solid #555' }}
+                                            />
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <h3>Kalemler</h3>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid #333', textAlign: 'left', color: '#888' }}>
+                                    <th style={{ padding: '8px' }}>İş Kalemi</th>
+                                    <th style={{ padding: '8px' }}>Birim Fiyat</th>
+                                    <th style={{ padding: '8px' }}>Metraj</th>
+                                    <th style={{ padding: '8px', textAlign: 'right' }}>Toplam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {detailData.items?.map((item, idx) => (
+                                    <tr key={idx} style={{ borderBottom: '1px solid #333' }}>
+                                        <td style={{ padding: '8px' }}>{item.work_item}</td>
+                                        <td style={{ padding: '8px' }}>{parseFloat(item.unit_price).toLocaleString('tr-TR')} ₺</td>
+                                        <td style={{ padding: '8px' }}>{item.quantity}</td>
+                                        <td style={{ padding: '8px', textAlign: 'right' }}>{parseFloat(item.total_price).toLocaleString('tr-TR')} ₺</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                        <div style={{ textAlign: 'right', marginTop: '20px', fontSize: '1.2rem', fontWeight: 'bold', color: '#4caf50' }}>
+                            TOPLAM: {parseFloat(detailData.total_amount).toLocaleString('tr-TR')} ₺
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

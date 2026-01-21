@@ -23,6 +23,7 @@ router.post('/prices', controller.addPrice);
 router.post('/prices/import', upload.single('file'), controller.importPrices);
 
 // Payments
-router.post('/payments', controller.createPayment);
+router.post('/payments', upload.single('waybill'), controller.createPayment);
+router.get('/payment/:id', controller.getPaymentDetails);
 
 module.exports = router;

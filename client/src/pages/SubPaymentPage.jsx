@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { ArrowLeft, Upload, Plus, Save, FileText, Paperclip, PlusCircle } from 'lucide-react';
+import { ArrowLeft, Upload, Plus, Save, FileText, Paperclip, PlusCircle, Camera } from 'lucide-react';
 
 const SubPaymentPage = () => {
     const { id } = useParams();
@@ -12,8 +12,11 @@ const SubPaymentPage = () => {
         store_name: '',
         title: '',
         date: new Date().toISOString().split('T')[0],
-        waybill: '' // Just text/ref for now, could be file
+        waybill_info: ''
     });
+
+    // File
+    const [waybillFile, setWaybillFile] = useState(null);
 
     // Data
     const [prices, setPrices] = useState([]); // Available items
@@ -22,7 +25,7 @@ const SubPaymentPage = () => {
 
     // Modals
     const [showDataModal, setShowDataModal] = useState(false);
-    const [importFile, setImportFile] = useState(null); // New State
+    const [importFile, setImportFile] = useState(null);
     const [showItemModal, setShowItemModal] = useState(false);
     const [newItem, setNewItem] = useState({ work_item: '', unit_price: '' });
 
@@ -76,12 +79,18 @@ const SubPaymentPage = () => {
 
         if (items.length === 0) return alert('En az bir kalem giriniz');
 
+        const formData = new FormData();
+        formData.append('subcontractor_id', id);
+        formData.append('title', header.title);
+        formData.append('store_name', header.store_name);
+        formData.append('payment_date', header.date);
+        formData.append('waybill_info', header.waybill_info);
+        if (waybillFile) formData.append('waybill', waybillFile);
+        formData.append('items', JSON.stringify(items));
+
         try {
-            await api.post('/subs/payments', {
-                subcontractor_id: id,
-                ...header,
-                waybill_info: header.waybill,
-                items
+            await api.post('/subs/payments', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
             alert('Hakediş Kaydedildi');
             navigate('/admin/subs');
@@ -109,14 +118,24 @@ const SubPaymentPage = () => {
                 </div>
 
                 {/* Actions Row */}
-                <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', flexWrap: 'wrap' }}>
-                    <button className="glass-btn" style={{ display: 'flex', gap: '5px', alignItems: 'center' }} onClick={() => {
-                        const val = prompt('İrsaliye No / Bilgisi Giriniz:');
-                        if (val) setHeader({ ...header, waybill: val });
-                    }}>
-                        <Paperclip size={18} />
-                        {header.waybill ? `İrsaliye: ${header.waybill}` : 'İrsaliye Ekle'}
-                    </button>
+                <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+                    {/* Waybill Section */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <div style={{ display: 'flex', gap: '5px' }}>
+                            <input
+                                className="glass-input"
+                                placeholder="İrsaliye No/Bilgi"
+                                value={header.waybill_info}
+                                onChange={e => setHeader({ ...header, waybill_info: e.target.value })}
+                                style={{ width: '150px' }}
+                            />
+                            <label className="glass-btn" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 10px' }}>
+                                <Camera size={18} />
+                                <input type="file" onChange={e => setWaybillFile(e.target.files[0])} hidden />
+                            </label>
+                        </div>
+                        {waybillFile && <span style={{ fontSize: '0.8rem', color: '#4caf50' }}>Fotoğraf Seçildi: {waybillFile.name}</span>}
+                    </div>
 
                     <button className="glass-btn" style={{ display: 'flex', gap: '5px', alignItems: 'center' }} onClick={() => setShowItemModal(true)}>
                         <PlusCircle size={18} /> Manuel Kalem Ekle

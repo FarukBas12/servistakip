@@ -217,6 +217,7 @@ async function runMigrations() {
         // Add columns if missing (for updates)
         await db.query("ALTER TABLE payments ADD COLUMN IF NOT EXISTS store_name VARCHAR(150)");
         await db.query("ALTER TABLE payments ADD COLUMN IF NOT EXISTS waybill_info TEXT");
+        await db.query("ALTER TABLE payments ADD COLUMN IF NOT EXISTS waybill_image TEXT"); // New Column for Photo URL
 
         // Create Payment Items Table (Hakediş Rows)
         await db.query(`
