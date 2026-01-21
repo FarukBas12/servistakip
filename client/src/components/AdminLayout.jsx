@@ -34,7 +34,7 @@ const AdminLayout = () => {
                     <Route path="/create-payment" element={<PaymentCreate />} />
                     <Route path="/data" element={<PriceList />} />
                     <Route path="/subs" element={<SubcontractorDashboard />} />
-                    <Route path="/admin/subs/:id" element={<SubcontractorDetail />} /> {/* NEW */}
+                    <Route path="/subs/:id" element={<SubcontractorDetail />} /> {/* NEW */}
                     <Route path="/reports" element={<Reports />} />
                 </Routes>
             </div>
