@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { ArrowLeft, Download } from 'lucide-react';
-import * as XLSX from 'xlsx';
 
 const SubLedger = () => {
     const { id } = useParams();
@@ -16,26 +15,36 @@ const SubLedger = () => {
     }, []);
 
     const fetchSubInfo = async () => {
-        const res = await api.get('/subs');
-        const found = res.data.find(s => s.id === parseInt(id));
-        setSub(found);
+        try {
+            const res = await api.get('/subs');
+            const found = res.data.find(s => s.id === parseInt(id));
+            setSub(found);
+        } catch (e) { console.error(e); }
     }
 
     const fetchData = async () => {
-        const res = await api.get(`/subs/${id}/ledger`);
-        setTransactions(res.data);
+        try {
+            const res = await api.get(`/subs/${id}/ledger`);
+            setTransactions(res.data);
+        } catch (e) { console.error(e); }
     };
 
-    const handleExport = () => {
-        const ws = XLSX.utils.json_to_sheet(transactions.map(t => ({
-            Tarih: new Date(t.date).toLocaleDateString('tr-TR'),
-            Açıklama: t.description,
-            Tür: t.type === 'hakedis' ? 'Hakediş (Alacak)' : 'Ödeme (Borç)',
-            Tutar: parseFloat(t.amount)
-        })));
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Ekstre");
-        XLSX.writeFile(wb, `${sub?.name}_Ekstre.xlsx`);
+    const handleExport = async () => {
+        try {
+            const XLSX = await import('xlsx');
+            const ws = XLSX.utils.json_to_sheet(transactions.map(t => ({
+                Tarih: new Date(t.date).toLocaleDateString('tr-TR'),
+                Açıklama: t.description,
+                Tür: t.type === 'hakedis' ? 'Hakediş (Alacak)' : 'Ödeme (Borç)',
+                Tutar: parseFloat(t.amount)
+            })));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Ekstre");
+            XLSX.writeFile(wb, `${sub?.name || 'Cari'}_Ekstre.xlsx`);
+        } catch (err) {
+            console.error('Export Error:', err);
+            alert('Excel oluşturulurken hata oluştu.');
+        }
     };
 
     const totalBalance = transactions.reduce((acc, t) => {

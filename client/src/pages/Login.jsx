@@ -7,15 +7,26 @@ const Login = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError('');
         try {
             const role = await login(formData.username, formData.password);
+            // ...
             if (role === 'admin') navigate('/admin');
             else navigate('/tech');
         } catch (err) {
-            setError('Invalid Credentials');
+            console.error(err);
+            if (!err.response) {
+                setError('Sunucuya Bağlanılamadı! (Network Error)');
+            } else if (err.response.status === 401 || err.response.status === 400) {
+                setError('Hatalı Kullanıcı Adı veya Şifre');
+            } else {
+                setError(`Giriş Hatası: ${err.message}`);
+            }
         }
     };
 
@@ -41,7 +52,9 @@ const Login = () => {
                     value={formData.password}
                     onChange={e => setFormData({ ...formData, password: e.target.value })}
                 />
-                <button type="submit" className="glass-btn" style={{ marginTop: '10px' }}>Giriş Yap</button>
+                <button disabled={loading} type="submit" className="glass-btn" style={{ marginTop: '10px' }}>
+                    {loading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
+                </button>
             </form>
         </div>
     );
