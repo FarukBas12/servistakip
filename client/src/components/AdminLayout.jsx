@@ -29,9 +29,9 @@ const AdminLayout = () => {
                     <Route path="/map" element={<GlobalMap />} />
                     <Route path="/daily" element={<DailyTracking />} />
                     <Route path="/archive" element={<CompletedTasks />} />
-                    <Route path="/subs" element={<SubcontractorDashboard />} />
-                    <Route path="/admin/subs/:id/payment" element={<SubPaymentPage />} />
-                    <Route path="/admin/subs/:id/ledger" element={<SubLedger />} /> {/* Ledger Page */} {/* New Page */}
+                    <Route path="subs" element={<SubcontractorDashboard />} />
+                    <Route path="subs/:id/payment" element={<SubPaymentPage />} />
+                    <Route path="subs/:id/ledger" element={<SubLedger />} />
                     <Route path="/reports" element={<Reports />} />
                 </Routes>
             </div>
