@@ -10,8 +10,7 @@ import GlobalMap from '../pages/GlobalMap';
 import Reports from '../pages/Reports';
 import DailyTracking from '../pages/DailyTracking';
 import CompletedTasks from '../pages/CompletedTasks';
-import CompletedTasks from '../pages/CompletedTasks'; // Kept
-import Reports from '../pages/Reports';
+
 
 const AdminLayout = () => {
     return (
