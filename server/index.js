@@ -15,8 +15,8 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/stores', require('./routes/stores'));
-app.use('/api/payments', require('./routes/payments'));
-app.use('/api/definitions', require('./routes/definitions'));
+// app.use('/api/payments', require('./routes/payments'));
+// app.use('/api/definitions', require('./routes/definitions'));
 
 // Static Folder for Uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

@@ -10,11 +10,8 @@ import GlobalMap from '../pages/GlobalMap';
 import Reports from '../pages/Reports';
 import DailyTracking from '../pages/DailyTracking';
 import CompletedTasks from '../pages/CompletedTasks';
-import PaymentPool from '../pages/PaymentPool';
-import PaymentCreate from '../pages/PaymentCreate';
-import PriceList from '../pages/PriceList';
-import SubcontractorDashboard from '../pages/SubcontractorDashboard';
-import SubcontractorDetail from '../pages/SubcontractorDetail'; // NEW
+import CompletedTasks from '../pages/CompletedTasks'; // Kept
+import Reports from '../pages/Reports';
 
 const AdminLayout = () => {
     return (
@@ -29,7 +26,6 @@ const AdminLayout = () => {
                     <Route path="/pool" element={<TaskPool />} />
                     <Route path="/map" element={<GlobalMap />} />
                     <Route path="/daily" element={<DailyTracking />} />
-                    <Route path="/archive" element={<CompletedTasks />} />
                     <Route path="/archive" element={<CompletedTasks />} />
                     <Route path="/reports" element={<Reports />} />
                 </Routes>
