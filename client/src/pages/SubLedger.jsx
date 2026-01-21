@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { ArrowLeft, Download } from 'lucide-react';
+import { ArrowLeft, Download, Trash2, CheckSquare, Square } from 'lucide-react';
 
 const SubLedger = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [transactions, setTransactions] = useState([]);
     const [sub, setSub] = useState(null);
+
+    // Selection State
+    const [selectedIds, setSelectedIds] = useState(new Set());
 
     useEffect(() => {
         fetchData();
@@ -26,6 +29,7 @@ const SubLedger = () => {
         try {
             const res = await api.get(`/subs/${id}/ledger`);
             setTransactions(res.data);
+            setSelectedIds(new Set()); // Reset selection on refresh
         } catch (e) { console.error(e); }
     };
 
@@ -47,6 +51,33 @@ const SubLedger = () => {
         }
     };
 
+    const toggleSelect = (uniqId) => {
+        const newSet = new Set(selectedIds);
+        if (newSet.has(uniqId)) newSet.delete(uniqId);
+        else newSet.add(uniqId);
+        setSelectedIds(newSet);
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedIds.size === transactions.length) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(transactions.map(t => `${t.type}-${t.id}`)));
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!window.confirm(`${selectedIds.size} adet kaydı silmek istediğinize emin misiniz?`)) return;
+
+        for (const uniqId of selectedIds) {
+            const [type, id] = uniqId.split('-');
+            try {
+                await api.delete(`/subs/transaction/${type}/${id}`);
+            } catch (err) { console.error(err); }
+        }
+        fetchData();
+    };
+
     const totalBalance = transactions.reduce((acc, t) => {
         return acc + (t.type === 'hakedis' ? parseFloat(t.amount) : -parseFloat(t.amount));
     }, 0);
@@ -61,9 +92,16 @@ const SubLedger = () => {
                         <p style={{ margin: 0, opacity: 0.7 }}>Hesap Özeti / Ekstre</p>
                     </div>
                 </div>
-                <button onClick={handleExport} className="glass-btn" style={{ background: '#4caf50' }}>
-                    <Download size={18} style={{ marginRight: '5px' }} /> Excel İndir
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    {selectedIds.size > 0 && (
+                        <button onClick={handleDelete} className="glass-btn" style={{ background: '#f44336' }}>
+                            <Trash2 size={18} style={{ marginRight: '5px' }} /> Seçilenleri Sil ({selectedIds.size})
+                        </button>
+                    )}
+                    <button onClick={handleExport} className="glass-btn" style={{ background: '#4caf50' }}>
+                        <Download size={18} style={{ marginRight: '5px' }} /> Excel İndir
+                    </button>
+                </div>
             </div>
 
             <div className="glass-panel" style={{ padding: '20px' }}>
@@ -74,6 +112,13 @@ const SubLedger = () => {
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr style={{ textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
+                            <th style={{ padding: '10px', width: '40px' }}>
+                                <div onClick={toggleSelectAll} style={{ cursor: 'pointer' }}>
+                                    {selectedIds.size === transactions.length && transactions.length > 0
+                                        ? <CheckSquare size={20} color="#4caf50" />
+                                        : <Square size={20} style={{ opacity: 0.5 }} />}
+                                </div>
+                            </th>
                             <th style={{ padding: '10px' }}>Tarih</th>
                             <th style={{ padding: '10px' }}>Açıklama</th>
                             <th style={{ padding: '10px' }}>Borç (Ödeme)</th>
@@ -81,18 +126,27 @@ const SubLedger = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {transactions.map(t => (
-                            <tr key={`${t.type}-${t.id}`} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                <td style={{ padding: '10px' }}>{new Date(t.date).toLocaleDateString('tr-TR')}</td>
-                                <td style={{ padding: '10px' }}>{t.description} {t.type === 'hakedis' ? '(Hakediş)' : ''}</td>
-                                <td style={{ padding: '10px', color: '#f44336' }}>
-                                    {t.type === 'odeme' ? parseFloat(t.amount).toLocaleString('tr-TR') + ' ₺' : '-'}
-                                </td>
-                                <td style={{ padding: '10px', color: '#4caf50' }}>
-                                    {t.type === 'hakedis' ? parseFloat(t.amount).toLocaleString('tr-TR') + ' ₺' : '-'}
-                                </td>
-                            </tr>
-                        ))}
+                        {transactions.map(t => {
+                            const uniqId = `${t.type}-${t.id}`;
+                            const isSelected = selectedIds.has(uniqId);
+                            return (
+                                <tr key={uniqId} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: isSelected ? 'rgba(76, 175, 80, 0.1)' : 'transparent' }}>
+                                    <td style={{ padding: '10px' }}>
+                                        <div onClick={() => toggleSelect(uniqId)} style={{ cursor: 'pointer' }}>
+                                            {isSelected ? <CheckSquare size={20} color="#4caf50" /> : <Square size={20} style={{ opacity: 0.5 }} />}
+                                        </div>
+                                    </td>
+                                    <td style={{ padding: '10px' }}>{new Date(t.date).toLocaleDateString('tr-TR')}</td>
+                                    <td style={{ padding: '10px' }}>{t.description} {t.type === 'hakedis' ? '(Hakediş)' : ''}</td>
+                                    <td style={{ padding: '10px', color: '#f44336' }}>
+                                        {t.type === 'odeme' ? parseFloat(t.amount).toLocaleString('tr-TR') + ' ₺' : '-'}
+                                    </td>
+                                    <td style={{ padding: '10px', color: '#4caf50' }}>
+                                        {t.type === 'hakedis' ? parseFloat(t.amount).toLocaleString('tr-TR') + ' ₺' : '-'}
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>

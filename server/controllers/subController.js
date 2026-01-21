@@ -155,3 +155,15 @@ exports.getLedger = async (req, res) => {
         res.json(all);
     } catch (err) { console.error(err); res.status(500).send('Server Error'); }
 };
+
+exports.deleteTransaction = async (req, res) => {
+    try {
+        const { type, id } = req.params;
+        if (type === 'hakedis') {
+            await db.query('DELETE FROM payments WHERE id = $1', [id]);
+        } else if (type === 'odeme') {
+            await db.query('DELETE FROM cash_transactions WHERE id = $1', [id]);
+        }
+        res.json({ message: 'Deleted' });
+    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+};

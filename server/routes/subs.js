@@ -12,6 +12,7 @@ router.get('/', controller.listSubs);
 router.post('/', controller.createSub);
 router.put('/:id', controller.updateSub);
 router.get('/:id/ledger', controller.getLedger);
+router.delete('/transaction/:type/:id', controller.deleteTransaction);
 
 // Cash
 router.post('/cash', controller.addCash);
