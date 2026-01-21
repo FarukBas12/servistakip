@@ -156,6 +156,8 @@ const SubcontractorDashboard = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
             {/* Edit Sub Modal */}
             {showEditModal && (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
