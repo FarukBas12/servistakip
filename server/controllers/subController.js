@@ -191,7 +191,7 @@ exports.getLedger = async (req, res) => {
         const { id } = req.params;
         // Fetch Payments (Credit)
         const paymentsRes = await db.query(`
-            SELECT id, title as description, total_amount as amount, payment_date as date, 'hakedis' as type 
+            SELECT id, title as description, store_name, total_amount as amount, payment_date as date, 'hakedis' as type 
             FROM payments WHERE subcontractor_id = $1 AND status != 'cancelled'
         `, [id]);
 

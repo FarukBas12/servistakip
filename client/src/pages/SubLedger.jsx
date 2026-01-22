@@ -50,6 +50,7 @@ const SubLedger = () => {
             const XLSX = await import('xlsx');
             const ws = XLSX.utils.json_to_sheet(transactions.map(t => ({
                 Tarih: new Date(t.date).toLocaleDateString('tr-TR'),
+                Mağaza: t.store_name || '-',
                 Açıklama: t.description,
                 Tür: t.type === 'hakedis' ? 'Hakediş (Alacak)' : 'Ödeme (Borç)',
                 Tutar: parseFloat(t.amount)
@@ -228,6 +229,7 @@ const SubLedger = () => {
                                 </div>
                             </th>
                             <th style={{ padding: '10px' }}>Tarih</th>
+                            <th style={{ padding: '10px' }}>Mağaza</th>
                             <th style={{ padding: '10px' }}>Açıklama</th>
                             <th style={{ padding: '10px' }}>Borç (Ödeme)</th>
                             <th style={{ padding: '10px' }}>Alacak (Hakediş)</th>
@@ -246,6 +248,7 @@ const SubLedger = () => {
                                         </div>
                                     </td>
                                     <td style={{ padding: '10px' }}>{new Date(t.date).toLocaleDateString('tr-TR')}</td>
+                                    <td style={{ padding: '10px' }}>{t.store_name || '-'}</td>
                                     <td style={{ padding: '10px' }}>{t.description} {t.type === 'hakedis' ? '(Hakediş)' : ''}</td>
                                     <td style={{ padding: '10px', color: '#f44336' }}>
                                         {t.type === 'odeme' ? parseFloat(t.amount).toLocaleString('tr-TR') + ' ₺' : '-'}
