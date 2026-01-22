@@ -6,7 +6,7 @@ const AdminDashboard = () => {
     return (
         <div className="dashboard">
             <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
-                <h1 style={{ marginBottom: '10px' }}>Yönetici Paneli (GÜNCEL)</h1>
+                <h1 style={{ marginBottom: '10px' }}>Yönetici Paneli</h1>
                 <p style={{ opacity: 0.7, marginBottom: '40px' }}>Hoşgeldiniz. İşlemlerinizi soldaki menüden veya aşağıdaki hızlı butonlardan yapabilirsiniz.</p>
 
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
