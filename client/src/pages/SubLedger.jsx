@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { ArrowLeft, Download, Trash2, CheckSquare, Square, Eye, X } from 'lucide-react';
+import { ArrowLeft, Download, Trash2, CheckSquare, Square, Eye, X, Edit2, Plus, Trash } from 'lucide-react';
 
 const SubLedger = () => {
     const { id } = useParams();
@@ -15,6 +15,14 @@ const SubLedger = () => {
     // Detail Modal State
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [detailData, setDetailData] = useState(null);
+
+    // Edit Cash Modal
+    const [showEditCashModal, setShowEditCashModal] = useState(false);
+    const [editCashData, setEditCashData] = useState(null);
+
+    // Edit Payment Modal
+    const [showEditPaymentModal, setShowEditPaymentModal] = useState(false);
+    const [editPaymentData, setEditPaymentData] = useState(null);
 
     useEffect(() => {
         fetchData();
@@ -89,6 +97,28 @@ const SubLedger = () => {
             setDetailData(res.data);
             setShowDetailModal(true);
         } catch (e) { console.error(e); alert('Detay alınamadı'); }
+    }
+
+    const handleEdit = async (trans) => {
+        if (trans.type === 'odeme') {
+            setEditCashData({
+                id: trans.id,
+                amount: trans.amount,
+                description: trans.description,
+                transaction_date: trans.date.split('T')[0]
+            });
+            setShowEditCashModal(true);
+        } else {
+            try {
+                const res = await api.get(`/subs/payment/${trans.id}`);
+                const data = res.data;
+                setEditPaymentData({
+                    ...data,
+                    payment_date: data.payment_date.split('T')[0]
+                });
+                setShowEditPaymentModal(true);
+            } catch (e) { console.error(e); alert('Hakediş detayları alınamadı'); }
+        }
     }
 
     const handlePrint = () => {
@@ -224,11 +254,16 @@ const SubLedger = () => {
                                         {t.type === 'hakedis' ? parseFloat(t.amount).toLocaleString('tr-TR') + ' ₺' : '-'}
                                     </td>
                                     <td style={{ padding: '10px' }}>
-                                        {t.type === 'hakedis' && (
-                                            <button onClick={() => handleShowDetail(t)} className="glass-btn" style={{ padding: '5px' }} title="Detay">
-                                                <Eye size={18} />
+                                        <div style={{ display: 'flex', gap: '5px' }}>
+                                            <button onClick={() => handleEdit(t)} className="glass-btn" style={{ padding: '5px' }} title="Düzenle">
+                                                <Edit2 size={16} />
                                             </button>
-                                        )}
+                                            {t.type === 'hakedis' && (
+                                                <button onClick={() => handleShowDetail(t)} className="glass-btn" style={{ padding: '5px' }} title="Detay">
+                                                    <Eye size={16} />
+                                                </button>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             );
@@ -296,6 +331,163 @@ const SubLedger = () => {
 
                         <div style={{ textAlign: 'right', marginTop: '20px', fontSize: '1.2rem', fontWeight: 'bold', color: '#4caf50' }}>
                             TOPLAM: {parseFloat(detailData.total_amount).toLocaleString('tr-TR')} ₺
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Cash Modal */}
+            {showEditCashModal && editCashData && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                    <div className="glass-panel" style={{ width: '100%', maxWidth: '400px', padding: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                            <h3 style={{ margin: 0 }}>Ödeme Düzenle</h3>
+                            <button onClick={() => setShowEditCashModal(false)} style={{ background: 'none', border: 'none', color: '#fff' }}><X size={20} /></button>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7, marginBottom: '5px' }}>Tarih</label>
+                                <input type="date" className="glass-input" value={editCashData.transaction_date} onChange={e => setEditCashData({ ...editCashData, transaction_date: e.target.value })} />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7, marginBottom: '5px' }}>Açıklama</label>
+                                <input type="text" className="glass-input" value={editCashData.description} onChange={e => setEditCashData({ ...editCashData, description: e.target.value })} />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7, marginBottom: '5px' }}>Tutar (₺)</label>
+                                <input type="number" className="glass-input" value={editCashData.amount} onChange={e => setEditCashData({ ...editCashData, amount: e.target.value })} />
+                            </div>
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        await api.put(`/subs/cash/${editCashData.id}`, editCashData);
+                                        setShowEditCashModal(false);
+                                        fetchData();
+                                    } catch (e) { alert('Hata oluştu'); }
+                                }}
+                                className="glass-btn" style={{ background: '#4caf50', marginTop: '10px' }}>Güncelle</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Payment Modal */}
+            {showEditPaymentModal && editPaymentData && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 1100, overflowY: 'auto', padding: '20px' }}>
+                    <div style={{ maxWidth: '800px', margin: '0 auto', background: '#1e1e1e', borderRadius: '10px', padding: '20px', border: '1px solid #333' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '1px solid #333', paddingBottom: '10px' }}>
+                            <h2 style={{ margin: 0 }}>Hakediş Düzenle</h2>
+                            <button onClick={() => setShowEditPaymentModal(false)} style={{ background: 'none', border: 'none', color: '#fff' }}><X size={24} /></button>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7 }}>Mağaza</label>
+                                    <input type="text" className="glass-input" value={editPaymentData.store_name} onChange={e => setEditPaymentData({ ...editPaymentData, store_name: e.target.value })} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7 }}>Başlık / Dönem</label>
+                                    <input type="text" className="glass-input" value={editPaymentData.title} onChange={e => setEditPaymentData({ ...editPaymentData, title: e.target.value })} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7 }}>Tarih</label>
+                                    <input type="date" className="glass-input" value={editPaymentData.payment_date} onChange={e => setEditPaymentData({ ...editPaymentData, payment_date: e.target.value })} />
+                                </div>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7 }}>İrsaliye Bilgisi</label>
+                                    <input type="text" className="glass-input" value={editPaymentData.waybill_info || ''} onChange={e => setEditPaymentData({ ...editPaymentData, waybill_info: e.target.value })} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7 }}>İrsaliye Fotoğrafı (Değiştirmek için seçin)</label>
+                                    <input type="file" className="glass-input" onChange={e => setEditPaymentData({ ...editPaymentData, new_waybill: e.target.files[0] })} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>Kalemler</h3>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid #333', textAlign: 'left', color: '#888' }}>
+                                    <th style={{ padding: '8px' }}>İş Kalemi</th>
+                                    <th style={{ padding: '8px', width: '120px' }}>Birim Fiyat</th>
+                                    <th style={{ padding: '8px', width: '100px' }}>Metraj</th>
+                                    <th style={{ padding: '8px', width: '50px' }}></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {editPaymentData.items?.map((item, idx) => (
+                                    <tr key={idx} style={{ borderBottom: '1px solid #222' }}>
+                                        <td style={{ padding: '5px' }}>
+                                            <input type="text" className="glass-input" style={{ width: '100%', background: 'transparent' }} value={item.work_item}
+                                                onChange={e => {
+                                                    const newItems = [...editPaymentData.items];
+                                                    newItems[idx].work_item = e.target.value;
+                                                    setEditPaymentData({ ...editPaymentData, items: newItems });
+                                                }} />
+                                        </td>
+                                        <td style={{ padding: '5px' }}>
+                                            <input type="number" className="glass-input" style={{ width: '100%', background: 'transparent' }} value={item.unit_price}
+                                                onChange={e => {
+                                                    const newItems = [...editPaymentData.items];
+                                                    newItems[idx].unit_price = e.target.value;
+                                                    setEditPaymentData({ ...editPaymentData, items: newItems });
+                                                }} />
+                                        </td>
+                                        <td style={{ padding: '5px' }}>
+                                            <input type="number" className="glass-input" style={{ width: '100%', background: 'transparent' }} value={item.quantity}
+                                                onChange={e => {
+                                                    const newItems = [...editPaymentData.items];
+                                                    newItems[idx].quantity = e.target.value;
+                                                    setEditPaymentData({ ...editPaymentData, items: newItems });
+                                                }} />
+                                        </td>
+                                        <td style={{ padding: '5px' }}>
+                                            <button className="glass-btn" style={{ padding: '5px', color: '#f44336' }}
+                                                onClick={() => {
+                                                    const newItems = editPaymentData.items.filter((_, i) => i !== idx);
+                                                    setEditPaymentData({ ...editPaymentData, items: newItems });
+                                                }}>
+                                                <Trash size={16} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        <button className="glass-btn" style={{ marginTop: '10px', fontSize: '0.8rem' }}
+                            onClick={() => {
+                                const newItems = [...(editPaymentData.items || []), { work_item: '', unit_price: 0, quantity: 0 }];
+                                setEditPaymentData({ ...editPaymentData, items: newItems });
+                            }}>
+                            <Plus size={16} style={{ marginRight: '5px' }} /> Yeni Kalem Ekle
+                        </button>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', marginTop: '30px' }}>
+                            <button onClick={() => setShowEditPaymentModal(false)} className="glass-btn">İptal</button>
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        const formData = new FormData();
+                                        formData.append('title', editPaymentData.title);
+                                        formData.append('store_name', editPaymentData.store_name);
+                                        formData.append('waybill_info', editPaymentData.waybill_info);
+                                        formData.append('payment_date', editPaymentData.payment_date);
+                                        formData.append('items', JSON.stringify(editPaymentData.items));
+                                        if (editPaymentData.new_waybill) {
+                                            formData.append('waybill', editPaymentData.new_waybill);
+                                        }
+
+                                        await api.put(`/subs/payment/${editPaymentData.id}`, formData, {
+                                            headers: { 'Content-Type': 'multipart/form-data' }
+                                        });
+                                        setShowEditPaymentModal(false);
+                                        fetchData();
+                                    } catch (e) { alert('Hata oluştu'); }
+                                }}
+                                className="glass-btn" style={{ background: '#4caf50' }}>Güncellemeleri Kaydet</button>
                         </div>
                     </div>
                 </div>

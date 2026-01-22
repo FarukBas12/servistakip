@@ -36,6 +36,10 @@ router.post('/prices/import', uploadMemory.single('file'), controller.importPric
 
 // Payments
 router.post('/payments', upload.single('waybill'), controller.createPayment);
+router.put('/payment/:id', upload.single('waybill'), controller.updatePayment);
 router.get('/payment/:id', controller.getPaymentDetails);
+
+// Cash Update
+router.put('/cash/:id', controller.updateCashTransaction);
 
 module.exports = router;

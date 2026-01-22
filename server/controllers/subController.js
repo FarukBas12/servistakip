@@ -219,3 +219,71 @@ exports.deleteTransaction = async (req, res) => {
         res.json({ message: 'Deleted' });
     } catch (err) { console.error(err); res.status(500).send('Server Error'); }
 };
+
+exports.updateCashTransaction = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { amount, description, transaction_date } = req.body;
+        await db.query(`
+            UPDATE cash_transactions 
+            SET amount = $1, description = $2, transaction_date = $3 
+            WHERE id = $4`,
+            [amount, description, transaction_date, id]);
+        res.json({ message: 'Updated' });
+    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+};
+
+exports.updatePayment = async (req, res) => {
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+        const { id } = req.params;
+        let { title, store_name, waybill_info, payment_date, items } = req.body;
+
+        if (typeof items === 'string') items = JSON.parse(items);
+
+        let waybill_image = null;
+        if (req.file) {
+            waybill_image = req.file.path;
+        }
+
+        // Calculate total
+        const total = items.reduce((acc, item) => acc + (parseFloat(item.quantity) * parseFloat(item.unit_price)), 0);
+
+        // Update header
+        if (waybill_image) {
+            await client.query(`
+                UPDATE payments 
+                SET title = $1, store_name = $2, waybill_info = $3, waybill_image = $4, payment_date = $5, total_amount = $6
+                WHERE id = $7`,
+                [title, store_name, waybill_info, waybill_image, payment_date, total, id]
+            );
+        } else {
+            await client.query(`
+                UPDATE payments 
+                SET title = $1, store_name = $2, waybill_info = $3, payment_date = $4, total_amount = $5
+                WHERE id = $6`,
+                [title, store_name, waybill_info, payment_date, total, id]
+            );
+        }
+
+        // Update items (Simple approach: delete and re-insert)
+        await client.query('DELETE FROM payment_items WHERE payment_id = $1', [id]);
+        for (const item of items) {
+            await client.query(`
+                INSERT INTO payment_items (payment_id, work_item, quantity, unit_price, total_price)
+                VALUES ($1, $2, $3, $4, $5)`,
+                [id, item.work_item, item.quantity, item.unit_price, (item.quantity * item.unit_price)]
+            );
+        }
+
+        await client.query('COMMIT');
+        res.json({ message: 'Payment Updated' });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error(err);
+        res.status(500).send('Server Error');
+    } finally {
+        client.release();
+    }
+};
