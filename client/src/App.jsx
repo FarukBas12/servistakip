@@ -5,6 +5,8 @@ import Login from './pages/Login';
 import AdminLayout from './components/AdminLayout';
 import TechDashboard from './pages/TechDashboard';
 import TechTaskDetail from './pages/TechTaskDetail';
+import ProjectDashboard from './pages/ProjectDashboard';
+import ProjectDetail from './pages/ProjectDetail';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
@@ -30,6 +32,8 @@ function App() {
                 <Routes>
                   <Route path="/" element={<TechDashboard />} />
                   <Route path="/task/:id" element={<TechTaskDetail />} />
+                  <Route path="/projects" element={<ProjectDashboard />} />
+                  <Route path="/projects/:id" element={<ProjectDetail />} />
                 </Routes>
               </>
             } />

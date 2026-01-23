@@ -30,6 +30,7 @@ const Navbar = () => {
                     ) : (
                         <>
                             <Link to="/tech" style={{ color: 'white', marginRight: '15px' }}>Görevlerim</Link>
+                            <Link to="/projects" style={{ color: 'white', marginRight: '15px' }}>Projeler</Link>
                         </>
                     )}
                 </span>

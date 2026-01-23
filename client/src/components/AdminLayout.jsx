@@ -14,6 +14,8 @@ import SubLedger from '../pages/SubLedger'; // NEW
 import DailyTracking from '../pages/DailyTracking';
 import CompletedTasks from '../pages/CompletedTasks';
 import DailyPlanReport from '../pages/DailyPlanReport';
+import ProjectDashboard from '../pages/ProjectDashboard';
+import ProjectDetail from '../pages/ProjectDetail';
 import Settings from '../pages/Settings';
 
 
@@ -37,6 +39,8 @@ const AdminLayout = () => {
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/daily-report" element={<DailyPlanReport />} />
+                    <Route path="/projects" element={<ProjectDashboard />} />
+                    <Route path="/projects/:id" element={<ProjectDetail />} />
                 </Routes>
             </div>
         </div>
