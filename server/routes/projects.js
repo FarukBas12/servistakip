@@ -47,11 +47,11 @@ router.get('/:id', async (req, res) => {
 // UPDATE Project
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, description, start_date, end_date, status } = req.body;
+    const { name, description, start_date, end_date, status, tender_price, progress_payment } = req.body;
     try {
         const result = await db.query(
-            'UPDATE projects SET name = $1, description = $2, start_date = $3, end_date = $4, status = $5 WHERE id = $6 RETURNING *',
-            [name, description, start_date, end_date, status, id]
+            'UPDATE projects SET name = $1, description = $2, start_date = $3, end_date = $4, status = $5, tender_price = $6, progress_payment = $7 WHERE id = $8 RETURNING *',
+            [name, description, start_date, end_date, status, tender_price || 0, progress_payment || 0, id]
         );
         if (result.rows.length === 0) return res.status(404).json({ message: 'Proje bulunamadı' });
         res.json(result.rows[0]);
@@ -63,11 +63,11 @@ router.put('/:id', async (req, res) => {
 
 // CREATE Project
 router.post('/', async (req, res) => {
-    const { name, description, start_date, end_date } = req.body;
+    const { name, description, start_date, end_date, tender_price, progress_payment } = req.body;
     try {
         const result = await db.query(
-            'INSERT INTO projects (name, description, start_date, end_date) VALUES ($1, $2, $3, $4) RETURNING *',
-            [name, description, start_date, end_date]
+            'INSERT INTO projects (name, description, start_date, end_date, tender_price, progress_payment) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [name, description, start_date, end_date, tender_price || 0, progress_payment || 0]
         );
         res.json(result.rows[0]);
     } catch (err) {

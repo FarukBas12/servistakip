@@ -288,10 +288,21 @@ async function runMigrations() {
                 description TEXT,
                 start_date DATE,
                 end_date DATE,
-                status VARCHAR(50) DEFAULT 'active', -- active, completed, overdue, cancelled
+                status VARCHAR(50) DEFAULT 'active',
+                tender_price DECIMAL(15, 2) DEFAULT 0, -- Ihale Bedeli
+                progress_payment DECIMAL(15, 2) DEFAULT 0, -- Hakedis (Alinan)
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
+
+        // Migration for existing tables (safe to run multiple times)
+        try {
+            await db.query(`ALTER TABLE projects ADD COLUMN IF NOT EXISTS tender_price DECIMAL(15, 2) DEFAULT 0;`);
+            await db.query(`ALTER TABLE projects ADD COLUMN IF NOT EXISTS progress_payment DECIMAL(15, 2) DEFAULT 0;`);
+        } catch (e) {
+            console.log('Migration note: Columns might already exist');
+        }
+
         console.log(' - Checked projects table');
 
         // NEW: Project Files (DWG, PDF, Excel)
