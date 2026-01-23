@@ -27,6 +27,11 @@ const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 
 app.get('/setup', async (req, res) => {
+    // SECURITY CHECK
+    if (req.query.key !== 'tamir123') {
+        return res.status(403).send('<h1>⛔ Erişim Engellendi</h1><p>Bu sayfaya erişim yetkiniz yok.</p>');
+    }
+
     const pool = new Pool({
         connectionString: process.env.DATABASE_URL,
         ssl: { rejectUnauthorized: false }
