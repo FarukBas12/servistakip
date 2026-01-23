@@ -92,94 +92,87 @@ const DailyPlanReport = () => {
             </div>
 
             {loading ? <p>Yükleniyor...</p> : (
-                /* REPORT CONTAINER (White Background for Screenshot) */
+                /* REPORT CONTAINER (Dark Mode for Modern Look) */
                 <div
                     ref={reportRef}
                     style={{
-                        background: 'white',
-                        color: 'black',
-                        padding: '20px',
+                        background: '#121212', // Dark background matching app
+                        color: '#ecf0f1', // Off-white text
+                        padding: '40px',
                         maxWidth: '1200px',
                         margin: '0 auto',
-                        fontFamily: 'Arial, sans-serif'
+                        fontFamily: "'Segoe UI', Roboto, Helvetica, sans-serif",
+                        border: '1px solid #333'
                     }}
                 >
-                    <h3 style={{ textAlign: 'center', borderBottom: '2px solid black', paddingBottom: '10px', color: 'black' }}>
-                        GÜNLÜK SAHA ÇALIŞMA PLANI - {new Date().toLocaleDateString('tr-TR')}
-                    </h3>
+                    <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                        <h2 style={{ margin: '0', fontSize: '2rem', background: 'linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                            Günlük Saha Çalışma Planı
+                        </h2>
+                        <div style={{ color: '#888', marginTop: '5px', fontSize: '1.1rem' }}>📅 {new Date().toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                    </div>
 
                     {Object.keys(groupedTasks).length === 0 ? (
-                        <p style={{ textAlign: 'center', padding: '20px', color: 'black' }}>Atanmış aktif görev bulunmamaktadır.</p>
+                        <p style={{ textAlign: 'center', padding: '40px', color: '#666', fontSize: '1.2rem', border: '2px dashed #333', borderRadius: '10px' }}>Atanmış aktif görev bulunmamaktadır.</p>
                     ) : (
                         Object.keys(groupedTasks).map((groupName, index) => (
-                            <div key={index} style={{ marginBottom: '30px', border: '2px solid #000' }}>
+                            <div key={index} style={{ marginBottom: '40px', background: '#1e1e1e', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', border: '1px solid #333' }}>
 
-                                {/* HEADER ROW (Pink/Red) */}
-                                <div style={{ display: 'flex', borderBottom: '1px solid #000' }}>
+                                {/* HEADER ROW (Gradient) */}
+                                <div style={{
+                                    background: 'linear-gradient(135deg, #1e1e1e 0%, #252525 100%)',
+                                    borderBottom: '1px solid #333',
+                                    padding: '20px',
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    gap: '20px',
+                                    alignItems: 'center'
+                                }}>
 
-                                    {/* PERSONNEL -> Left */}
-                                    <div style={{
-                                        flex: 2, // More space for names
-                                        background: '#ffcccc', // Light red
-                                        padding: '10px',
-                                        fontWeight: 'bold',
-                                        color: '#cc0000',
-                                        borderRight: '1px solid #000',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '15px' // Space between Label and Name
-                                    }}>
-                                        <span style={{ minWidth: '80px' }}>PERSONEL:</span>
-                                        <span style={{ fontSize: '1.2rem', color: 'black' }}>{groupName}</span>
+                                    {/* PERSONNEL */}
+                                    <div style={{ flex: 2, display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                        <div style={{ padding: '8px 15px', background: 'rgba(255, 107, 107, 0.15)', color: '#ff6b6b', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 'bold', letterSpacing: '1px' }}>
+                                            EKİP
+                                        </div>
+                                        <span style={{ fontSize: '1.3rem', fontWeight: '600', color: '#fff' }}>{groupName}</span>
                                     </div>
 
-                                    {/* DRIVER -> Right */}
-                                    <div style={{
-                                        flex: 1,
-                                        background: '#ffcccc',
-                                        padding: '10px',
-                                        fontWeight: 'bold',
-                                        color: '#cc0000',
-                                        display: 'flex',
-                                        alignItems: 'center'
-                                    }}>
-                                        <span style={{ marginRight: '10px' }}>ŞOFÖR:</span>
+                                    {/* DRIVER INPUT */}
+                                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '5px 15px', borderRadius: '8px', border: '1px solid #333' }}>
+                                        <span style={{ color: '#888', fontSize: '0.8rem', marginRight: '10px', fontWeight: 'bold' }}>ŞOFÖR:</span>
                                         <input
                                             type="text"
-                                            placeholder="İsim..."
+                                            placeholder="İsim giriniz..."
                                             value={manualData[groupName]?.driver || ''}
                                             onChange={(e) => handleInputChange(groupName, 'driver', e.target.value)}
                                             style={{
                                                 border: 'none',
                                                 background: 'transparent',
-                                                borderBottom: '1px dashed #cc0000',
-                                                flex: 1,
-                                                fontWeight: 'bold',
-                                                color: 'black',
+                                                color: '#4facfe',
                                                 fontSize: '1rem',
+                                                fontWeight: 'bold',
+                                                width: '100%',
                                                 outline: 'none'
                                             }}
                                         />
                                     </div>
-                                </div>
 
-                                {/* VEHICLE ROW (Blue/Gray) */}
-                                <div style={{ display: 'flex', borderBottom: '1px solid #000', background: '#e6f3ff' }}>
-                                    <div style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', fontWeight: 'bold', color: '#003366' }}>
-                                        <span style={{ minWidth: '80px' }}>ARAÇ:</span>
+                                    {/* VEHICLE INPUT */}
+                                    {/* Break to new line on mobile/print but keep inline here if space permits */}
+                                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '5px 15px', borderRadius: '8px', border: '1px solid #333' }}>
+                                        <span style={{ color: '#888', fontSize: '0.8rem', marginRight: '10px', fontWeight: 'bold' }}>ARAÇ:</span>
                                         <input
                                             type="text"
-                                            placeholder="Plaka Giriniz..."
+                                            placeholder="Plaka..."
                                             value={manualData[groupName]?.plate || ''}
                                             onChange={(e) => handleInputChange(groupName, 'plate', e.target.value)}
                                             style={{
                                                 border: 'none',
                                                 background: 'transparent',
-                                                borderBottom: '1px dashed #003366',
-                                                flex: 1,
-                                                fontWeight: 'bold',
-                                                color: 'black',
+                                                color: '#f0932b',
                                                 fontSize: '1rem',
+                                                fontWeight: 'bold',
+                                                width: '100%',
                                                 outline: 'none'
                                             }}
                                         />
@@ -187,35 +180,45 @@ const DailyPlanReport = () => {
                                 </div>
 
                                 {/* TASKS TABLE */}
-                                <table style={{ width: '100%', borderCollapse: 'collapse', color: 'black' }}>
-                                    <thead>
-                                        <tr style={{ background: '#ffead9', fontSize: '0.9rem' }}>
-                                            <th style={{ border: '1px solid #000', padding: '10px', width: '50px', color: 'black' }}>NO</th>
-                                            <th style={{ border: '1px solid #000', padding: '10px', width: '250px', color: 'black' }}>MAĞAZA KODU / ADI</th>
-                                            <th style={{ border: '1px solid #000', padding: '10px', color: 'black' }}>YAPILACAK İŞ</th>
-                                            <th style={{ border: '1px solid #000', padding: '10px', width: '300px', color: 'black' }}>ADRES</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {groupedTasks[groupName].map((task, idx) => (
-                                            <tr key={task.id} style={{ fontSize: '0.9rem' }}>
-                                                <td style={{ border: '1px solid #000', padding: '8px', textAlign: 'center', color: 'black' }}>{idx + 1}</td>
-                                                <td style={{ border: '1px solid #000', padding: '8px', fontWeight: 'bold', color: 'black' }}>{task.title}</td>
-                                                <td style={{ border: '1px solid #000', padding: '8px', color: 'black' }}>
-                                                    {task.description ? task.description : '-'}
-                                                </td>
-                                                <td style={{ border: '1px solid #000', padding: '8px', fontSize: '0.85rem', color: 'black' }}>{task.address}</td>
+                                <div style={{ padding: '10px' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 5px' }}>
+                                        <thead>
+                                            <tr style={{ fontSize: '0.85rem', color: '#666', textAlign: 'left' }}>
+                                                <th style={{ padding: '10px 15px', width: '50px' }}>#</th>
+                                                <th style={{ padding: '10px 15px', width: '25%' }}>MAĞAZA / LOKASYON</th>
+                                                <th style={{ padding: '10px 15px' }}>YAPILACAK İŞLEM</th>
+                                                <th style={{ padding: '10px 15px', width: '30%' }}>ADRES</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-
+                                        </thead>
+                                        <tbody>
+                                            {groupedTasks[groupName].map((task, idx) => (
+                                                <tr key={task.id} style={{ background: '#222', borderRadius: '8px', color: '#ddd' }}>
+                                                    <td style={{ padding: '15px', borderTopLeftRadius: '8px', borderBottomLeftRadius: '8px', fontWeight: 'bold', color: '#4facfe' }}>
+                                                        {idx + 1}
+                                                    </td>
+                                                    <td style={{ padding: '15px', fontWeight: '600' }}>
+                                                        {task.title}
+                                                    </td>
+                                                    <td style={{ padding: '15px', color: '#aaa', lineHeight: '1.4' }}>
+                                                        {task.description || '-'}
+                                                    </td>
+                                                    <td style={{ padding: '15px', borderTopRightRadius: '8px', borderBottomRightRadius: '8px', fontSize: '0.9rem', color: '#888' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                            📍 {task.address}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         ))
                     )}
 
-                    <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.8rem', color: 'black' }}>
-                        * Bu rapor {new Date().toLocaleString()} tarihinde sistemden otomatik oluşturulmuştur.
+                    <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #333', paddingTop: '20px', color: '#555', fontSize: '0.9rem' }}>
+                        <div>SAHA YÖNETİM SİSTEMİ</div>
+                        <div>Oluşturulma: {new Date().toLocaleTimeString()}</div>
                     </div>
                 </div>
             )}
