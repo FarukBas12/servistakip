@@ -88,7 +88,7 @@ const ProjectDashboard = () => {
                             <div
                                 key={project.id}
                                 style={{ background: '#1e1e1e', borderRadius: '15px', border: '1px solid #333', overflow: 'hidden', cursor: 'pointer', transition: 'transform 0.2s' }}
-                                onClick={() => navigate(`/admin/projects/${project.id}`)}
+                                onClick={() => navigate(isTech ? `/tech/projects/${project.id}` : `/admin/projects/${project.id}`)}
                                 onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
                                 onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                             >
