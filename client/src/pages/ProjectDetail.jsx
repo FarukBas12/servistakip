@@ -53,7 +53,8 @@ const ProjectDetail = () => {
             setFileForm({ file: null, name: '' });
             fetchData();
         } catch (err) {
-            alert('Dosya yüklenemedi');
+            console.error(err);
+            alert('Dosya yüklenemedi: ' + (err.response?.data || err.message));
         }
     };
 
