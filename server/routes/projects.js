@@ -8,9 +8,13 @@ const fs = require('fs');
 // GET All Projects
 router.get('/', async (req, res) => {
     try {
-        // Calculate progress based on dates for each project?
-        // For now just return raw data, frontend can calculate days remaining.
-        const result = await db.query('SELECT * FROM projects ORDER BY created_at DESC');
+        const result = await db.query(`
+            SELECT p.*, COALESCE(SUM(pe.amount), 0) as total_expenses 
+            FROM projects p 
+            LEFT JOIN project_expenses pe ON p.id = pe.project_id 
+            GROUP BY p.id 
+            ORDER BY p.created_at DESC
+        `);
         res.json(result.rows);
     } catch (err) {
         console.error(err);
