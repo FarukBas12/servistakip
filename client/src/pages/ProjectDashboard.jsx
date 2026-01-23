@@ -38,7 +38,8 @@ const ProjectDashboard = () => {
             fetchProjects();
             setNewProject({ name: '', description: '', start_date: '', end_date: '' });
         } catch (err) {
-            alert('Hata oluştu');
+            console.error(err);
+            alert('Hata oluştu: ' + (err.response?.data || err.message));
         }
     };
 

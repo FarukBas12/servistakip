@@ -279,7 +279,49 @@ async function runMigrations() {
         `);
         console.log(' - Checked cash_transactions table');
 
-        // Create App Settings Table
+        // NEW: Projects Table (Insaat/Ihale)
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS projects (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                description TEXT,
+                start_date DATE,
+                end_date DATE,
+                status VARCHAR(50) DEFAULT 'active', -- active, completed, overdue, cancelled
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log(' - Checked projects table');
+
+        // NEW: Project Files (DWG, PDF, Excel)
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS project_files (
+                id SERIAL PRIMARY KEY,
+                project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+                file_url TEXT NOT NULL,
+                file_type VARCHAR(50), -- dwg, pdf, excel, image, other
+                file_name VARCHAR(255),
+                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log(' - Checked project_files table');
+
+        // NEW: Project Expenses (Giderler)
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS project_expenses (
+                id SERIAL PRIMARY KEY,
+                project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+                amount DECIMAL(10, 2) NOT NULL,
+                category VARCHAR(100),
+                description TEXT,
+                receipt_url TEXT, -- Image of the bill/receipt
+                expense_date DATE DEFAULT CURRENT_DATE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log(' - Checked project_expenses table');
+
+        // Check app_settings
         await db.query(`
             CREATE TABLE IF NOT EXISTS app_settings (
                 id SERIAL PRIMARY KEY,
