@@ -114,11 +114,6 @@ router.post('/:id/files', upload.single('file'), async (req, res) => {
         if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
         res.status(500).send('Upload Error: ' + err.message);
     }
-} catch (err) {
-    console.error('Upload Error Details:', err);
-    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-    res.status(500).send('Upload Error: ' + err.message);
-}
 });
 
 // DELETE File
