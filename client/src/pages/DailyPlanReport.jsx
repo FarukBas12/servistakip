@@ -104,12 +104,12 @@ const DailyPlanReport = () => {
                         fontFamily: 'Arial, sans-serif'
                     }}
                 >
-                    <h3 style={{ textAlign: 'center', borderBottom: '2px solid black', paddingBottom: '10px' }}>
+                    <h3 style={{ textAlign: 'center', borderBottom: '2px solid black', paddingBottom: '10px', color: 'black' }}>
                         GÜNLÜK SAHA ÇALIŞMA PLANI - {new Date().toLocaleDateString('tr-TR')}
                     </h3>
 
                     {Object.keys(groupedTasks).length === 0 ? (
-                        <p style={{ textAlign: 'center', padding: '20px' }}>Atanmış aktif görev bulunmamaktadır.</p>
+                        <p style={{ textAlign: 'center', padding: '20px', color: 'black' }}>Atanmış aktif görev bulunmamaktadır.</p>
                     ) : (
                         Object.keys(groupedTasks).map((groupName, index) => (
                             <div key={index} style={{ marginBottom: '30px', border: '2px solid #000' }}>
@@ -119,24 +119,25 @@ const DailyPlanReport = () => {
 
                                     {/* PERSONNEL -> Left */}
                                     <div style={{
-                                        flex: 1,
+                                        flex: 2, // More space for names
                                         background: '#ffcccc', // Light red
-                                        padding: '5px',
+                                        padding: '10px',
                                         fontWeight: 'bold',
                                         color: '#cc0000',
                                         borderRight: '1px solid #000',
                                         display: 'flex',
-                                        alignItems: 'center'
+                                        alignItems: 'center',
+                                        gap: '15px' // Space between Label and Name
                                     }}>
-                                        <span style={{ width: '80px' }}>PERSONEL:</span>
-                                        <span style={{ fontSize: '1.1rem' }}>{groupName}</span>
+                                        <span style={{ minWidth: '80px' }}>PERSONEL:</span>
+                                        <span style={{ fontSize: '1.2rem', color: 'black' }}>{groupName}</span>
                                     </div>
 
                                     {/* DRIVER -> Right */}
                                     <div style={{
                                         flex: 1,
                                         background: '#ffcccc',
-                                        padding: '5px',
+                                        padding: '10px',
                                         fontWeight: 'bold',
                                         color: '#cc0000',
                                         display: 'flex',
@@ -145,7 +146,7 @@ const DailyPlanReport = () => {
                                         <span style={{ marginRight: '10px' }}>ŞOFÖR:</span>
                                         <input
                                             type="text"
-                                            placeholder="Şoför Adı..."
+                                            placeholder="İsim..."
                                             value={manualData[groupName]?.driver || ''}
                                             onChange={(e) => handleInputChange(groupName, 'driver', e.target.value)}
                                             style={{
@@ -154,8 +155,9 @@ const DailyPlanReport = () => {
                                                 borderBottom: '1px dashed #cc0000',
                                                 flex: 1,
                                                 fontWeight: 'bold',
-                                                color: '#000',
-                                                fontSize: '1rem'
+                                                color: 'black',
+                                                fontSize: '1rem',
+                                                outline: 'none'
                                             }}
                                         />
                                     </div>
@@ -163,8 +165,8 @@ const DailyPlanReport = () => {
 
                                 {/* VEHICLE ROW (Blue/Gray) */}
                                 <div style={{ display: 'flex', borderBottom: '1px solid #000', background: '#e6f3ff' }}>
-                                    <div style={{ flex: 1, padding: '5px', display: 'flex', alignItems: 'center', fontWeight: 'bold', color: '#cc0000' }}>
-                                        <span style={{ width: '80px' }}>ARAÇ:</span>
+                                    <div style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', fontWeight: 'bold', color: '#003366' }}>
+                                        <span style={{ minWidth: '80px' }}>ARAÇ:</span>
                                         <input
                                             type="text"
                                             placeholder="Plaka Giriniz..."
@@ -173,35 +175,36 @@ const DailyPlanReport = () => {
                                             style={{
                                                 border: 'none',
                                                 background: 'transparent',
-                                                borderBottom: '1px dashed #cc0000',
+                                                borderBottom: '1px dashed #003366',
                                                 flex: 1,
                                                 fontWeight: 'bold',
-                                                color: '#000',
-                                                fontSize: '1rem'
+                                                color: 'black',
+                                                fontSize: '1rem',
+                                                outline: 'none'
                                             }}
                                         />
                                     </div>
                                 </div>
 
                                 {/* TASKS TABLE */}
-                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', color: 'black' }}>
                                     <thead>
                                         <tr style={{ background: '#ffead9', fontSize: '0.9rem' }}>
-                                            <th style={{ border: '1px solid #000', padding: '5px', width: '30px' }}>NO</th>
-                                            <th style={{ border: '1px solid #000', padding: '5px', width: '200px' }}>MAĞAZA KODU / ADI</th>
-                                            <th style={{ border: '1px solid #000', padding: '5px' }}>YAPILACAK İŞ</th>
-                                            <th style={{ border: '1px solid #000', padding: '5px', width: '200px' }}>ADRES</th>
+                                            <th style={{ border: '1px solid #000', padding: '10px', width: '50px', color: 'black' }}>NO</th>
+                                            <th style={{ border: '1px solid #000', padding: '10px', width: '250px', color: 'black' }}>MAĞAZA KODU / ADI</th>
+                                            <th style={{ border: '1px solid #000', padding: '10px', color: 'black' }}>YAPILACAK İŞ</th>
+                                            <th style={{ border: '1px solid #000', padding: '10px', width: '300px', color: 'black' }}>ADRES</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {groupedTasks[groupName].map((task, idx) => (
                                             <tr key={task.id} style={{ fontSize: '0.9rem' }}>
-                                                <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'center' }}>{idx + 1}</td>
-                                                <td style={{ border: '1px solid #000', padding: '5px', fontWeight: 'bold' }}>{task.title}</td>
-                                                <td style={{ border: '1px solid #000', padding: '5px' }}>
+                                                <td style={{ border: '1px solid #000', padding: '8px', textAlign: 'center', color: 'black' }}>{idx + 1}</td>
+                                                <td style={{ border: '1px solid #000', padding: '8px', fontWeight: 'bold', color: 'black' }}>{task.title}</td>
+                                                <td style={{ border: '1px solid #000', padding: '8px', color: 'black' }}>
                                                     {task.description ? task.description : '-'}
                                                 </td>
-                                                <td style={{ border: '1px solid #000', padding: '5px', fontSize: '0.8rem' }}>{task.address}</td>
+                                                <td style={{ border: '1px solid #000', padding: '8px', fontSize: '0.85rem', color: 'black' }}>{task.address}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -211,7 +214,7 @@ const DailyPlanReport = () => {
                         ))
                     )}
 
-                    <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.8rem', color: '#666' }}>
+                    <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.8rem', color: 'black' }}>
                         * Bu rapor {new Date().toLocaleString()} tarihinde sistemden otomatik oluşturulmuştur.
                     </div>
                 </div>
