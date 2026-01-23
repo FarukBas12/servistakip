@@ -161,6 +161,20 @@ async function runMigrations() {
         `);
         console.log(' - Checked task_assignments table');
 
+        // MIGRATION: If task_assignments is empty, verify if we need to migrate from old column
+        const countRes = await db.query('SELECT COUNT(*) FROM task_assignments');
+        if (parseInt(countRes.rows[0].count) === 0) {
+            console.log(' - detailed migration check...');
+            // Insert existing assignments
+            await db.query(`
+                INSERT INTO task_assignments (task_id, user_id)
+                SELECT id, assigned_to FROM tasks 
+                WHERE assigned_to IS NOT NULL
+                ON CONFLICT DO NOTHING
+             `);
+            console.log(' - Migrated old assignments to task_assignments table');
+        }
+
         // FIX: Drop restrictive Check Constraint on photos type if exists
         try {
             await db.query('ALTER TABLE photos DROP CONSTRAINT IF EXISTS photos_type_check');
