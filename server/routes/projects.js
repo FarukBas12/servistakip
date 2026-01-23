@@ -142,6 +142,51 @@ router.post('/:id/expenses', upload.single('receipt'), async (req, res) => {
     }
 });
 
+// UPDATE Expense
+router.put('/:id/expenses/:expenseId', async (req, res) => {
+    const { expenseId } = req.params;
+    const { amount, category, description, expense_date } = req.body;
+    try {
+        const result = await db.query(
+            'UPDATE project_expenses SET amount = $1, category = $2, description = $3, expense_date = $4 WHERE id = $5 RETURNING *',
+            [amount, category, description, expense_date, expenseId]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+// DELETE Expense
+router.delete('/:id/expenses/:expenseId', async (req, res) => {
+    const { expenseId } = req.params;
+    try {
+        await db.query('DELETE FROM project_expenses WHERE id = $1', [expenseId]);
+        res.json({ message: 'Gider silindi' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+// UPDATE Project
+router.put('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, description, start_date, end_date, status } = req.body;
+    try {
+        const result = await db.query(
+            'UPDATE projects SET name = $1, description = $2, start_date = $3, end_date = $4, status = $5 WHERE id = $6 RETURNING *',
+            [name, description, start_date, end_date, status, id]
+        );
+        if (result.rows.length === 0) return res.status(404).json({ message: 'Proje bulunamadı' });
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error: ' + err.message);
+    }
+});
+
 // DELETE Project / File / Expense (Optional, but good to have)
 router.delete('/:id', async (req, res) => {
     // Delete project
