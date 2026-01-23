@@ -78,8 +78,8 @@ const ProjectDashboard = () => {
             </div>
 
             {loading ? <p>Yükleniyor...</p> : (
-                {
-                    projects.map(project => {
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
+                    {projects.map(project => {
                         const progress = calculateProgress(project.start_date, project.end_date);
                         const progressColor = getProgressColor(progress);
                         const isOverdue = new Date() > new Date(project.end_date) && project.status !== 'completed';
@@ -180,57 +180,56 @@ const ProjectDashboard = () => {
                                 </div>
                             </div>
                         );
-                    })
-                }
+                    })}
                 </div>
-    )
-}
+            )
+            }
 
-{/* CREATE MODAL */ }
-{
-    showModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-            <div style={{ background: '#1e1e1e', padding: '30px', borderRadius: '15px', width: '400px', border: '1px solid #333' }}>
-                <h2 style={{ marginTop: 0 }}>Yeni Proje / İhale</h2>
-                <form onSubmit={handleCreate}>
-                    <div className="form-group">
-                        <label>Proje Adı</label>
-                        <input required type="text" value={newProject.name} onChange={e => setNewProject({ ...newProject, name: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
-                    </div>
-                    <div className="form-group" style={{ marginTop: '15px' }}>
-                        <label>Açıklama</label>
-                        <textarea value={newProject.description} onChange={e => setNewProject({ ...newProject, description: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
-                    </div>
+            {/* CREATE MODAL */}
+            {
+                showModal && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+                        <div style={{ background: '#1e1e1e', padding: '30px', borderRadius: '15px', width: '400px', border: '1px solid #333' }}>
+                            <h2 style={{ marginTop: 0 }}>Yeni Proje / İhale</h2>
+                            <form onSubmit={handleCreate}>
+                                <div className="form-group">
+                                    <label>Proje Adı</label>
+                                    <input required type="text" value={newProject.name} onChange={e => setNewProject({ ...newProject, name: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
+                                </div>
+                                <div className="form-group" style={{ marginTop: '15px' }}>
+                                    <label>Açıklama</label>
+                                    <textarea value={newProject.description} onChange={e => setNewProject({ ...newProject, description: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
+                                </div>
 
-                    <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-                        <div className="form-group" style={{ flex: 1 }}>
-                            <label>İhale Bedeli</label>
-                            <input type="number" value={newProject.tender_price || ''} onChange={e => setNewProject({ ...newProject, tender_price: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
+                                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+                                    <div className="form-group" style={{ flex: 1 }}>
+                                        <label>İhale Bedeli</label>
+                                        <input type="number" value={newProject.tender_price || ''} onChange={e => setNewProject({ ...newProject, tender_price: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
+                                    </div>
+                                    <div className="form-group" style={{ flex: 1 }}>
+                                        <label>Hakediş (Alınan)</label>
+                                        <input type="number" value={newProject.progress_payment || ''} onChange={e => setNewProject({ ...newProject, progress_payment: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
+                                    </div>
+                                </div>
+
+                                <div className="form-group" style={{ marginTop: '15px' }}>
+                                    <label>Başlangıç Tarihi</label>
+                                    <input required type="date" value={newProject.start_date} onChange={e => setNewProject({ ...newProject, start_date: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
+                                </div>
+                                <div className="form-group" style={{ marginTop: '15px' }}>
+                                    <label>Bitiş Tarihi</label>
+                                    <input required type="date" value={newProject.end_date} onChange={e => setNewProject({ ...newProject, end_date: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
+                                </div>
+
+                                <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                                    <button type="button" onClick={() => setShowModal(false)} style={{ padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#444', color: 'white', cursor: 'pointer' }}>İptal</button>
+                                    <button type="submit" style={{ padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#4facfe', color: 'white', cursor: 'pointer' }}>Oluştur</button>
+                                </div>
+                            </form>
                         </div>
-                        <div className="form-group" style={{ flex: 1 }}>
-                            <label>Hakediş (Alınan)</label>
-                            <input type="number" value={newProject.progress_payment || ''} onChange={e => setNewProject({ ...newProject, progress_payment: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
-                        </div>
                     </div>
-
-                    <div className="form-group" style={{ marginTop: '15px' }}>
-                        <label>Başlangıç Tarihi</label>
-                        <input required type="date" value={newProject.start_date} onChange={e => setNewProject({ ...newProject, start_date: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
-                    </div>
-                    <div className="form-group" style={{ marginTop: '15px' }}>
-                        <label>Bitiş Tarihi</label>
-                        <input required type="date" value={newProject.end_date} onChange={e => setNewProject({ ...newProject, end_date: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
-                    </div>
-
-                    <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                        <button type="button" onClick={() => setShowModal(false)} style={{ padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#444', color: 'white', cursor: 'pointer' }}>İptal</button>
-                        <button type="submit" style={{ padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#4facfe', color: 'white', cursor: 'pointer' }}>Oluştur</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    )
-}
+                )
+            }
         </div >
     );
 };
