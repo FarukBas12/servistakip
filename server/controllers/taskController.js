@@ -2,19 +2,28 @@ const db = require('../db');
 
 exports.getTasks = async (req, res) => {
     try {
-        // Enlanced Query: Get Task + Assigned User + Last Cancellation info
+        // Enlanced Query: Get Task + Assigned Users (Array) + Last Cancellation
         let query = `
-            SELECT t.*, u.username as assigned_user,
+            SELECT t.*, 
+            COALESCE(
+                (SELECT json_agg(json_build_object('id', u.id, 'username', u.username))
+                 FROM task_assignments ta
+                 JOIN users u ON ta.user_id = u.id
+                 WHERE ta.task_id = t.id),
+                '[]'
+            ) as assigned_users,
             (SELECT description FROM task_logs tl WHERE tl.task_id = t.id AND tl.action = 'cancelled' ORDER BY tl.created_at DESC LIMIT 1) as last_cancel_reason,
             (SELECT COUNT(*) FROM task_logs tl WHERE tl.task_id = t.id AND tl.action = 'cancelled') as cancel_count
-            FROM tasks t 
-            LEFT JOIN users u ON t.assigned_to = u.id
+            FROM tasks t
         `;
         const params = [];
 
         // If technician, only show assigned tasks
         if (req.user.role === 'technician') {
-            query += ' WHERE t.assigned_to = $1';
+            query += ` 
+                JOIN task_assignments ta_filter ON t.id = ta_filter.task_id 
+                WHERE ta_filter.user_id = $1
+            `;
             params.push(req.user.id);
         }
 
@@ -32,17 +41,35 @@ exports.createTask = async (req, res) => {
     const { title, description, address, maps_link, due_date, assigned_to, lat, lng } = req.body;
 
     try {
-        // Basic validation
         if (!title || !address) {
             return res.status(400).json({ message: 'Title and Address are required' });
         }
 
+        // 1. Create Task
         const { rows } = await db.query(
-            'INSERT INTO tasks (title, description, address, maps_link, due_date, assigned_to, lat, lng, region) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
-            [title, description, address, maps_link, due_date || null, assigned_to || null, req.body.lat || null, req.body.lng || null, req.body.region || 'Diğer']
+            'INSERT INTO tasks (title, description, address, maps_link, due_date, lat, lng, region) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+            [title, description, address, maps_link, due_date || null, req.body.lat || null, req.body.lng || null, req.body.region || 'Diğer']
         );
+        const task = rows[0];
 
-        res.json(rows[0]);
+        // 2. Handle Assignments (Expect Array of IDs)
+        if (assigned_to && Array.isArray(assigned_to) && assigned_to.length > 0) {
+            for (const userId of assigned_to) {
+                await db.query(
+                    'INSERT INTO task_assignments (task_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                    [task.id, userId]
+                );
+            }
+        }
+        // Backward compatibility for single ID
+        else if (assigned_to && !Array.isArray(assigned_to)) {
+            await db.query(
+                'INSERT INTO task_assignments (task_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                [task.id, assigned_to]
+            );
+        }
+
+        res.json(task);
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: err.message });
@@ -51,74 +78,71 @@ exports.createTask = async (req, res) => {
 
 exports.updateTask = async (req, res) => {
     const { id } = req.params;
-    // status, assigned_to, title, description can be updated
     const { status, assigned_to, title, description } = req.body;
 
     try {
-        // Build dynamic query
+        // 1. Update Basic Fields
         let query = 'UPDATE tasks SET ';
         const params = [id];
         const updates = [];
         let counter = 2; // $1 is id
 
-        if (status) {
-            updates.push(`status = $${counter}`);
-            params.push(status);
-            counter++;
-        }
+        if (status) { updates.push(`status = $${counter++}`); params.push(status); }
         if (req.body.due_date !== undefined) {
-            updates.push(`due_date = $${counter}`);
-            params.push(req.body.due_date ? req.body.due_date : null);
-            counter++;
+            updates.push(`due_date = $${counter++}`);
+            params.push(req.body.due_date || null);
         }
-        if (assigned_to !== undefined) { // Check undefined because null is valid (unassign)
-            updates.push(`assigned_to = $${counter}`);
-            params.push(assigned_to);
-            counter++;
-        }
-        if (title) {
-            updates.push(`title = $${counter}`);
-            params.push(title);
-            counter++;
-        }
-        if (description) {
-            updates.push(`description = $${counter}`);
-            params.push(description);
-            counter++;
-        }
-        if (req.body.region) {
-            updates.push(`region = $${counter}`);
-            params.push(req.body.region);
-            counter++;
-        }
-        if (req.body.service_form_no) {
-            updates.push(`service_form_no = $${counter}`);
-            params.push(req.body.service_form_no);
-            counter++;
-        }
-        if (req.body.is_quoted !== undefined) {
-            updates.push(`is_quoted = $${counter}`);
-            params.push(req.body.is_quoted);
-            counter++;
+        if (title) { updates.push(`title = $${counter++}`); params.push(title); }
+        if (description) { updates.push(`description = $${counter++}`); params.push(description); }
+        if (req.body.region) { updates.push(`region = $${counter++}`); params.push(req.body.region); }
+        if (req.body.service_form_no) { updates.push(`service_form_no = $${counter++}`); params.push(req.body.service_form_no); }
+        if (req.body.is_quoted !== undefined) { updates.push(`is_quoted = $${counter++}`); params.push(req.body.is_quoted); }
+
+        // Only run update if there are fields (excluding assigned_to which is handled separately)
+        if (updates.length > 0) {
+            query += updates.join(', ') + ' WHERE id = $1 RETURNING *';
+            await db.query(query, params);
         }
 
-        if (updates.length === 0) {
-            return res.json({ message: 'No updates provided' });
+        // 2. Handle Assignments Update (If provided)
+        if (assigned_to !== undefined) {
+            // Clear existing
+            await db.query('DELETE FROM task_assignments WHERE task_id = $1', [id]);
+
+            // Insert New
+            const userIds = Array.isArray(assigned_to) ? assigned_to : [assigned_to];
+            // Filter out null/empty if any
+            const validIds = userIds.filter(uid => uid);
+
+            for (const uid of validIds) {
+                await db.query('INSERT INTO task_assignments (task_id, user_id) VALUES ($1, $2)', [id, uid]);
+            }
         }
 
-        query += updates.join(', ') + ' WHERE id = $1 RETURNING *';
-
-        const { rows } = await db.query(query, params);
-
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Task not found' });
-        }
-
-        res.json(rows[0]);
+        // Return updated task with new assignments
+        const result = await exports.getTaskByIdInternal(id); // Helper to get full object
+        res.json(result);
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: err.message });
     }
+};
+
+// Internal Helper to get fresh task data after update
+exports.getTaskByIdInternal = async (id) => {
+    const query = `
+            SELECT t.*, 
+            COALESCE(
+                (SELECT json_agg(json_build_object('id', u.id, 'username', u.username))
+                 FROM task_assignments ta
+                 JOIN users u ON ta.user_id = u.id
+                 WHERE ta.task_id = t.id),
+                '[]'
+            ) as assigned_users
+            FROM tasks t WHERE t.id = $1
+    `;
+    const { rows } = await db.query(query, [id]);
+    return rows[0];
 };
 
 exports.deleteTask = async (req, res) => {
@@ -192,10 +216,12 @@ exports.cancelTask = async (req, res) => {
             [id, userId, 'cancelled', reason]
         );
 
-        // 2. Reset Task (Status: pending, Assigned: null)
+        // 2. Reset Task (Status: pending) & Clear Assignments
+        await db.query('DELETE FROM task_assignments WHERE task_id = $1', [id]);
+
         const { rows } = await db.query(
-            'UPDATE tasks SET status = $1, assigned_to = $2 WHERE id = $3 RETURNING *',
-            ['pending', null, id]
+            'UPDATE tasks SET status = $1 WHERE id = $2 RETURNING *',
+            ['pending', id]
         );
 
         if (rows.length === 0) return res.status(404).json({ message: 'Task not found' });

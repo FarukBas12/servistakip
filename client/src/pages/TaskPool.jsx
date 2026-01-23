@@ -74,11 +74,26 @@ const TaskPool = () => {
         setModalMode('edit');
     };
 
+    // State for multiple assignment
+    const [selectedAssignees, setSelectedAssignees] = useState([]);
+
     const openAssignModal = (task) => {
         setEditingTask(task);
-        // Pre-select current user if re-assigning
-        setAssignId(task.assigned_to || '');
+        // Pre-select current users
+        if (task.assigned_users && task.assigned_users.length > 0) {
+            setSelectedAssignees(task.assigned_users.map(u => u.id));
+        } else {
+            setSelectedAssignees([]);
+        }
         setModalMode('assign');
+    };
+
+    const handleAssignCheckboxChange = (userId) => {
+        if (selectedAssignees.includes(userId)) {
+            setSelectedAssignees(selectedAssignees.filter(id => id !== userId));
+        } else {
+            setSelectedAssignees([...selectedAssignees, userId]);
+        }
     };
 
     const handleEditSubmit = async (e) => {
@@ -96,8 +111,9 @@ const TaskPool = () => {
     const handleAssignSubmit = async (e) => {
         e.preventDefault();
         try {
-            await api.put(`/tasks/${editingTask.id}`, { assigned_to: assignId });
-            alert(activeTab === 'pool' ? 'Görev atandı' : 'Personel değiştirildi');
+            // Send array of user IDs
+            await api.put(`/tasks/${editingTask.id}`, { assigned_to: selectedAssignees });
+            alert(activeTab === 'pool' ? 'Görev atandı' : 'Personel güncellendi');
             setEditingTask(null);
             fetchTasks();
         } catch (err) {
@@ -107,13 +123,15 @@ const TaskPool = () => {
 
     // Filter Logic
     const filteredTasks = tasks.filter(task => {
+        const hasAssignees = task.assigned_users && task.assigned_users.length > 0;
+
         // Tab Filter
         if (activeTab === 'pool') {
             // Pool: Unassigned only
-            if (task.assigned_to) return false;
+            if (hasAssignees) return false;
         } else {
             // Active: Assigned only
-            if (!task.assigned_to) return false;
+            if (!hasAssignees) return false;
         }
 
         // Region Filter
@@ -248,7 +266,11 @@ const TaskPool = () => {
 
                             {activeTab === 'active' && (
                                 <div style={{ background: 'rgba(255,255,255,0.1)', padding: '8px', borderRadius: '5px', marginBottom: '10px' }}>
-                                    👤 <strong>{task.assigned_user}</strong> üzerinde
+                                    👤 <strong>
+                                        {task.assigned_users && task.assigned_users.length > 0
+                                            ? task.assigned_users.map(u => u.username).join(', ')
+                                            : 'Atanmamış'}
+                                    </strong>
                                 </div>
                             )}
 
@@ -258,7 +280,7 @@ const TaskPool = () => {
 
                             <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
                                 <button onClick={() => openAssignModal(task)} className="glass-btn" style={{ flex: 1, background: 'rgba(33, 150, 243, 0.3)' }}>
-                                    {activeTab === 'pool' ? '👤 Personele Ata' : '🔄 Personel Değiştir'}
+                                    {activeTab === 'pool' ? '👤 Personelleri Seç' : '🔄 Personelleri Güncelle'}
                                 </button>
                                 <button onClick={() => openEditModal(task)} className="glass-btn" style={{ flex: 1, background: 'rgba(255, 193, 7, 0.3)' }}>
                                     ✏️ Düzenle
@@ -316,22 +338,25 @@ const TaskPool = () => {
                             </form>
                         ) : (
                             <form onSubmit={handleAssignSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <p>"{editingTask.title}" görevi için işlem yapıyorsunuz:</p>
-                                <select
-                                    className="glass-input"
-                                    value={assignId}
-                                    onChange={(e) => setAssignId(e.target.value)}
-                                    required
-                                    style={{ color: 'white' }}
-                                >
-                                    <option value="" style={{ color: 'black' }}>-- Seçiniz --</option>
+                                <p>"{editingTask.title}" görevi için personelleri seçiniz:</p>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '200px', overflowY: 'auto' }}>
                                     {users.map(u => (
-                                        <option key={u.id} value={u.id} style={{ color: 'black' }}>{u.username}</option>
+                                        <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '5px', background: 'rgba(255,255,255,0.05)', borderRadius: '5px' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedAssignees.includes(u.id)}
+                                                onChange={() => handleAssignCheckboxChange(u.id)}
+                                                style={{ transform: 'scale(1.2)' }}
+                                            />
+                                            {u.username}
+                                        </label>
                                     ))}
-                                </select>
+                                </div>
+
                                 <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                                     <button type="submit" className="glass-btn" style={{ flex: 1, background: 'rgba(33, 150, 243, 0.3)' }}>
-                                        {activeTab === 'pool' ? 'Atamayı Yap' : 'Transfer Et'}
+                                        {activeTab === 'pool' ? 'Seçilenleri Ata' : 'Güncelle'}
                                     </button>
                                     <button type="button" onClick={() => setEditingTask(null)} className="glass-btn" style={{ flex: 1, background: 'rgba(255, 0, 0, 0.3)' }}>İptal</button>
                                 </div>

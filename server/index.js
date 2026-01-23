@@ -150,6 +150,17 @@ async function runMigrations() {
         `);
         console.log(' - Checked photos table');
 
+        // NEW: Create Task Assignments Table (Multi-Assign)
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS task_assignments (
+                task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (task_id, user_id)
+            );
+        `);
+        console.log(' - Checked task_assignments table');
+
         // FIX: Drop restrictive Check Constraint on photos type if exists
         try {
             await db.query('ALTER TABLE photos DROP CONSTRAINT IF EXISTS photos_type_check');
