@@ -143,6 +143,18 @@ const ProjectDashboard = () => {
                                 <label>Açıklama</label>
                                 <textarea value={newProject.description} onChange={e => setNewProject({ ...newProject, description: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
                             </div>
+
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+                                <div className="form-group" style={{ flex: 1 }}>
+                                    <label>İhale Bedeli</label>
+                                    <input type="number" value={newProject.tender_price || ''} onChange={e => setNewProject({ ...newProject, tender_price: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
+                                </div>
+                                <div className="form-group" style={{ flex: 1 }}>
+                                    <label>Hakediş (Alınan)</label>
+                                    <input type="number" value={newProject.progress_payment || ''} onChange={e => setNewProject({ ...newProject, progress_payment: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
+                                </div>
+                            </div>
+
                             <div className="form-group" style={{ marginTop: '15px' }}>
                                 <label>Başlangıç Tarihi</label>
                                 <input required type="date" value={newProject.start_date} onChange={e => setNewProject({ ...newProject, start_date: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
