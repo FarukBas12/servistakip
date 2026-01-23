@@ -239,12 +239,14 @@ const ProjectDetail = () => {
 
             {/* TABS (No Print) */}
             <div className="no-print" style={{ display: 'flex', borderBottom: '1px solid #333', marginBottom: '20px' }}>
-                <button
-                    onClick={() => setActiveTab('files')}
-                    style={{ padding: '10px 20px', background: 'transparent', border: 'none', borderBottom: activeTab === 'files' ? '2px solid #60a5fa' : 'none', color: activeTab === 'files' ? '#60a5fa' : '#aaa', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.3s' }}
-                >
-                    📂 PROJE DOSYALARI
-                </button>
+                {!isTech && (
+                    <button
+                        onClick={() => setActiveTab('files')}
+                        style={{ padding: '10px 20px', background: 'transparent', border: 'none', borderBottom: activeTab === 'files' ? '2px solid #60a5fa' : 'none', color: activeTab === 'files' ? '#60a5fa' : '#aaa', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.3s' }}
+                    >
+                        📂 PROJE DOSYALARI
+                    </button>
+                )}
                 {!isTech && (
                     <button
                         onClick={() => setActiveTab('expenses')}
@@ -256,7 +258,7 @@ const ProjectDetail = () => {
             </div>
 
             {/* FILES CONTENT */}
-            {activeTab === 'files' && (
+            {activeTab === 'files' && !isTech && (
                 <div>
                     {!isTech && (
                         <button onClick={() => setShowFileModal(true)} className="glass-btn" style={{ marginBottom: '20px', background: 'rgba(59, 130, 246, 0.2)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
@@ -266,7 +268,7 @@ const ProjectDetail = () => {
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
                         {files.map(file => (
-                            <div key={file.id} style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', transition: 'transform 0.2s', cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+                            <div key={file.id} style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', transition: 'transform 0.2s', position: 'relative' }}>
                                 <div style={{ marginBottom: '10px', display: 'flex', justifyContent: 'center' }}>
                                     {getFileIcon(file.file_type || 'raw')}
                                 </div>
@@ -276,9 +278,22 @@ const ProjectDetail = () => {
                                 <div style={{ fontSize: '0.7rem', color: '#666', marginBottom: '10px' }}>
                                     {new Date(file.uploaded_at).toLocaleDateString()}
                                 </div>
-                                <a href={file.file_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 10px', background: 'rgba(255,255,255,0.1)', borderRadius: '5px', color: 'white', textDecoration: 'none', fontSize: '0.8rem' }}>
-                                    <Download size={14} /> İndir
-                                </a>
+                                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                                    <a href={file.file_url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 10px', background: 'rgba(255,255,255,0.1)', borderRadius: '5px', color: 'white', textDecoration: 'none', fontSize: '0.8rem' }}>
+                                        <Download size={14} /> İndir
+                                    </a>
+                                    <button
+                                        onClick={async () => {
+                                            if (!window.confirm('Bu dosyayı silmek istediğinize emin misiniz?')) return;
+                                            try {
+                                                await api.delete(`/projects/${id}/files/${file.id}`);
+                                                fetchData();
+                                            } catch (err) { alert('Silinemedi'); }
+                                        }}
+                                        style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 10px', background: 'rgba(239, 68, 68, 0.2)', borderRadius: '5px', color: '#ef4444', border: 'none', cursor: 'pointer', fontSize: '0.8rem' }}>
+                                        <Trash2 size={14} /> Sil
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>

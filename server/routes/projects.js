@@ -114,6 +114,23 @@ router.post('/:id/files', upload.single('file'), async (req, res) => {
         if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
         res.status(500).send('Upload Error: ' + err.message);
     }
+} catch (err) {
+    console.error('Upload Error Details:', err);
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    res.status(500).send('Upload Error: ' + err.message);
+}
+});
+
+// DELETE File
+router.delete('/:id/files/:fileId', async (req, res) => {
+    const { fileId } = req.params;
+    try {
+        await db.query('DELETE FROM project_files WHERE id = $1', [fileId]);
+        res.json({ message: 'Dosya silindi' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
 });
 
 // ADD Expense
