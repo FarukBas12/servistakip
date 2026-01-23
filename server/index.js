@@ -17,6 +17,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/stores', require('./routes/stores'));
 app.use('/api/subs', require('./routes/subs')); // Unified Route
+app.use('/api/projects', require('./routes/projects')); // NEW: Projects Route
 
 
 // Static Folder for Uploads
