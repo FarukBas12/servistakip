@@ -387,40 +387,40 @@ const ProjectDetail = () => {
                             <button onClick={() => setShowPreviewModal(false)} style={{ padding: '10px', background: '#e74c3c', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}><X size={16} /></button>
                         </div>
 
-                        <div className="print-section">
-                            <h1 style={{ borderBottom: '2px solid #333', paddingBottom: '10px' }}>{project.name}</h1>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontSize: '0.9rem', color: '#555' }}>
+                        <div className="print-section" style={{ color: '#000' }}>
+                            <h1 style={{ borderBottom: '2px solid #333', paddingBottom: '10px', color: '#000', background: 'none', WebkitTextFillColor: 'initial' }}>{project.name}</h1>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontSize: '0.9rem', color: '#000' }}>
                                 <span><strong>Tarih:</strong> {new Date(project.start_date).toLocaleDateString()} - {new Date(project.end_date).toLocaleDateString()}</span>
                                 <span><strong>Durum:</strong> {project.status}</span>
                             </div>
-                            <p style={{ marginBottom: '30px', padding: '15px', background: '#f5f5f5', borderRadius: '5px' }}>{project.description}</p>
+                            <p style={{ marginBottom: '30px', padding: '15px', background: '#f5f5f5', borderRadius: '5px', color: '#000' }}>{project.description}</p>
 
-                            <h3>Proje Özeti</h3>
-                            <table style={{ width: '100%', marginBottom: '30px', borderCollapse: 'collapse' }}>
+                            <h3 style={{ color: '#000', background: 'none', WebkitTextFillColor: 'initial' }}>Proje Özeti</h3>
+                            <table style={{ width: '100%', marginBottom: '30px', borderCollapse: 'collapse', color: '#000' }}>
                                 <tbody>
-                                    <tr style={{ borderBottom: '1px solid #ddd' }}><td style={{ padding: '8px' }}>Toplam Gider:</td><td style={{ padding: '8px', fontWeight: 'bold' }}>{totalExpenses.toFixed(2)} TL</td></tr>
-                                    <tr style={{ borderBottom: '1px solid #ddd' }}><td style={{ padding: '8px' }}>Yüklenen Dosya Sayısı:</td><td style={{ padding: '8px' }}>{files.length}</td></tr>
-                                    <tr style={{ borderBottom: '1px solid #ddd' }}><td style={{ padding: '8px' }}>Gider Kalemi Sayısı:</td><td style={{ padding: '8px' }}>{expenses.length}</td></tr>
+                                    <tr style={{ borderBottom: '1px solid #ddd' }}><td style={{ padding: '8px', color: '#000' }}>Toplam Gider:</td><td style={{ padding: '8px', fontWeight: 'bold', color: '#000' }}>{totalExpenses.toFixed(2)} TL</td></tr>
+                                    <tr style={{ borderBottom: '1px solid #ddd' }}><td style={{ padding: '8px', color: '#000' }}>Yüklenen Dosya Sayısı:</td><td style={{ padding: '8px', color: '#000' }}>{files.length}</td></tr>
+                                    <tr style={{ borderBottom: '1px solid #ddd' }}><td style={{ padding: '8px', color: '#000' }}>Gider Kalemi Sayısı:</td><td style={{ padding: '8px', color: '#000' }}>{expenses.length}</td></tr>
                                 </tbody>
                             </table>
 
-                            <h3>Gider Listesi</h3>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                            <h3 style={{ color: '#000', background: 'none', WebkitTextFillColor: 'initial' }}>Gider Listesi</h3>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', color: '#000' }}>
                                 <thead>
                                     <tr style={{ background: '#333', color: 'white' }}>
-                                        <th style={{ padding: '8px', textAlign: 'left' }}>Tarih</th>
-                                        <th style={{ padding: '8px', textAlign: 'left' }}>Kategori</th>
-                                        <th style={{ padding: '8px', textAlign: 'left' }}>Açıklama</th>
-                                        <th style={{ padding: '8px', textAlign: 'right' }}>Tutar</th>
+                                        <th style={{ padding: '8px', textAlign: 'left', color: '#fff' }}>Tarih</th>
+                                        <th style={{ padding: '8px', textAlign: 'left', color: '#fff' }}>Kategori</th>
+                                        <th style={{ padding: '8px', textAlign: 'left', color: '#fff' }}>Açıklama</th>
+                                        <th style={{ padding: '8px', textAlign: 'right', color: '#fff' }}>Tutar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {expenses.map(exp => (
                                         <tr key={exp.id} style={{ borderBottom: '1px solid #ddd' }}>
-                                            <td style={{ padding: '8px' }}>{new Date(exp.expense_date).toLocaleDateString()}</td>
-                                            <td style={{ padding: '8px' }}>{exp.category}</td>
-                                            <td style={{ padding: '8px' }}>{exp.description}</td>
-                                            <td style={{ padding: '8px', textAlign: 'right' }}>{exp.amount} TL</td>
+                                            <td style={{ padding: '8px', color: '#000' }}>{new Date(exp.expense_date).toLocaleDateString()}</td>
+                                            <td style={{ padding: '8px', color: '#000' }}>{exp.category}</td>
+                                            <td style={{ padding: '8px', color: '#000' }}>{exp.description}</td>
+                                            <td style={{ padding: '8px', textAlign: 'right', color: '#000' }}>{exp.amount} TL</td>
                                         </tr>
                                     ))}
                                 </tbody>
