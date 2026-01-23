@@ -89,9 +89,9 @@ router.post('/:id/files', upload.single('file'), async (req, res) => {
 
         res.json(result.rows[0]);
     } catch (err) {
-        console.error(err);
-        if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-        res.status(500).send('Upload Error');
+        console.error('Upload Error Details:', err);
+        if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+        res.status(500).send('Upload Error: ' + err.message);
     }
 });
 
