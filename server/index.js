@@ -32,9 +32,34 @@ app.get('/setup', async (req, res) => {
         ssl: { rejectUnauthorized: false }
     });
     try {
-        // 1. Run Schema (Create Tables)
-        const sql = fs.readFileSync(path.join(__dirname, 'database.sql'), 'utf8');
+        console.log('Starting setup...');
+
+        // Hardcoded Schema to avoid FS issues
+        const sql = `
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(50) UNIQUE NOT NULL,
+                password_hash VARCHAR(255) NOT NULL,
+                role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'technician')),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE TABLE IF NOT EXISTS tasks (
+                id SERIAL PRIMARY KEY,
+                title VARCHAR(100) NOT NULL,
+                description TEXT,
+                address TEXT NOT NULL,
+                maps_link TEXT,
+                lat DECIMAL(9,6),
+                lng DECIMAL(9,6),
+                due_date TIMESTAMP,
+                status VARCHAR(20) DEFAULT 'pending',
+                assigned_to INTEGER REFERENCES users(id),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `;
+
         await pool.query(sql);
+        console.log('Tables created.');
 
         // 2. Force Reset Admin Password (Server-Side Hash)
         const salt = await bcrypt.genSalt(10);
@@ -47,15 +72,19 @@ app.get('/setup', async (req, res) => {
             ON CONFLICT (username) DO UPDATE 
             SET password_hash = $1
         `, [hash]);
+        console.log('Admin user upserted.');
 
-        res.send('<h1>✅ TAMIR EDILDI!</h1><p>Admin sifresi <b>sunucu tarafinda</b> yeniden 123456 olarak ayarlandi.</p><p>Simdi giris yapabilirsiniz.</p>');
+        res.send('<h1>✅ TAMIR EDILDI!</h1><p>Admin sifresi: 123456</p>');
     } catch (err) {
         console.error('SETUP ERROR:', err);
-        res.send(`
-            <h1>❌ HATA</h1>
-            <p><strong>Message:</strong> ${err.message}</p>
-            <p><strong>Stack:</strong></p>
-            <pre>${err.stack}</pre>
+        res.status(500).send(`
+            <div style="font-family: monospace; padding: 20px; background: #ffebee;">
+                <h1>❌ HATA</h1>
+                <h3>Message:</h3>
+                <pre>${err.message}</pre>
+                <h3>Stack:</h3>
+                <pre>${err.stack}</pre>
+            </div>
         `);
     } finally {
         await pool.end();
