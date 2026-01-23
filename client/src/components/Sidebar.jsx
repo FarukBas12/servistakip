@@ -4,13 +4,15 @@ import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, Inbox, Map, FileBarChart, Users, LogOut, Activity, FolderArchive, Wallet, Database, Shield, FolderOpen } from 'lucide-react'; // Added Wallet
 
 const Sidebar = () => {
-    const { logout } = useAuth();
+    const { user } = useAuth();
+    const isTech = user?.role === 'technician';
 
     const menuItems = [
         { path: '/admin', icon: <LayoutDashboard size={24} />, label: 'Panel', exact: true },
         { path: '/admin/pool', icon: <Inbox size={24} />, label: 'Havuz' },
         { path: '/admin/subs', icon: <Users size={24} />, label: 'Taşeronlar' },
-        { path: '/admin/projects', icon: <FolderOpen size={24} />, label: 'Projeler' },
+        // Hide Projects for Technicians
+        ...(!isTech ? [{ path: '/admin/projects', icon: <FolderOpen size={24} />, label: 'Projeler' }] : []),
         { path: '/admin/settings', icon: <Shield size={24} />, label: 'Ayarlar' },
     ];
 
