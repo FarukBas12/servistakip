@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
@@ -21,12 +22,51 @@ app.use('/api/subs', require('./routes/subs')); // Unified Route
 // Static Folder for Uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// WEB SETUP & REPAIR ROUTE
+const { Pool } = require('pg');
+const bcrypt = require('bcrypt');
+
+app.get('/setup', async (req, res) => {
+    const pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+    });
+    try {
+        // 1. Run Schema (Create Tables)
+        const sql = fs.readFileSync(path.join(__dirname, 'database.sql'), 'utf8');
+        await pool.query(sql);
+
+        // 2. Force Reset Admin Password (Server-Side Hash)
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash('123456', salt);
+
+        // Upsert Admin User
+        await pool.query(`
+            INSERT INTO users (username, password_hash, role) 
+            VALUES ('admin', $1, 'admin')
+            ON CONFLICT (username) DO UPDATE 
+            SET password_hash = $1
+        `, [hash]);
+
+        res.send('<h1>✅ TAMIR EDILDI!</h1><p>Admin sifresi <b>sunucu tarafinda</b> yeniden 123456 olarak ayarlandi.</p><p>Simdi giris yapabilirsiniz.</p>');
+    } catch (err) {
+        console.error('SETUP ERROR:', err);
+        res.send(`
+            <h1>❌ HATA</h1>
+            <p><strong>Message:</strong> ${err.message}</p>
+            <p><strong>Stack:</strong></p>
+            <pre>${err.stack}</pre>
+        `);
+    } finally {
+        await pool.end();
+    }
+});
+
 app.get('/', (req, res) => {
     res.send('Field Service API Running');
 });
 
 // Ensure Uploads Directory Exists
-const fs = require('fs');
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
