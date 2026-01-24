@@ -402,6 +402,7 @@ const StockPage = () => {
                         <button onClick={() => setHistoryModalOpen(false)} style={{ width: '100%', marginTop: '15px', padding: '10px', background: '#555', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Kapat</button>
                     </div>
                 </div>
+            )}
             {/* IMPORT MODAL */}
             {importModalOpen && (
                 <div className="modal-overlay">
