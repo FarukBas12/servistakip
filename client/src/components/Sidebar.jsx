@@ -32,7 +32,7 @@ const Sidebar = () => {
 
     const menuItems = [
         { path: '/admin', icon: <LayoutDashboard size={24} />, label: 'Panel', exact: true },
-        { path: '/admin/map', icon: <Map size={24} />, label: 'Harita' },
+
         { path: '/admin/pool', icon: <Inbox size={24} />, label: 'Havuz' },
         { path: '/admin/subs', icon: <Users size={24} />, label: 'Taşeronlar' },
         // Hide Projects for Technicians
