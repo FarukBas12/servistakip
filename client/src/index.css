@@ -344,9 +344,11 @@ h3 {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 1.5rem;
+}
 
 /* --- MOBILE LAYOUT (PWA) --- */
 @media (max-width: 768px) {
+
     /* Turn Sidebar into Bottom Tab Bar */
     .sidebar-container {
         width: 100% !important;
@@ -361,7 +363,8 @@ h3 {
         justify-content: space-between !important;
         padding: 0 10px !important;
         z-index: 9999 !important;
-        background: rgba(15, 23, 42, 0.95) !important; /* Solid bg for mobile */
+        background: rgba(15, 23, 42, 0.95) !important;
+        /* Solid bg for mobile */
         backdrop-filter: blur(20px) !important;
     }
 
@@ -372,11 +375,11 @@ h3 {
 
     /* Adjust Navigation Layout */
     .sidebar-nav {
-         width: 100% !important;
-         flex-direction: row !important;
-         justify-content: space-around !important;
-         align-items: center !important;
-         gap: 0 !important;
+        width: 100% !important;
+        flex-direction: row !important;
+        justify-content: space-around !important;
+        align-items: center !important;
+        gap: 0 !important;
     }
 
     .sidebar-link {
@@ -395,17 +398,19 @@ h3 {
     .sidebar-link span {
         font-size: 0.6rem !important;
     }
-    
+
     /* Hide the Update Button on Mobile Bottom Bar */
     .sidebar-update-btn {
         display: none !important;
     }
 
     /* Fix Main Content Margin */
-    .dashboard, div[style*="max-width: 1200px"] { 
+    .dashboard,
+    div[style*="max-width: 1200px"] {
         /* StockPage wrapper */
         margin-left: 0 !important;
-        margin-bottom: 80px !important; /* Space for bottom bar */
+        margin-bottom: 80px !important;
+        /* Space for bottom bar */
         padding: 15px !important;
     }
 }
