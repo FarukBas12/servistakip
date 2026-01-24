@@ -8,27 +8,8 @@ const Sidebar = () => {
     const { user, logout } = useAuth();
     const isTech = user?.role === 'technician';
 
-    // AUTO-UPDATE LOGIC
-    const APP_VERSION = '1.3.8'; // MUST MATCH SERVER
-    const [updateAvailable, setUpdateAvailable] = React.useState(false);
+    // AUTO-UPDATE LOGIC MOVED TO VersionManager.jsx
 
-    React.useEffect(() => {
-        const checkVersion = async () => {
-            try {
-                const res = await fetch('/api/version');
-                const data = await res.json();
-                if (data.version && data.version !== APP_VERSION) {
-                    setUpdateAvailable(true);
-                }
-            } catch (err) {
-                // Ignore errors (offline etc)
-            }
-        };
-
-        checkVersion(); // Initial check
-        const interval = setInterval(checkVersion, 60000); // Check every minute
-        return () => clearInterval(interval);
-    }, []);
 
     const menuItems = [
         { path: '/admin', icon: <LayoutDashboard size={24} />, label: 'Panel', exact: true },
@@ -78,32 +59,7 @@ const Sidebar = () => {
                 ))}
             </nav>
 
-            <button
-                className="sidebar-update-btn"
-                onClick={() => window.location.reload(true)}
-                style={{
-                    marginBottom: '10px',
-                    background: updateAvailable ? '#ef4444' : 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: updateAvailable ? 'white' : '#e0e0e0',
-                    opacity: updateAvailable ? 1 : 0.5,
-                    padding: '10px',
-                    borderRadius: updateAvailable ? '10px' : '0',
-                    transition: 'all 0.2s',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '2px',
-                    animation: updateAvailable ? 'pulse 2s infinite' : 'none'
-                }}
-                title={updateAvailable ? "YENİ GÜNCELLEME MEVCUT! TIKLA" : "Güncellemeleri Kontrol Et (Yenile)"}
-            >
-                <Activity size={20} />
-                <span style={{ fontSize: '0.6rem', fontWeight: updateAvailable ? 'bold' : 'normal' }}>
-                    {updateAvailable ? 'GÜNCELLE' : 'Yenile'}
-                </span>
-            </button>
+
 
             <button
                 className="sidebar-update-btn"

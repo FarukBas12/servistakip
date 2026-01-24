@@ -10,6 +10,7 @@ import ProjectDetail from './pages/ProjectDetail';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
+import VersionManager from './components/VersionManager';
 
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
           <Route path="/" element={<Navigate to="/login" />} />
         </Routes>
         <PWAInstallPrompt />
+        <VersionManager />
       </Router>
     </AuthProvider>
   );
