@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Search, Archive, AlertTriangle, History, ArrowRight, ArrowLeft, Upload, Printer } from 'lucide-react';
+import { Package, Plus, Search, Archive, AlertTriangle, History, ArrowRight, ArrowLeft, Upload, Printer, Edit2 } from 'lucide-react';
 import api from '../utils/api'; // Use centralized API wrapper
 
 const StockPage = () => {
@@ -298,7 +298,7 @@ const StockPage = () => {
                                         className={`glass-btn ${editingId === stock.id ? 'glass-btn-primary' : 'glass-btn-secondary'}`}
                                         style={{ padding: '6px 12px', fontSize: '0.8rem' }} title="Düzenle"
                                     >
-                                        Edit
+                                        <Edit2 size={16} />
                                     </button>
                                 </div>
                             </div>
