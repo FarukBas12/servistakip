@@ -150,9 +150,9 @@ const StockPage = () => {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {filteredStocks.length === 0 && (
-                    <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: '#aaa', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
+                    <div style={{ textAlign: 'center', padding: '40px', color: '#aaa', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
                         <Package size={48} style={{ opacity: 0.5, marginBottom: '10px' }} />
                         <p>Henüz görüntülenecek stok yok veya arama sonucu boş.</p>
                         <p style={{ fontSize: '0.8rem' }}>Yeni stok eklemek için sağ üstteki düğmeyi kullanın.</p>
@@ -161,44 +161,58 @@ const StockPage = () => {
                 {filteredStocks.map(stock => {
                     const isCritical = parseFloat(stock.quantity) <= parseFloat(stock.critical_level);
                     return (
-                        <div key={stock.id} className="glass-panel" style={{ padding: '15px', borderLeft: isCritical ? '4px solid #ef4444' : '4px solid #22c55e', position: 'relative' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                                <div>
-                                    <h3 style={{ margin: '0 0 5px 0', color: 'white', fontSize: '1.1rem' }}>{stock.name}</h3>
-                                    <span style={{ fontSize: '0.8rem', color: '#aaa', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px' }}>
-                                        {stock.category}
-                                    </span>
-                                </div>
-                                <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: isCritical ? '#ef4444' : 'white' }}>
-                                        {stock.quantity} <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>{stock.unit}</span>
-                                    </div>
-                                    {isCritical && <div style={{ fontSize: '0.7rem', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'end', gap: '4px' }}><AlertTriangle size={12} /> Kritik Seviye</div>}
+                        <div key={stock.id} className="glass-panel" style={{
+                            padding: '12px 20px',
+                            borderLeft: isCritical ? '4px solid #ef4444' : '4px solid #22c55e',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: '15px'
+                        }}>
+                            {/* Left: Info */}
+                            <div style={{ flex: 1, minWidth: '200px' }}>
+                                <h3 style={{ margin: '0 0 4px 0', color: 'white', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    {stock.name}
+                                    {isCritical && <span style={{ fontSize: '0.7rem', color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '3px' }}><AlertTriangle size={10} /> Kritik</span>}
+                                </h3>
+                                <span style={{ fontSize: '0.75rem', color: '#aaa', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px' }}>
+                                    {stock.category}
+                                </span>
+                            </div>
+
+                            {/* Middle: Quantity */}
+                            <div style={{ textAlign: 'right', minWidth: '100px' }}>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: isCritical ? '#ef4444' : 'white' }}>
+                                    {stock.quantity} <span style={{ fontSize: '0.8rem', fontWeight: 'normal', color: '#888' }}>{stock.unit}</span>
                                 </div>
                             </div>
 
-                            <div style={{ marginTop: '15px', display: 'flex', gap: '10px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px' }}>
+                            {/* Right: Actions */}
+                            <div style={{ display: 'flex', gap: '8px' }}>
                                 <button
                                     onClick={() => { setCurrentItem(stock); setTransactionData({ type: 'in', quantity: 1, description: '', project_id: '' }); setTransactionModalOpen(true); }}
-                                    className="glass-btn glass-btn-success" style={{ flex: 1, justifyContent: 'center', fontSize: '0.85rem' }}
+                                    className="glass-btn glass-btn-success" style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                                    title="Stok Girişi"
                                 >
-                                    + Giriş
+                                    +
                                 </button>
                                 <button
                                     onClick={() => { setCurrentItem(stock); setTransactionData({ type: 'out', quantity: 1, description: '', project_id: '' }); setTransactionModalOpen(true); }}
-                                    className="glass-btn glass-btn-danger" style={{ flex: 1, justifyContent: 'center', fontSize: '0.85rem' }}
+                                    className="glass-btn glass-btn-danger" style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                                    title="Stok Çıkışı"
                                 >
-                                    - Çıkış
+                                    -
                                 </button>
                                 <button
                                     onClick={() => openHistory(stock)}
-                                    className="glass-btn glass-btn-secondary" style={{ padding: '10px' }} title="Hareket Geçmişi"
+                                    className="glass-btn glass-btn-secondary" style={{ padding: '6px 10px' }} title="Hareket Geçmişi"
                                 >
-                                    <History size={18} />
+                                    <History size={16} />
                                 </button>
                                 <button
                                     onClick={() => { setCurrentItem(stock); setFormData({ ...stock }); setModalOpen(true); }}
-                                    className="glass-btn glass-btn-secondary" style={{ padding: '10px', fontSize: '0.8rem' }} title="Düzenle"
+                                    className="glass-btn glass-btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} title="Düzenle"
                                 >
                                     Edit
                                 </button>
