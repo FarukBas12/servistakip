@@ -69,9 +69,43 @@ app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/stock-tracking', require('./routes/stockTracking')); // Distinct from 'stores'
 // app.use('/api/subcontractors', ...); // REMOVED invalid route
 
+// Debug / Health Check Endpoint
+app.get('/api/health-check', async (req, res) => {
+    try {
+        // Check table existence
+        const tableCheck = await db.query("SELECT to_regclass('public.stocks') as table_exists");
+
+        // Check row count if table exists
+        let rowCount = 0;
+        let rows = [];
+        if (tableCheck.rows[0].table_exists) {
+            const countRes = await db.query('SELECT count(*) FROM stocks');
+            rowCount = countRes.rows[0].count;
+
+            // Get last 5 items to verify data
+            const itemsRes = await db.query('SELECT name, quantity FROM stocks ORDER BY id DESC LIMIT 5');
+            rows = itemsRes.rows;
+        }
+
+        res.json({
+            status: 'online',
+            dbConnected: true,
+            tableExists: !!tableCheck.rows[0].table_exists,
+            rowCount: rowCount,
+            lastItems: rows
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: 'error',
+            error: err.toString(),
+            stack: err.stack
+        });
+    }
+});
+
 // Version Endpoint for Auto-Update
 app.get('/api/version', (req, res) => {
-    res.json({ version: '1.2.9' });
+    res.json({ version: '1.3.0' });
 });
 
 // The "catchall" handler: for any request that doesn't

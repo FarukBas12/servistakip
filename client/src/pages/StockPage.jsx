@@ -5,6 +5,7 @@ const StockPage = () => {
     const [stocks, setStocks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debugError, setDebugError] = useState(null); // New Debug State
 
     // Modal States
     const [modalOpen, setModalOpen] = useState(false);
@@ -24,9 +25,16 @@ const StockPage = () => {
     const fetchStocks = async () => {
         try {
             const res = await fetch('/api/stock-tracking', { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } });
-            if (res.ok) setStocks(await res.json());
+            if (res.ok) {
+                setStocks(await res.json());
+                setDebugError(null);
+            } else {
+                const txt = await res.text();
+                setDebugError('Fetch Failed: ' + txt);
+            }
         } catch (err) {
             console.error(err);
+            setDebugError('Fetch Exception: ' + err.message);
         } finally {
             setLoading(false);
         }
@@ -131,7 +139,7 @@ const StockPage = () => {
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.2.9 (Debug)</span>
+                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.0 (Health)</span>
                 </h2>
                 <div>
                     <button
