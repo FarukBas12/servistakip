@@ -124,7 +124,7 @@ const StockPage = () => {
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.2.3</span>
+                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.2.4</span>
                 </h2>
                 <div>
                     <button
@@ -151,14 +151,8 @@ const StockPage = () => {
                         placeholder="Ürün adı veya kategori ara..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{
-                            width: '100%',
-                            padding: '10px 10px 10px 40px',
-                            borderRadius: '8px',
-                            border: '1px solid #444',
-                            background: 'rgba(0,0,0,0.2)',
-                            color: 'white'
-                        }}
+                        className="glass-input"
+                        style={{ paddingLeft: '40px' }}
                     />
                 </div>
             </div>
@@ -221,29 +215,15 @@ const StockPage = () => {
                         <h3>{currentItem ? 'Stoğu Düzenle' : 'Yeni Stok Ekle'}</h3>
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
-                                <label>Ürün Adı</label>
+                                <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Ürün Adı</label>
                                 <input required type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                    style={{
-                                        width: '100%',
-                                        padding: '8px',
-                                        background: '#333',
-                                        color: 'white',
-                                        border: '1px solid #555',
-                                        borderRadius: '5px'
-                                    }}
+                                    className="glass-input"
                                 />
                             </div>
                             <div className="form-group">
-                                <label>Kategori</label>
+                                <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Kategori</label>
                                 <input type="text" list="categories" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}
-                                    style={{
-                                        width: '100%',
-                                        padding: '8px',
-                                        background: '#333',
-                                        color: 'white',
-                                        border: '1px solid #555',
-                                        borderRadius: '5px'
-                                    }}
+                                    className="glass-input"
                                 />
                                 <datalist id="categories">
                                     <option value="Genel" />
@@ -254,22 +234,16 @@ const StockPage = () => {
                             </div>
                             <div style={{ display: 'flex', gap: '10px' }}>
                                 <div className="form-group">
-                                    <label>Miktar</label>
+                                    <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Miktar</label>
                                     <input type="number" step="0.01" value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: e.target.value })} disabled={!!currentItem}
-                                        style={{
-                                            width: '100%',
-                                            padding: '8px',
-                                            background: '#333',
-                                            color: '#eee',
-                                            border: '1px solid #555',
-                                            borderRadius: '5px'
-                                        }}
+                                        className="glass-input"
+                                        style={!!currentItem ? { opacity: 0.5 } : {}}
                                     />
                                     {currentItem && <small style={{ color: '#aaa' }}>Miktar sadece giriş/çıkış ile değişir.</small>}
                                 </div>
                                 <div className="form-group">
-                                    <label>Birim</label>
-                                    <select value={formData.unit} onChange={e => setFormData({ ...formData, unit: e.target.value })} style={{ padding: '8px', borderRadius: '5px', background: '#333', color: 'white', border: '1px solid #555' }}>
+                                    <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Birim</label>
+                                    <select value={formData.unit} onChange={e => setFormData({ ...formData, unit: e.target.value })} className="glass-input">
                                         <option value="Adet">Adet</option>
                                         <option value="Metre">Metre</option>
                                         <option value="Kg">Kg</option>
@@ -279,16 +253,9 @@ const StockPage = () => {
                                 </div>
                             </div>
                             <div className="form-group">
-                                <label>Kritik Seviye (Uyarı Limiti)</label>
+                                <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Kritik Seviye (Uyarı Limiti)</label>
                                 <input type="number" value={formData.critical_level} onChange={e => setFormData({ ...formData, critical_level: e.target.value })}
-                                    style={{
-                                        width: '100%',
-                                        padding: '8px',
-                                        background: '#333',
-                                        color: 'white',
-                                        border: '1px solid #555',
-                                        borderRadius: '5px'
-                                    }}
+                                    className="glass-input"
                                 />
                             </div>
 
@@ -311,23 +278,16 @@ const StockPage = () => {
                         <h3>{transactionData.type === 'in' ? 'Stok Girişi' : 'Stok Çıkışı'} - {currentItem?.name}</h3>
                         <form onSubmit={handleTransaction}>
                             <div className="form-group">
-                                <label>Miktar ({currentItem?.unit})</label>
+                                <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Miktar ({currentItem?.unit})</label>
                                 <input autoFocus required type="number" step="0.01" min="0.01" value={transactionData.quantity} onChange={e => setTransactionData({ ...transactionData, quantity: e.target.value })}
-                                    style={{
-                                        width: '100%',
-                                        padding: '8px',
-                                        background: '#333',
-                                        color: 'white',
-                                        border: '1px solid #555',
-                                        borderRadius: '5px'
-                                    }}
+                                    className="glass-input"
                                 />
                             </div>
 
                             {transactionData.type === 'out' && (
                                 <div className="form-group">
-                                    <label>Kullanılan Proje (Opsiyonel)</label>
-                                    <select value={transactionData.project_id} onChange={e => setTransactionData({ ...transactionData, project_id: e.target.value })} style={{ width: '100%', padding: '8px', background: '#333', color: 'white', border: '1px solid #555' }}>
+                                    <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Kullanılan Proje</label>
+                                    <select value={transactionData.project_id} onChange={e => setTransactionData({ ...transactionData, project_id: e.target.value })} className="glass-input">
                                         <option value="">-- Proje Seçin --</option>
                                         {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                                     </select>
@@ -335,16 +295,9 @@ const StockPage = () => {
                             )}
 
                             <div className="form-group">
-                                <label>Açıklama</label>
+                                <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Açıklama</label>
                                 <textarea value={transactionData.description} onChange={e => setTransactionData({ ...transactionData, description: e.target.value })} rows={3} placeholder="Tedarikçi firma, kullanım yeri vb."
-                                    style={{
-                                        width: '100%',
-                                        padding: '8px',
-                                        background: '#333',
-                                        color: 'white',
-                                        border: '1px solid #555',
-                                        borderRadius: '5px'
-                                    }}
+                                    className="glass-input"
                                 ></textarea>
                             </div>
 
@@ -437,9 +390,10 @@ const StockPage = () => {
                             }
                         }}>
                             <div className="form-group">
-                                <label>Excel Dosyası (.xlsx)</label>
+                                <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Excel Dosyası (.xlsx)</label>
                                 <input name="file" type="file" accept=".xlsx, .xls" required
-                                    style={{ padding: '10px', background: '#333', borderRadius: '5px', width: '100%' }}
+                                    className="glass-input"
+                                    style={{ lineHeight: '20px' }}
                                 />
                             </div>
                             <div className="modal-actions">
