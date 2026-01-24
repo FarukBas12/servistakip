@@ -13,7 +13,12 @@ const NotificationBell = ({ placement = 'bottom-right' }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const dropdownRef = useRef(null);
-    const audioRef = useRef(new Audio(NOTIFICATION_SOUND_URL)); // Preload audio
+    const audioRef = useRef(new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3')); // Preload audio
+
+    const playSound = () => {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(e => console.error("Audio play failed", e));
+    };
 
     const fetchNotifications = async () => {
         try {
