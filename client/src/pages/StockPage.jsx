@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Plus, Search, Archive, AlertTriangle, History, ArrowRight, ArrowLeft, Upload } from 'lucide-react';
+import api from '../utils/api'; // Use centralized API wrapper
 
 const StockPage = () => {
     const [stocks, setStocks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [debugError, setDebugError] = useState(null);
-    const [serverVersion, setServerVersion] = useState('Checking...'); // New State
+    const [serverVersion, setServerVersion] = useState('Checking...');
 
     // Modal States
     const [modalOpen, setModalOpen] = useState(false);
     const [transactionModalOpen, setTransactionModalOpen] = useState(false);
     const [historyModalOpen, setHistoryModalOpen] = useState(false);
-    const [importModalOpen, setImportModalOpen] = useState(false); // NEW
+    const [importModalOpen, setImportModalOpen] = useState(false);
 
     // Form Data
     const [currentItem, setCurrentItem] = useState(null);
@@ -24,18 +25,14 @@ const StockPage = () => {
     const [projects, setProjects] = useState([]);
 
     const fetchStocks = async () => {
+        setLoading(true);
         try {
-            const res = await fetch('/api/stock-tracking', { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } });
-            if (res.ok) {
-                setStocks(await res.json());
-                setDebugError(null);
-            } else {
-                const txt = await res.text();
-                setDebugError('Fetch Failed: ' + txt);
-            }
+            const res = await api.get('/stock-tracking');
+            setStocks(res.data);
+            setDebugError(null);
         } catch (err) {
             console.error(err);
-            setDebugError('Fetch Exception: ' + err.message);
+            setDebugError('Fetch Failed: ' + (err.response?.data?.message || err.message));
         } finally {
             setLoading(false);
         }
@@ -43,50 +40,35 @@ const StockPage = () => {
 
     const fetchProjects = async () => {
         try {
-            const res = await fetch('/api/projects');
-            if (res.ok) setProjects(await res.json());
+            const res = await api.get('/projects');
+            setProjects(res.data);
         } catch (err) { }
     };
 
     useEffect(() => {
         fetchStocks();
         fetchProjects();
-        // Check Server Version independently
-        fetch('/api/version')
-            .then(res => res.json())
-            .then(data => setServerVersion(data.version))
+        // Check Server Version
+        api.get('/version')
+            .then(res => setServerVersion(res.data.version))
             .catch(() => setServerVersion('Unknown'));
     }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const url = currentItem ? `/api/stock-tracking/${currentItem.id}` : '/api/stock-tracking';
-            const method = currentItem ? 'PUT' : 'POST';
+            const url = currentItem ? `/stock-tracking/${currentItem.id}` : '/stock-tracking';
+            const method = currentItem ? 'put' : 'post';
 
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
+            await api[method](url, formData);
 
-            if (res.ok) {
-                fetchStocks();
-                setModalOpen(false);
-                setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel' });
-                setCurrentItem(null);
-            } else {
-                const text = await res.text();
-                try {
-                    const json = JSON.parse(text);
-                    alert(json.message || 'Bir hata oluştu: ' + text);
-                } catch {
-                    alert('Sunucu Hatası: ' + text);
-                }
-            }
+            fetchStocks();
+            setModalOpen(false);
+            setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel' });
+            setCurrentItem(null);
         } catch (err) {
             console.error(err);
-            alert('Beklenmedik bir hata oluştu: ' + err.message);
+            alert('Hata: ' + (err.response?.data?.message || err.message));
         }
     };
 
@@ -95,29 +77,21 @@ const StockPage = () => {
         if (!currentItem) return;
 
         try {
-            const res = await fetch('/api/stock-tracking/transaction', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...transactionData, stock_id: currentItem.id })
-            });
+            await api.post('/stock-tracking/transaction', { ...transactionData, stock_id: currentItem.id });
 
-            if (res.ok) {
-                fetchStocks();
-                setTransactionModalOpen(false);
-                setTransactionData({ type: 'out', quantity: 1, project_id: '', description: '' });
-            } else {
-                const err = await res.json();
-                alert(err.message || 'Hata oluştu');
-            }
+            fetchStocks();
+            setTransactionModalOpen(false);
+            setTransactionData({ type: 'out', quantity: 1, project_id: '', description: '' });
         } catch (err) {
             console.error(err);
+            alert('Hata: ' + (err.response?.data?.message || err.message));
         }
     };
 
     const handleDelete = async (id) => {
         if (!window.confirm('Bu stoğu silmek istediğinize emin misiniz?')) return;
         try {
-            await fetch(`/api/stock-tracking/${id}`, { method: 'DELETE' });
+            await api.delete(`/stock-tracking/${id}`);
             fetchStocks();
         } catch (err) { console.error(err); }
     };
@@ -125,11 +99,9 @@ const StockPage = () => {
     const openHistory = async (stock) => {
         setCurrentItem(stock);
         try {
-            const res = await fetch(`/api/stock-tracking/${stock.id}/history`);
-            if (res.ok) {
-                setStockHistory(await res.json());
-                setHistoryModalOpen(true);
-            }
+            const res = await api.get(`/stock-tracking/${stock.id}/history`);
+            setStockHistory(res.data);
+            setHistoryModalOpen(true);
         } catch (error) {
             console.error(error);
         }
@@ -145,7 +117,7 @@ const StockPage = () => {
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.5 (Instant Boot)</span>
+                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.5 (Fixed)</span>
                 </h2>
                 <div>
                     <button
@@ -401,20 +373,14 @@ const StockPage = () => {
                             formData.append('file', file);
 
                             try {
-                                const res = await fetch('/api/stock-tracking/bulk', {
-                                    method: 'POST',
-                                    body: formData
+                                const res = await api.post('/stock-tracking/bulk', formData, {
+                                    headers: { 'Content-Type': 'multipart/form-data' }
                                 });
-                                const data = await res.json();
-                                if (res.ok) {
-                                    alert(data.message);
-                                    setImportModalOpen(false);
-                                    fetchStocks();
-                                } else {
-                                    alert(data.message);
-                                }
+                                alert(res.data.message);
+                                setImportModalOpen(false);
+                                fetchStocks();
                             } catch (err) {
-                                alert('Yükleme hatası');
+                                alert('Yükleme hatası: ' + (err.response?.data?.message || err.message));
                             }
                         }}>
                             <div className="form-group">
@@ -448,18 +414,12 @@ const StockPage = () => {
                 <p>Loading State: {loading ? 'True' : 'False'}</p>
                 <p>Search Term: "{searchTerm}"</p>
                 <p>Filtered Count: {filteredStocks.length}</p>
-                <p style={{ fontWeight: 'bold', color: serverVersion === '1.3.5' ? '#4ade80' : '#f87171' }}>
-                    Server Version: {serverVersion} (Should be 1.3.5)
+                {debugError && <p style={{ color: '#ef4444' }}>Error: {debugError}</p>}
+                <p style={{ fontWeight: 'bold' }}>
+                    Server Version: {serverVersion}
                 </p>
                 <div style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
                     <button onClick={fetchStocks} style={{ padding: '5px', cursor: 'pointer' }}>Force Refresh</button>
-                    <button onClick={async () => {
-                        try {
-                            const res = await fetch('/api/health'); // Use NEW route
-                            const json = await res.json();
-                            alert(JSON.stringify(json, null, 2));
-                        } catch (e) { alert('Check Failed: ' + e.message); }
-                    }} style={{ padding: '5px', cursor: 'pointer', background: 'orange', color: 'black', fontWeight: 'bold' }}>Check DB Health</button>
                 </div>
             </div>
         </div>

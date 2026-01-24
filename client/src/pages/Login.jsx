@@ -27,6 +27,8 @@ const Login = () => {
             } else {
                 setError(`Giriş Hatası: ${err.message}`);
             }
+        } finally {
+            setLoading(false);
         }
     };
 
