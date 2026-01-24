@@ -124,7 +124,7 @@ const StockPage = () => {
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.2.5</span>
+                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.2.6</span>
                 </h2>
                 <div>
                     <button
@@ -233,7 +233,7 @@ const StockPage = () => {
                                 </datalist>
                             </div>
                             <div style={{ display: 'flex', gap: '10px' }}>
-                                <div className="form-group">
+                                <div className="form-group" style={{ flex: 1 }}>
                                     <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Miktar</label>
                                     <input type="number" step="0.01" value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: e.target.value })} disabled={!!currentItem}
                                         className="glass-input"
@@ -241,7 +241,7 @@ const StockPage = () => {
                                     />
                                     {currentItem && <small style={{ color: '#aaa' }}>Miktar sadece giriş/çıkış ile değişir.</small>}
                                 </div>
-                                <div className="form-group">
+                                <div className="form-group" style={{ flex: 1 }}>
                                     <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Birim</label>
                                     <select value={formData.unit} onChange={e => setFormData({ ...formData, unit: e.target.value })} className="glass-input">
                                         <option value="Adet">Adet</option>
