@@ -19,16 +19,7 @@
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
-  <script>
-    // FORCE UNREGISTER SERVICE WORKER TO FIX CACHING ISSUES
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function (registrations) {
-        for (let registration of registrations) {
-          registration.unregister();
-        }
-      });
-    }
-  </script>
+
 </body>
 
 </html>
