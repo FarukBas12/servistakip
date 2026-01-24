@@ -417,10 +417,31 @@ h3 {
         /* Prevent text wrap */
     }
 
-    /* Hide the Update Button on Mobile Bottom Bar */
+    /* Show Update/Logout buttons in scroll list */
     .sidebar-update-btn {
-        display: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: transparent !important;
+        width: auto !important;
+        min-width: 50px !important;
+        height: 100% !important;
+        padding: 0 10px !important;
+        border: none !important;
+        margin: 0 !important;
+        flex-shrink: 0 !important;
     }
+
+    .sidebar-update-btn svg {
+        margin-bottom: 2px !important;
+    }
+
+    .sidebar-update-btn span {
+        display: none !important;
+        /* Hide text to save space if needed, or keep it */
+    }
+
 
     /* Fix Main Content Margin */
     .dashboard,

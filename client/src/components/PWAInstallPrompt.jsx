@@ -38,9 +38,9 @@ const PWAInstallPrompt = () => {
             className="glass-btn"
             style={{
                 position: 'fixed',
-                bottom: '20px',
+                bottom: '90px', /* Lifted up for mobile bottom bar */
                 right: '20px',
-                zIndex: 1000,
+                zIndex: 1001, /* Above sidebar */
                 background: 'rgba(33, 150, 243, 0.9)',
                 color: 'white',
                 boxShadow: '0 4px 15px rgba(33, 150, 243, 0.4)',
