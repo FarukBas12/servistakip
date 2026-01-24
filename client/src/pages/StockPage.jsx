@@ -22,7 +22,7 @@ const StockPage = () => {
 
     // Form Data
     const [currentItem, setCurrentItem] = useState(null);
-    const [formData, setFormData] = useState({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel' });
+    const [formData, setFormData] = useState({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel', purchase_price: 0 });
     const [transactionData, setTransactionData] = useState({ type: 'out', quantity: 1, project_id: '', description: '' });
 
     // History Data
@@ -70,7 +70,7 @@ const StockPage = () => {
             fetchStocks();
             setModalOpen(false);
             setEditingId(null);
-            setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel' });
+            setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel', purchase_price: 0 });
             setCurrentItem(null);
         } catch (err) {
             console.error(err);
@@ -149,7 +149,7 @@ const StockPage = () => {
     const cancelInlineEdit = () => {
         setEditingId(null);
         setCurrentItem(null);
-        setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel' });
+        setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel', purchase_price: 0 });
     };
 
     // Filtered Stocks
@@ -216,7 +216,7 @@ const StockPage = () => {
                         <Printer size={18} /> Yazdır
                     </button>
                     <button
-                        onClick={() => { setCurrentItem(null); setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel' }); setModalOpen(true); }}
+                        onClick={() => { setCurrentItem(null); setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel', purchase_price: 0 }); setModalOpen(true); }}
                         className="glass-btn glass-btn-success"
                     >
                         <Plus size={18} /> Yeni Stok Ekle
@@ -435,6 +435,12 @@ const StockPage = () => {
                                             </select>
                                         </div>
                                         <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.8rem' }}>Birim Fiyat (TL)</label>
+                                            <input type="number" step="0.01" value={formData.purchase_price || 0} onChange={e => setFormData({ ...formData, purchase_price: e.target.value })}
+                                                className="glass-input" style={{ width: '100%' }}
+                                            />
+                                        </div>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
                                             <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.8rem' }}>Kritik Seviye</label>
                                             <input type="number" value={formData.critical_level} onChange={e => setFormData({ ...formData, critical_level: e.target.value })}
                                                 className="glass-input" style={{ width: '100%' }}
@@ -496,6 +502,12 @@ const StockPage = () => {
                                         <option value="Top">Top</option>
                                     </select>
                                 </div>
+                            </div>
+                            <div className="form-group">
+                                <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Birim Fiyat (TL)</label>
+                                <input type="number" step="0.01" value={formData.purchase_price || 0} onChange={e => setFormData({ ...formData, purchase_price: e.target.value })}
+                                    className="glass-input"
+                                />
                             </div>
                             <div className="form-group">
                                 <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Kritik Seviye (Uyarı Limiti)</label>
@@ -566,7 +578,7 @@ const StockPage = () => {
                         <h3>Excel ile Toplu Stok Yükle</h3>
                         <p style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '15px' }}>
                             Excel dosyanızda şu sütunlar olmalı: <br />
-                            <b>Ürün Adı, Kategori, Miktar, Birim, Kritik</b>
+                            <b>Ürün Adı, Kategori, Miktar, Birim, Kritik, Fiyat</b>
                         </p>
                         <form onSubmit={async (e) => {
                             e.preventDefault();

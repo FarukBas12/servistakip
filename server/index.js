@@ -463,6 +463,9 @@ async function runMigrations() {
         `);
         console.log(' - Checked stocks table');
 
+        await db.query("ALTER TABLE stocks ADD COLUMN IF NOT EXISTS purchase_price DECIMAL(10, 2) DEFAULT 0");
+        console.log(' - Checked purchase_price in stocks');
+
         await db.query(`
             CREATE TABLE IF NOT EXISTS stock_transactions (
                 id SERIAL PRIMARY KEY,

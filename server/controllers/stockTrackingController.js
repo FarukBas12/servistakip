@@ -15,7 +15,7 @@ exports.getStocks = async (req, res) => {
 // Create New Stock Item
 exports.createStock = async (req, res) => {
     try {
-        const { name, unit, quantity, critical_level, category } = req.body;
+        const { name, unit, quantity, critical_level, category, purchase_price } = req.body;
 
         // Check if exists
         const check = await db.query('SELECT * FROM stocks WHERE name = $1', [name]);
@@ -24,8 +24,8 @@ exports.createStock = async (req, res) => {
         }
 
         const { rows } = await db.query(
-            'INSERT INTO stocks (name, unit, quantity, critical_level, category) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [name, unit || 'Adet', quantity || 0, critical_level || 0, category || 'Genel']
+            'INSERT INTO stocks (name, unit, quantity, critical_level, category, purchase_price) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [name, unit || 'Adet', quantity || 0, critical_level || 0, category || 'Genel', purchase_price || 0]
         );
         res.json(rows[0]);
     } catch (err) {
@@ -38,11 +38,11 @@ exports.createStock = async (req, res) => {
 exports.updateStock = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, unit, critical_level, category } = req.body;
+        const { name, unit, critical_level, category, purchase_price } = req.body;
 
         const { rows } = await db.query(
-            'UPDATE stocks SET name = $1, unit = $2, critical_level = $3, category = $4 WHERE id = $5 RETURNING *',
-            [name, unit, critical_level, category, id]
+            'UPDATE stocks SET name = $1, unit = $2, critical_level = $3, category = $4, purchase_price = $5 WHERE id = $6 RETURNING *',
+            [name, unit, critical_level, category, purchase_price || 0, id]
         );
         res.json(rows[0]);
     } catch (err) {
@@ -175,6 +175,7 @@ exports.bulkImport = async (req, res) => {
         const keyQuantity = mapField(['Miktar', 'Adet', 'Sayi', 'Quantity']);
         const keyUnit = mapField(['Birim', 'Unit', 'Olcu']);
         const keyCritical = mapField(['Kritik', 'Kritik Seviye', 'Uyarı', 'Limit', 'Critical']);
+        const keyPrice = mapField(['Fiyat', 'Price', 'Birim Fiyat', 'Alis Fiyati', 'Purchase Price', 'Maliyet']);
 
         // Debug: If main key is missing, fail early
         if (!keyName) {
@@ -197,27 +198,27 @@ exports.bulkImport = async (req, res) => {
                 const quantity = keyQuantity ? (parseFloat(row[keyQuantity]) || 0) : 0;
                 const unit = keyUnit ? (row[keyUnit] || 'Adet') : 'Adet';
                 const critical_level = keyCritical ? (parseFloat(row[keyCritical]) || 5) : 5;
+                const purchase_price = keyPrice ? (parseFloat(row[keyPrice]) || 0) : 0;
 
                 // Check existence
                 const check = await client.query('SELECT id FROM stocks WHERE name = $1', [name]);
 
                 if (check.rows.length === 0) {
                     await client.query(`
-                        INSERT INTO stocks (name, category, quantity, unit, critical_level)
-                        VALUES ($1, $2, $3, $4, $5)
-                    `, [name, category, quantity, unit, critical_level]);
+                        INSERT INTO stocks (name, category, quantity, unit, critical_level, purchase_price)
+                        VALUES ($1, $2, $3, $4, $5, $6)
+                    `, [name, category, quantity, unit, critical_level, purchase_price]);
                     addedCount++;
                 } else {
-                    // Update info but ADD quantity
-                    // Strategy: If user uploads excel, maybe they are adding stock OR setting initial stock.
-                    // For safety, let's UPDATE params and ADD quantity if > 0
+                    // Update info and PRICE, but ADD quantity
                     await client.query(`
                         UPDATE stocks SET 
                             category = $2, 
                             critical_level = $3,
+                            purchase_price = $5,
                             quantity = quantity + $4 
                         WHERE id = $1
-                    `, [check.rows[0].id, category, critical_level, quantity]); // Add quantity!
+                    `, [check.rows[0].id, category, critical_level, quantity, purchase_price]);
                     updatedCount++;
                 }
             }
