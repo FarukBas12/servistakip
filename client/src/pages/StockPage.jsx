@@ -145,7 +145,7 @@ const StockPage = () => {
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.4 (Build Fix)</span>
+                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.5 (Instant Boot)</span>
                 </h2>
                 <div>
                     <button
@@ -448,8 +448,8 @@ const StockPage = () => {
                 <p>Loading State: {loading ? 'True' : 'False'}</p>
                 <p>Search Term: "{searchTerm}"</p>
                 <p>Filtered Count: {filteredStocks.length}</p>
-                <p style={{ fontWeight: 'bold', color: serverVersion === '1.3.3' ? '#4ade80' : '#f87171' }}>
-                    Server Version: {serverVersion} (Should be 1.3.3)
+                <p style={{ fontWeight: 'bold', color: serverVersion === '1.3.5' ? '#4ade80' : '#f87171' }}>
+                    Server Version: {serverVersion} (Should be 1.3.5)
                 </p>
                 <div style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
                     <button onClick={fetchStocks} style={{ padding: '5px', cursor: 'pointer' }}>Force Refresh</button>

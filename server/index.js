@@ -100,7 +100,7 @@ app.use('/api/stock-tracking', require('./routes/stockTracking')); // Distinct f
 
 // Version Endpoint for Auto-Update
 app.get('/api/version', (req, res) => {
-    res.json({ version: '1.3.4' });
+    res.json({ version: '1.3.5' });
 });
 
 // The "catchall" handler: for any request that doesn't
@@ -484,8 +484,9 @@ async function runMigrations() {
 }
 
 // Start Server AFTER Migrations
-runMigrations().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
+// Start Server IMMEDIATELY to pass Health Checks
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    // Run Migrations in Background
+    runMigrations();
 });
