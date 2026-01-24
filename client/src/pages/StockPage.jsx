@@ -15,8 +15,9 @@ const StockPage = () => {
     const [historyModalOpen, setHistoryModalOpen] = useState(false);
     const [importModalOpen, setImportModalOpen] = useState(false);
 
-    // Inline Edit State
+    // Inline State
     const [editingId, setEditingId] = useState(null);
+    const [historyId, setHistoryId] = useState(null);
 
     // Form Data
     const [currentItem, setCurrentItem] = useState(null);
@@ -67,7 +68,7 @@ const StockPage = () => {
 
             fetchStocks();
             setModalOpen(false);
-            setEditingId(null); // Close inline edit
+            setEditingId(null);
             setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel' });
             setCurrentItem(null);
         } catch (err) {
@@ -100,18 +101,30 @@ const StockPage = () => {
         } catch (err) { console.error(err); }
     };
 
-    const openHistory = async (stock) => {
+    // Toggle Inline History
+    const toggleHistory = async (stock) => {
+        if (historyId === stock.id) {
+            setHistoryId(null);
+            return;
+        }
+
+        // Close Edit if open
+        setEditingId(null);
         setCurrentItem(stock);
+        setStockHistory([]); // Clear prev
+        setHistoryId(stock.id);
+
         try {
             const res = await api.get(`/stock-tracking/${stock.id}/history`);
             setStockHistory(res.data);
-            setHistoryModalOpen(true);
         } catch (error) {
             console.error(error);
         }
     };
 
     const startInlineEdit = (stock) => {
+        // Close History if open
+        setHistoryId(null);
         setCurrentItem(stock);
         setFormData({ ...stock });
         setEditingId(stock.id);
@@ -149,7 +162,7 @@ const StockPage = () => {
                     .print-header { display: block !important; margin-bottom: 20px; text-align: center; }
                 }
                 .print-header { display: none; }
-                .inline-edit-form {
+                .inline-section {
                     background: rgba(0,0,0,0.3);
                     padding: 15px;
                     border-radius: 8px;
@@ -161,6 +174,12 @@ const StockPage = () => {
                     from { opacity: 0; transform: translateY(-10px); }
                     to { opacity: 1; transform: translateY(0); }
                 }
+                .history-table th, .history-table td {
+                    padding: 8px;
+                    text-align: left;
+                    border-bottom: 1px solid rgba(255,255,255,0.05);
+                }
+                .history-table th { color: #aaa; font-weight: normal; font-size: 0.8rem; }
             `}</style>
 
             <div className="print-header">
@@ -170,7 +189,7 @@ const StockPage = () => {
 
             <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.7 (Inline Edit)</span>
+                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.8 (Inline History)</span>
                 </h2>
                 <div>
                     <button
@@ -268,23 +287,67 @@ const StockPage = () => {
                                         -
                                     </button>
                                     <button
-                                        onClick={() => openHistory(stock)}
-                                        className="glass-btn glass-btn-secondary" style={{ padding: '6px 10px' }} title="Hareket Geçmişi"
+                                        onClick={() => toggleHistory(stock)}
+                                        className={`glass-btn ${historyId === stock.id ? 'glass-btn-primary' : 'glass-btn-secondary'}`}
+                                        style={{ padding: '6px 10px' }} title="Hareket Geçmişi"
                                     >
                                         <History size={16} />
                                     </button>
                                     <button
                                         onClick={() => startInlineEdit(stock)}
-                                        className="glass-btn glass-btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} title="Düzenle"
+                                        className={`glass-btn ${editingId === stock.id ? 'glass-btn-primary' : 'glass-btn-secondary'}`}
+                                        style={{ padding: '6px 12px', fontSize: '0.8rem' }} title="Düzenle"
                                     >
                                         Edit
                                     </button>
                                 </div>
                             </div>
 
+                            {/* INLINE HISTORY VIEW */}
+                            {historyId === stock.id && (
+                                <div className="inline-section no-print">
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                        <h4 style={{ margin: 0, color: '#aaa' }}>Hareket Geçmişi</h4>
+                                        <button onClick={() => setHistoryId(null)} className="glass-btn glass-btn-secondary" style={{ padding: '2px 8px', fontSize: '0.7rem' }}>Kapat</button>
+                                    </div>
+                                    <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                        <table className="history-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                            <thead>
+                                                <tr>
+                                                    <th>Tarih</th>
+                                                    <th>İşlem</th>
+                                                    <th>Miktar</th>
+                                                    <th>Detay</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {stockHistory.map(h => (
+                                                    <tr key={h.id}>
+                                                        <td style={{ color: '#aaa' }}>{new Date(h.transaction_date).toLocaleDateString('tr-TR')} {new Date(h.transaction_date).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</td>
+                                                        <td>
+                                                            {h.type === 'in'
+                                                                ? <span style={{ color: '#22c55e', display: 'flex', alignItems: 'center', gap: '4px' }}><ArrowLeft size={14} /> Giriş</span>
+                                                                : <span style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px' }}>Çıkış <ArrowRight size={14} /></span>
+                                                            }
+                                                        </td>
+                                                        <td style={{ fontWeight: 'bold' }}>{h.quantity}</td>
+                                                        <td style={{ fontSize: '0.8rem' }}>
+                                                            {h.project_name && <div style={{ color: '#4facfe' }}>📂 {h.project_name}</div>}
+                                                            <div style={{ color: '#bbb' }}>{h.description}</div>
+                                                            <div style={{ color: '#666', fontSize: '0.7rem' }}>👤 {h.username}</div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                                {stockHistory.length === 0 && <tr><td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: '#999' }}>Henüz hareket yok.</td></tr>}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* INLINE EDIT FORM */}
                             {editingId === stock.id && (
-                                <form onSubmit={handleSubmit} className="inline-edit-form no-print">
+                                <form onSubmit={handleSubmit} className="inline-section no-print">
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '15px' }}>
                                         <div className="form-group" style={{ marginBottom: 0 }}>
                                             <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.8rem' }}>Ürün Adı</label>
