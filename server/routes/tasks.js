@@ -11,7 +11,7 @@ const { storage } = require('../utils/cloudinary');
 const upload = multer({
     storage: storage,
     limits: { fileSize: 10000000 }, // 10MB
-}).single('photo'); // 'photo' is the form field name
+}).array('photos', 20); // 'photos' is the form field name, max 20 files
 
 function checkFileType(file, cb) {
     // Allowed ext

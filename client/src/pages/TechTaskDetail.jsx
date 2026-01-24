@@ -6,7 +6,7 @@ const TechTaskDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [task, setTask] = useState(null);
-    const [file, setFile] = useState(null);
+    const [files, setFiles] = useState([]);
     const [uploading, setUploading] = useState(false);
 
     // Form states
@@ -41,14 +41,19 @@ const TechTaskDetail = () => {
     };
 
     const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
+        // Convert FileList to Array
+        setFiles(Array.from(e.target.files));
     };
 
     const handleUpload = async (type) => {
-        if (!file) return alert('Lütfen bir dosya seçin.');
+        if (files.length === 0) return alert('Lütfen en az bir dosya seçin.');
 
         const formData = new FormData();
-        formData.append('photo', file);
+        // Append all files with same key 'photos'
+        files.forEach(file => {
+            formData.append('photos', file);
+        });
+
         formData.append('type', type);
 
         // Mock GPS
@@ -60,8 +65,12 @@ const TechTaskDetail = () => {
             await api.post(`/tasks/${id}/photos`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            alert(type === 'service_form' ? 'Servis Formu yüklendi!' : 'Fotoğraf yüklendi!');
-            setFile(null);
+            alert(files.length + ' dosya başarıyla yüklendi!');
+            setFiles([]); // Clear selection
+
+            // Clear input value visually
+            document.querySelectorAll('input[type="file"]').forEach(input => input.value = '');
+
             // Refresh task to show new photo
             const res = await api.get(`/tasks/${id}`);
             setTask(res.data);
@@ -192,30 +201,30 @@ const TechTaskDetail = () => {
 
                                         <label style={{ marginTop: '10px' }}>Servis Formu Fotoğrafı:</label>
                                         <div style={{ display: 'flex', gap: '10px' }}>
-                                            <input type="file" onChange={handleFileChange} accept="image/*" capture="environment" className="glass-input" />
+                                            <input type="file" multiple onChange={handleFileChange} accept="image/*" capture="environment" className="glass-input" />
                                             <button
                                                 onClick={() => handleUpload('service_form')}
-                                                disabled={!file || uploading}
+                                                disabled={files.length === 0 || uploading}
                                                 className="glass-btn"
                                                 style={{ background: 'rgba(33, 150, 243, 0.3)' }}
                                             >
-                                                {uploading ? '...' : 'Formu Yükle'}
+                                                {uploading ? '...' : (files.length > 0 ? `${files.length} Yükle` : 'Form Yükle')}
                                             </button>
                                         </div>
                                     </div>
                                 )}
                             </div>
 
-                            <h4>Diğer Fotoğraflar / Kanıtlar</h4>
+                            <h4>Diğer Fotoğraflar / Kanıtlar (Çoklu Seçilebilir)</h4>
                             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                <input type="file" onChange={handleFileChange} accept="image/*" capture="environment" className="glass-input" />
+                                <input type="file" multiple onChange={handleFileChange} accept="image/*" capture="environment" className="glass-input" />
                                 <button
                                     onClick={() => handleUpload('completion')}
-                                    disabled={!file || uploading}
+                                    disabled={files.length === 0 || uploading}
                                     className="glass-btn"
                                     style={{ whiteSpace: 'nowrap' }}
                                 >
-                                    {uploading ? '...' : 'Yükle'}
+                                    {uploading ? '...' : (files.length > 0 ? `${files.length} Fotoğrafı Yükle` : 'Yükle')}
                                 </button>
                             </div>
 

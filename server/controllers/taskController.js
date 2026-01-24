@@ -176,22 +176,31 @@ exports.deleteTask = async (req, res) => {
 
 exports.addPhoto = async (req, res) => {
     const { id } = req.params;
-    // req.file is from multer
-    if (!req.file) {
+
+    // Check for multiple files (req.files) or single file (req.file) fallback
+    const files = req.files || (req.file ? [req.file] : []);
+
+    if (files.length === 0) {
         return res.status(400).json({ message: 'No file uploaded' });
     }
 
     const { type, gps_lat, gps_lng } = req.body;
-
-    // Cloudinary returns the full SSL URL in req.file.path
-    const url = req.file.path;
+    const uploadedPhotos = [];
 
     try {
-        const { rows } = await db.query(
-            'INSERT INTO photos (task_id, url, type, gps_lat, gps_lng) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [id, url, type, gps_lat, gps_lng]
-        );
-        res.json(rows[0]);
+        for (const file of files) {
+            // Cloudinary returns the full SSL URL in file.path
+            const url = file.path;
+
+            const { rows } = await db.query(
+                'INSERT INTO photos (task_id, url, type, gps_lat, gps_lng) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+                [id, url, type, gps_lat, gps_lng]
+            );
+            uploadedPhotos.push(rows[0]);
+        }
+
+        // Return array of saved photos (or single object if frontend expects one, but array is safer now)
+        res.json(uploadedPhotos);
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: err.message });
