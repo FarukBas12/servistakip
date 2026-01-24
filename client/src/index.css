@@ -344,4 +344,86 @@ h3 {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 1.5rem;
+
+/* --- MOBILE LAYOUT (PWA) --- */
+@media (max-width: 768px) {
+    /* Turn Sidebar into Bottom Tab Bar */
+    .sidebar-container {
+        width: 100% !important;
+        height: 70px !important;
+        bottom: 0 !important;
+        top: auto !important;
+        left: 0 !important;
+        border-right: none !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        flex-direction: row !important;
+        padding-top: 0 !important;
+        justify-content: space-between !important;
+        padding: 0 10px !important;
+        z-index: 9999 !important;
+        background: rgba(15, 23, 42, 0.95) !important; /* Solid bg for mobile */
+        backdrop-filter: blur(20px) !important;
+    }
+
+    /* Hide Top Logo/Bell area on Mobile Sidebar */
+    .sidebar-header {
+        display: none !important;
+    }
+
+    /* Adjust Navigation Layout */
+    .sidebar-nav {
+         width: 100% !important;
+         flex-direction: row !important;
+         justify-content: space-around !important;
+         align-items: center !important;
+         gap: 0 !important;
+    }
+
+    .sidebar-link {
+        width: 100% !important;
+        height: 100% !important;
+        padding: 5px 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+    }
+
+    .sidebar-link.active {
+        color: var(--primary) !important;
+        border-top: 2px solid var(--primary);
+    }
+
+    .sidebar-link span {
+        font-size: 0.6rem !important;
+    }
+    
+    /* Hide the Update Button on Mobile Bottom Bar */
+    .sidebar-update-btn {
+        display: none !important;
+    }
+
+    /* Fix Main Content Margin */
+    .dashboard, div[style*="max-width: 1200px"] { 
+        /* StockPage wrapper */
+        margin-left: 0 !important;
+        margin-bottom: 80px !important; /* Space for bottom bar */
+        padding: 15px !important;
+    }
+}
+
+/* Sidebar Container (Desktop Default) */
+.sidebar-container {
+    width: 80px;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 30px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    transition: width 0.3s ease;
 }
