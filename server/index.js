@@ -83,6 +83,7 @@ app.use(express.static(path.join(__dirname, '../client/dist'), {
 }));
 
 // API Routes
+app.use('/api/health', require('./routes/health')); // New standardized health route
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/stores', require('./routes/stores')); // Restored
@@ -99,7 +100,7 @@ app.use('/api/stock-tracking', require('./routes/stockTracking')); // Distinct f
 
 // Version Endpoint for Auto-Update
 app.get('/api/version', (req, res) => {
-    res.json({ version: '1.3.2' });
+    res.json({ version: '1.3.3' });
 });
 
 // The "catchall" handler: for any request that doesn't

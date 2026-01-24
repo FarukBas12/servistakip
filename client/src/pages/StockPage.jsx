@@ -5,7 +5,8 @@ const StockPage = () => {
     const [stocks, setStocks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [debugError, setDebugError] = useState(null); // New Debug State
+    const [debugError, setDebugError] = useState(null);
+    const [serverVersion, setServerVersion] = useState('Checking...'); // New State
 
     // Modal States
     const [modalOpen, setModalOpen] = useState(false);
@@ -50,6 +51,11 @@ const StockPage = () => {
     useEffect(() => {
         fetchStocks();
         fetchProjects();
+        // Check Server Version independently
+        fetch('/api/version')
+            .then(res => res.json())
+            .then(data => setServerVersion(data.version))
+            .catch(() => setServerVersion('Unknown'));
     }, []);
 
     const handleSubmit = async (e) => {
@@ -139,7 +145,7 @@ const StockPage = () => {
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.2 (Priority)</span>
+                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.3 (Sync Check)</span>
                 </h2>
                 <div>
                     <button
@@ -442,11 +448,14 @@ const StockPage = () => {
                 <p>Loading State: {loading ? 'True' : 'False'}</p>
                 <p>Search Term: "{searchTerm}"</p>
                 <p>Filtered Count: {filteredStocks.length}</p>
+                <p style={{ fontWeight: 'bold', color: serverVersion === '1.3.3' ? '#4ade80' : '#f87171' }}>
+                    Server Version: {serverVersion} (Should be 1.3.3)
+                </p>
                 <div style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
                     <button onClick={fetchStocks} style={{ padding: '5px', cursor: 'pointer' }}>Force Refresh</button>
                     <button onClick={async () => {
                         try {
-                            const res = await fetch('/api/health-check');
+                            const res = await fetch('/api/health'); // Use NEW route
                             const json = await res.json();
                             alert(JSON.stringify(json, null, 2));
                         } catch (e) { alert('Check Failed: ' + e.message); }
