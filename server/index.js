@@ -12,13 +12,39 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Routes
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '../client/dist'), {
+    setHeaders: (res, path) => {
+        if (path.endsWith('index.html')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+        }
+    }
+}));
+
+// API Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
-app.use('/api/stores', require('./routes/stores'));
-app.use('/api/subs', require('./routes/subs')); // Unified Route
-app.use('/api/projects', require('./routes/projects')); // NEW: Projects Route
+app.use('/api/subcontractors', require('./routes/subcontractors'));
+app.use('/api/definitions', require('./routes/definitions'));
+app.use('/api/projects', require('./routes/projects'));
+app.use('/api/payments', require('./routes/payments')); // Add this line
+app.use('/api/subs', require('./routes/subs')); // Add this line
 
+// Version Endpoint for Debugging
+app.get('/api/version', (req, res) => {
+    res.json({ timestamp: new Date().toISOString(), version: '1.0.1-fix-cache' });
+});
+
+// The "catchall" handler: for any request that doesn't
+// match one above, send back React's index.html file.
+app.get('*', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
 
 // Static Folder for Uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
