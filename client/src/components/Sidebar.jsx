@@ -9,7 +9,7 @@ const Sidebar = () => {
     const isTech = user?.role === 'technician';
 
     // AUTO-UPDATE LOGIC
-    const APP_VERSION = '1.3.6'; // MUST MATCH SERVER
+    const APP_VERSION = '1.3.7'; // MUST MATCH SERVER
     const [updateAvailable, setUpdateAvailable] = React.useState(false);
 
     React.useEffect(() => {
@@ -36,7 +36,7 @@ const Sidebar = () => {
         { path: '/admin/subs', icon: <Users size={24} />, label: 'Taşeronlar' },
         // Hide Projects for Technicians
         ...(!isTech ? [{ path: '/admin/projects', icon: <FolderOpen size={24} />, label: 'Projeler' }] : []),
-        { path: '/admin/stocks', icon: <Package size={24} />, label: 'Stok' },
+        // { path: '/admin/stocks', icon: <Package size={24} />, label: 'Stok' },
         { path: '/admin/settings', icon: <Shield size={24} />, label: 'Ayarlar' },
     ];
 
