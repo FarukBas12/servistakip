@@ -1,6 +1,6 @@
-import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, NavLink } from 'react-router-dom';
+import { List } from 'lucide-react';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
@@ -17,7 +17,7 @@ const Navbar = () => {
         <nav className="glass-panel" style={{ margin: '1rem', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
                 <img src="/logo.png" alt="Logo" style={{ height: '40px', marginRight: '15px' }} />
-                <strong style={{ fontSize: '1.2rem', marginRight: '20px' }}>APPnov</strong>
+                <strong style={{ fontSize: '1.2rem', marginRight: '20px' }}>Servis Takip</strong>
                 <span style={{ marginLeft: '20px' }}>
                     {user.role === 'admin' ? (
                         <div style={{ display: 'flex', gap: '15px' }}>
@@ -28,10 +28,26 @@ const Navbar = () => {
                             <Link to="/admin/create-user" className="nav-link">Personel Ekle</Link>
                         </div>
                     ) : (
-                        <>
-                            <Link to="/tech" style={{ color: 'white', marginRight: '15px' }}>Görevlerim</Link>
-                            <Link to="/projects" style={{ color: 'white', marginRight: '15px' }}>Projeler</Link>
-                        </>
+                        <div style={{ display: 'flex', gap: '15px' }}> {/* Added div for flex layout */}
+                            <NavLink
+                                to="/tech"
+                                end
+                                style={({ isActive }) => ({
+                                    color: isActive ? '#4facfe' : '#aaa',
+                                    textDecoration: 'none',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.9rem',
+                                    padding: '10px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center'
+                                })}
+                            >
+                                <List size={20} style={{ marginBottom: '4px' }} />
+                                Görevlerim
+                            </NavLink>
+                            {/* PROJECT LINK REMOVED AS PER REQUEST */}
+                        </div>
                     )}
                 </span>
             </div>
