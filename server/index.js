@@ -100,7 +100,7 @@ app.use('/api/stock-tracking', require('./routes/stockTracking')); // Distinct f
 
 // Version Endpoint for Auto-Update
 app.get('/api/version', (req, res) => {
-    res.json({ version: '1.3.5' });
+    res.json({ version: '1.3.6' });
 });
 
 // The "catchall" handler: for any request that doesn't
