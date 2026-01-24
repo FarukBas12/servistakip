@@ -32,11 +32,12 @@ const Sidebar = () => {
 
     const menuItems = [
         { path: '/admin', icon: <LayoutDashboard size={24} />, label: 'Panel', exact: true },
+        { path: '/admin/map', icon: <Map size={24} />, label: 'Harita' },
         { path: '/admin/pool', icon: <Inbox size={24} />, label: 'Havuz' },
         { path: '/admin/subs', icon: <Users size={24} />, label: 'Taşeronlar' },
         // Hide Projects for Technicians
         ...(!isTech ? [{ path: '/admin/projects', icon: <FolderOpen size={24} />, label: 'Projeler' }] : []),
-        // { path: '/admin/stocks', icon: <Package size={24} />, label: 'Stok' },
+        { path: '/admin/stocks', icon: <Package size={24} />, label: 'Stok' },
         { path: '/admin/settings', icon: <Shield size={24} />, label: 'Ayarlar' },
     ];
 
