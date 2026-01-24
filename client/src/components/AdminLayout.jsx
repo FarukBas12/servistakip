@@ -24,7 +24,7 @@ const AdminLayout = () => {
     return (
         <div style={{ display: 'flex' }}>
             <Sidebar />
-            <div style={{ flex: 1, paddingLeft: '80px', minHeight: '100vh', background: 'var(--bg-color)' }}>
+            <div className="admin-content" style={{ flex: 1, minHeight: '100vh', background: 'var(--bg-color)' }}>
                 <Routes>
                     <Route path="/" element={<AdminDashboard />} />
                     <Route path="/create-task" element={<TaskCreate />} />

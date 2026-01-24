@@ -432,3 +432,18 @@ h3 {
     z-index: 1000;
     transition: width 0.3s ease;
 }
+
+/* ADMIN CONTENT LAYOUT */
+.admin-content {
+    padding-left: 80px;
+    /* Desktop Sidebar width */
+    transition: padding-left 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .admin-content {
+        padding-left: 0 !important;
+        padding-bottom: 80px !important;
+        /* Bottom Bar height space */
+    }
+}
