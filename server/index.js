@@ -5,6 +5,7 @@ const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
+const db = require('./db'); // Moved to top level for global access
 // AUTOMATED REMINDERS (Simple Cron)
 const notificationController = require('./controllers/notificationController');
 
@@ -177,7 +178,7 @@ app.use((err, req, res, next) => {
 });
 
 // AUTO MIGRATION FUNCTION
-const db = require('./db');
+// const db = require('./db'); // Already imported at top
 
 async function runMigrations() {
     console.log('🔄 Checking Database Schema...');
