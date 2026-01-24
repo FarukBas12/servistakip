@@ -9,7 +9,7 @@ const Sidebar = () => {
     const isTech = user?.role === 'technician';
 
     // AUTO-UPDATE LOGIC
-    const APP_VERSION = '1.2.8'; // MUST MATCH SERVER
+    const APP_VERSION = '1.2.9'; // MUST MATCH SERVER
     const [updateAvailable, setUpdateAvailable] = React.useState(false);
 
     React.useEffect(() => {

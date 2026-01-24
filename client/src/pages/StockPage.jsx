@@ -23,7 +23,7 @@ const StockPage = () => {
 
     const fetchStocks = async () => {
         try {
-            const res = await fetch('/api/stock-tracking');
+            const res = await fetch('/api/stock-tracking', { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } });
             if (res.ok) setStocks(await res.json());
         } catch (err) {
             console.error(err);
@@ -131,7 +131,7 @@ const StockPage = () => {
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.2.8</span>
+                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.2.9 (Debug)</span>
                 </h2>
                 <div>
                     <button
@@ -426,6 +426,16 @@ const StockPage = () => {
                     </div>
                 </div>
             )}
+
+            {/* DEBUG PANEL */}
+            <div style={{ marginTop: '50px', padding: '10px', background: 'rgba(0,0,0,0.5)', borderRadius: '8px', fontSize: '0.7rem', color: '#888' }}>
+                <p>Debug Info:</p>
+                <p>Stocks Loaded: {stocks.length}</p>
+                <p>Loading State: {loading ? 'True' : 'False'}</p>
+                <p>Search Term: "{searchTerm}"</p>
+                <p>Filtered Count: {filteredStocks.length}</p>
+                <button onClick={fetchStocks} style={{ marginTop: '5px', padding: '5px', cursor: 'pointer' }}>Force Refresh</button>
+            </div>
         </div>
     );
 };
