@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Search, Archive, AlertTriangle, History, ArrowRight, ArrowLeft, Upload } from 'lucide-react';
+import { Package, Plus, Search, Archive, AlertTriangle, History, ArrowRight, ArrowLeft, Upload, Printer } from 'lucide-react';
 import api from '../utils/api'; // Use centralized API wrapper
 
 const StockPage = () => {
@@ -115,11 +115,43 @@ const StockPage = () => {
 
     return (
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <style>{`
+                @media print {
+                    .no-print { display: none !important; }
+                    .sidebar { display: none !important; }
+                    body { background: white !important; color: black !important; }
+                    .glass-panel { 
+                        background: none !important; 
+                        box-shadow: none !important; 
+                        border: 1px solid #ddd !important;
+                        color: black !important;
+                        break-inside: avoid;
+                        margin-bottom: 10px;
+                    }
+                    .glass-btn { display: none !important; }
+                    h2, h3 { color: black !important; }
+                    .print-header { display: block !important; margin-bottom: 20px; text-align: center; }
+                }
+                .print-header { display: none; }
+            `}</style>
+
+            <div className="print-header">
+                <h2>Stok Listesi Raporu</h2>
+                <p>{new Date().toLocaleDateString('tr-TR')}</p>
+            </div>
+
+            <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.5 (Fixed)</span>
+                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.6 (Print)</span>
                 </h2>
                 <div>
+                    <button
+                        onClick={() => window.print()}
+                        className="glass-btn glass-btn-secondary"
+                        style={{ marginRight: '10px' }}
+                    >
+                        <Printer size={18} /> Yazdır
+                    </button>
                     <button
                         onClick={() => { setCurrentItem(null); setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel' }); setModalOpen(true); }}
                         className="glass-btn glass-btn-success"
@@ -136,7 +168,7 @@ const StockPage = () => {
                 </div>
             </div>
 
-            <div className="glass-panel" style={{ padding: '20px', marginBottom: '20px' }}>
+            <div className="glass-panel no-print" style={{ padding: '20px', marginBottom: '20px' }}>
                 <div style={{ position: 'relative' }}>
                     <Search style={{ position: 'absolute', left: '10px', top: '10px', color: '#aaa' }} size={20} />
                     <input
@@ -189,7 +221,7 @@ const StockPage = () => {
                             </div>
 
                             {/* Right: Actions */}
-                            <div style={{ display: 'flex', gap: '8px' }}>
+                            <div className="no-print" style={{ display: 'flex', gap: '8px' }}>
                                 <button
                                     onClick={() => { setCurrentItem(stock); setTransactionData({ type: 'in', quantity: 1, description: '', project_id: '' }); setTransactionModalOpen(true); }}
                                     className="glass-btn glass-btn-success" style={{ padding: '6px 12px', fontSize: '0.8rem' }}
@@ -224,7 +256,7 @@ const StockPage = () => {
 
             {/* CREATE/EDIT MODAL */}
             {modalOpen && (
-                <div className="modal-overlay">
+                <div className="modal-overlay no-print">
                     <div className="modal-content glass-panel">
                         <h3>{currentItem ? 'Stoğu Düzenle' : 'Yeni Stok Ekle'}</h3>
                         <form onSubmit={handleSubmit}>
@@ -287,7 +319,7 @@ const StockPage = () => {
 
             {/* TRANSACTION MODAL */}
             {transactionModalOpen && (
-                <div className="modal-overlay">
+                <div className="modal-overlay no-print">
                     <div className="modal-content glass-panel">
                         <h3>{transactionData.type === 'in' ? 'Stok Girişi' : 'Stok Çıkışı'} - {currentItem?.name}</h3>
                         <form onSubmit={handleTransaction}>
@@ -328,7 +360,7 @@ const StockPage = () => {
 
             {/* HISTORY MODAL */}
             {historyModalOpen && (
-                <div className="modal-overlay">
+                <div className="modal-overlay no-print">
                     <div className="modal-content glass-panel" style={{ maxWidth: '600px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                             <h3>Hareket Geçmişi - {currentItem?.name}</h3>
@@ -372,7 +404,7 @@ const StockPage = () => {
             )}
             {/* IMPORT MODAL */}
             {importModalOpen && (
-                <div className="modal-overlay">
+                <div className="modal-overlay no-print">
                     <div className="modal-content glass-panel">
                         <h3>Excel ile Toplu Stok Yükle</h3>
                         <p style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '15px' }}>
@@ -421,8 +453,8 @@ const StockPage = () => {
                 </div>
             )}
 
-            {/* DEBUG PANEL */}
-            <div style={{ marginTop: '50px', padding: '10px', background: 'rgba(0,0,0,0.5)', borderRadius: '8px', fontSize: '0.7rem', color: '#888' }}>
+            {/* DEBUG PANEL - Hidden on print */}
+            <div className="no-print" style={{ marginTop: '50px', padding: '10px', background: 'rgba(0,0,0,0.5)', borderRadius: '8px', fontSize: '0.7rem', color: '#888' }}>
                 <p>Debug Info:</p>
                 <p>Stocks Loaded: {stocks.length}</p>
                 <p>Loading State: {loading ? 'True' : 'False'}</p>
