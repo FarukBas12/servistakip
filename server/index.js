@@ -105,7 +105,7 @@ app.get('/api/health-check', async (req, res) => {
 
 // Version Endpoint for Auto-Update
 app.get('/api/version', (req, res) => {
-    res.json({ version: '1.3.0' });
+    res.json({ version: '1.3.1' });
 });
 
 // The "catchall" handler: for any request that doesn't

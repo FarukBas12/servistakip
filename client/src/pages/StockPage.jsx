@@ -139,7 +139,7 @@ const StockPage = () => {
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.0 (Health)</span>
+                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.1 (Healer)</span>
                 </h2>
                 <div>
                     <button
@@ -442,7 +442,16 @@ const StockPage = () => {
                 <p>Loading State: {loading ? 'True' : 'False'}</p>
                 <p>Search Term: "{searchTerm}"</p>
                 <p>Filtered Count: {filteredStocks.length}</p>
-                <button onClick={fetchStocks} style={{ marginTop: '5px', padding: '5px', cursor: 'pointer' }}>Force Refresh</button>
+                <div style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
+                    <button onClick={fetchStocks} style={{ padding: '5px', cursor: 'pointer' }}>Force Refresh</button>
+                    <button onClick={async () => {
+                        try {
+                            const res = await fetch('/api/health-check');
+                            const json = await res.json();
+                            alert(JSON.stringify(json, null, 2));
+                        } catch (e) { alert('Check Failed: ' + e.message); }
+                    }} style={{ padding: '5px', cursor: 'pointer', background: 'orange', color: 'black', fontWeight: 'bold' }}>Check DB Health</button>
+                </div>
             </div>
         </div>
     );
