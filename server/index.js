@@ -31,11 +31,13 @@ app.use('/api/definitions', require('./routes/definitions'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/subs', require('./routes/subs')); // Unified Route
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/stock-tracking', require('./routes/stockTracking')); // Distinct from 'stores'
 // app.use('/api/subcontractors', ...); // REMOVED invalid route
 
 // Version Endpoint for Auto-Update
 app.get('/api/version', (req, res) => {
-    res.json({ version: '1.1.0' });
+    res.json({ version: '1.2.0' });
 });
 
 // The "catchall" handler: for any request that doesn't
@@ -370,6 +372,47 @@ async function runMigrations() {
         // Ensure one row exists
         await db.query("INSERT INTO app_settings (id, delete_password) VALUES (1, '123456') ON CONFLICT (id) DO NOTHING");
         console.log(' - Checked app_settings table');
+
+        // NEW: Notifications Table
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS notifications (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                message TEXT NOT NULL,
+                is_read BOOLEAN DEFAULT FALSE,
+                type VARCHAR(50) DEFAULT 'info',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log(' - Checked notifications table');
+
+        // NEW: Stock Tracking Tables
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS stocks (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(150) NOT NULL,
+                unit VARCHAR(20) DEFAULT 'Adet',
+                quantity NUMERIC(15, 2) DEFAULT 0,
+                critical_level NUMERIC(15, 2) DEFAULT 0,
+                category VARCHAR(100) DEFAULT 'Genel',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log(' - Checked stocks table');
+
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS stock_transactions (
+                id SERIAL PRIMARY KEY,
+                stock_id INTEGER REFERENCES stocks(id) ON DELETE CASCADE,
+                user_id INTEGER REFERENCES users(id),
+                type VARCHAR(20) NOT NULL CHECK (type IN ('in', 'out')),
+                quantity NUMERIC(15, 2) NOT NULL,
+                project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+                description TEXT,
+                transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log(' - Checked stock_transactions table');
 
         console.log('✅ Database Schema Verified & Updated!');
     } catch (e) {

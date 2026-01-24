@@ -16,6 +16,7 @@ import CompletedTasks from '../pages/CompletedTasks';
 import DailyPlanReport from '../pages/DailyPlanReport';
 import ProjectDashboard from '../pages/ProjectDashboard';
 import ProjectDetail from '../pages/ProjectDetail';
+import StockPage from '../pages/StockPage'; // NEW
 import Settings from '../pages/Settings';
 
 
@@ -41,6 +42,7 @@ const AdminLayout = () => {
                     <Route path="/daily-report" element={<DailyPlanReport />} />
                     <Route path="/projects" element={<ProjectDashboard />} />
                     <Route path="/projects/:id" element={<ProjectDetail />} />
+                    <Route path="/stocks" element={<StockPage />} />
                 </Routes>
             </div>
         </div>

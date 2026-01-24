@@ -1,6 +1,7 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, NavLink } from 'react-router-dom';
 import { List } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
@@ -53,6 +54,8 @@ const Navbar = () => {
             </div>
             <div>
                 <span style={{ marginRight: '1rem', opacity: 0.8 }}>{user.role}</span>
+                <NotificationBell />
+                <span style={{ margin: '0 10px' }}></span>
                 <button onClick={handleLogout} className="glass-btn" style={{ background: 'rgba(255, 107, 107, 0.3)', borderColor: 'rgba(255,107,107,0.5)' }}>Çıkış</button>
             </div>
         </nav >

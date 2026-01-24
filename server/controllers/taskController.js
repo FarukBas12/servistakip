@@ -1,4 +1,5 @@
 const db = require('../db');
+const notificationController = require('./notificationController');
 
 exports.getTasks = async (req, res) => {
     try {
@@ -59,6 +60,8 @@ exports.createTask = async (req, res) => {
                     'INSERT INTO task_assignments (task_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
                     [task.id, userId]
                 );
+                // NOTIFICATION
+                await notificationController.createNotification(userId, `Yeni Gezici Görev: ${title}`, 'task');
             }
         }
         // Backward compatibility for single ID
@@ -121,6 +124,16 @@ exports.updateTask = async (req, res) => {
 
         // Return updated task with new assignments
         const result = await exports.getTaskByIdInternal(id); // Helper to get full object
+
+        // NOTIFICATION FOR NEW ASSIGNMENTS
+        if (assigned_to !== undefined && result) {
+            const userIds = Array.isArray(assigned_to) ? assigned_to : [assigned_to];
+            const validIds = userIds.filter(uid => uid);
+            for (const uid of validIds) {
+                await notificationController.createNotification(uid, `Size yeni bir görev atandı: ${result.title}`, 'task');
+            }
+        }
+
         res.json(result);
     } catch (err) {
         console.error(err.message);

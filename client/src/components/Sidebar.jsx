@@ -1,14 +1,15 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Inbox, Map, FileBarChart, Users, LogOut, Activity, FolderArchive, Wallet, Database, Shield, FolderOpen } from 'lucide-react'; // Added Wallet
+import { LayoutDashboard, Inbox, Map, FileBarChart, Users, LogOut, Activity, FolderArchive, Wallet, Database, Shield, FolderOpen, Package } from 'lucide-react'; // Added Package
+import NotificationBell from './NotificationBell';
 
 const Sidebar = () => {
     const { user, logout } = useAuth();
     const isTech = user?.role === 'technician';
 
     // AUTO-UPDATE LOGIC
-    const APP_VERSION = '1.1.0'; // MUST MATCH SERVER
+    const APP_VERSION = '1.2.0'; // MUST MATCH SERVER
     const [updateAvailable, setUpdateAvailable] = React.useState(false);
 
     React.useEffect(() => {
@@ -35,6 +36,7 @@ const Sidebar = () => {
         { path: '/admin/subs', icon: <Users size={24} />, label: 'Taşeronlar' },
         // Hide Projects for Technicians
         ...(!isTech ? [{ path: '/admin/projects', icon: <FolderOpen size={24} />, label: 'Projeler' }] : []),
+        { path: '/admin/stocks', icon: <Package size={24} />, label: 'Stok' },
         { path: '/admin/settings', icon: <Shield size={24} />, label: 'Ayarlar' },
     ];
 
@@ -57,8 +59,11 @@ const Sidebar = () => {
         }}
             className="sidebar"
         >
-            <div style={{ marginBottom: '40px', opacity: 0.8 }}>
+            <div style={{ marginBottom: '40px', opacity: 0.8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
                 <img src="/logo.png" alt="Logo" style={{ width: '56px', filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.4))' }} />
+                <div style={{ color: 'white' }}>
+                    <NotificationBell placement="right-start" />
+                </div>
             </div>
 
             <nav style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
