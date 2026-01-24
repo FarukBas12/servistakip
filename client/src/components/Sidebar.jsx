@@ -66,13 +66,35 @@ const Sidebar = () => {
             </nav>
 
             <button
+                onClick={() => window.location.reload(true)}
+                style={{
+                    marginBottom: '10px',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#e0e0e0',
+                    opacity: 0.5,
+                    padding: '10px',
+                    transition: 'opacity 0.2s',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '2px'
+                }}
+                title="Güncellemeleri Kontrol Et (Yenile)"
+            >
+                <Activity size={20} />
+                <span style={{ fontSize: '0.6rem' }}>Yenile</span>
+            </button>
+
+            <button
                 onClick={logout}
                 style={{
                     marginBottom: '30px',
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
-                    color: '#e0e0e0',
+                    color: '#ef4444',
                     opacity: 0.5,
                     padding: '10px',
                     transition: 'opacity 0.2s'
