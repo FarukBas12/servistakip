@@ -62,6 +62,7 @@ const UserCreate = () => {
                         <label>Rol</label>
                         <select className="glass-input" name="role" onChange={handleChange} style={{ background: 'rgba(255,255,255,0.05)', color: 'white' }}>
                             <option value="technician" style={{ color: 'black' }}>Teknisyen</option>
+                            <option value="depocu" style={{ color: 'black' }}>Depocu (Sadece Stok)</option>
                             <option value="admin" style={{ color: 'black' }}>Admin</option>
                         </select>
                         <button type="submit" className="glass-btn" style={{ background: 'rgba(76, 175, 80, 0.3)', marginTop: '10px' }}>Kaydet</button>
