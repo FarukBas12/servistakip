@@ -18,6 +18,7 @@ const StockPage = () => {
     // Inline State
     const [editingId, setEditingId] = useState(null);
     const [historyId, setHistoryId] = useState(null);
+    const [transactionOpenId, setTransactionOpenId] = useState(null);
 
     // Form Data
     const [currentItem, setCurrentItem] = useState(null);
@@ -77,6 +78,19 @@ const StockPage = () => {
         }
     };
 
+    const startTransaction = (stock, type) => {
+        setEditingId(null);
+        setHistoryId(null);
+        setCurrentItem(stock);
+        setTransactionData({ type, quantity: 1, project_id: '', description: '' });
+        setTransactionOpenId(stock.id);
+    };
+
+    const cancelTransaction = () => {
+        setTransactionOpenId(null);
+        setCurrentItem(null);
+    };
+
     const handleTransaction = async (e) => {
         e.preventDefault();
         if (!currentItem) return;
@@ -85,7 +99,7 @@ const StockPage = () => {
             await api.post('/stock-tracking/transaction', { ...transactionData, stock_id: currentItem.id });
 
             fetchStocks();
-            setTransactionModalOpen(false);
+            setTransactionOpenId(null);
             setTransactionData({ type: 'out', quantity: 1, project_id: '', description: '' });
         } catch (err) {
             console.error(err);
@@ -108,8 +122,9 @@ const StockPage = () => {
             return;
         }
 
-        // Close Edit if open
+        // Close Edit/Transaction if open
         setEditingId(null);
+        setTransactionOpenId(null);
         setCurrentItem(stock);
         setStockHistory([]); // Clear prev
         setHistoryId(stock.id);
@@ -123,8 +138,9 @@ const StockPage = () => {
     };
 
     const startInlineEdit = (stock) => {
-        // Close History if open
+        // Close History/Transaction if open
         setHistoryId(null);
+        setTransactionOpenId(null);
         setCurrentItem(stock);
         setFormData({ ...stock });
         setEditingId(stock.id);
@@ -273,14 +289,14 @@ const StockPage = () => {
                                 {/* Right: Actions */}
                                 <div className="no-print" style={{ display: 'flex', gap: '8px' }}>
                                     <button
-                                        onClick={() => { setCurrentItem(stock); setTransactionData({ type: 'in', quantity: 1, description: '', project_id: '' }); setTransactionModalOpen(true); }}
+                                        onClick={() => startTransaction(stock, 'in')}
                                         className="glass-btn glass-btn-success" style={{ padding: '6px 12px', fontSize: '0.8rem' }}
                                         title="Stok Girişi"
                                     >
                                         +
                                     </button>
                                     <button
-                                        onClick={() => { setCurrentItem(stock); setTransactionData({ type: 'out', quantity: 1, description: '', project_id: '' }); setTransactionModalOpen(true); }}
+                                        onClick={() => startTransaction(stock, 'out')}
                                         className="glass-btn glass-btn-danger" style={{ padding: '6px 12px', fontSize: '0.8rem' }}
                                         title="Stok Çıkışı"
                                     >
@@ -342,6 +358,51 @@ const StockPage = () => {
                                             </tbody>
                                         </table>
                                     </div>
+                                </div>
+                            )}
+
+                            {/* INLINE TRANSACTION FORM */}
+                            {transactionOpenId === stock.id && (
+                                <div className="inline-section no-print">
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                        <h4 style={{ margin: 0, color: transactionData.type === 'in' ? '#86efac' : '#fca5a5' }}>
+                                            {transactionData.type === 'in' ? 'Stok Ekle (+)' : 'Stok Düş (-)'}
+                                        </h4>
+                                    </div>
+                                    <form onSubmit={handleTransaction}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '15px' }}>
+                                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                                <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.8rem' }}>Miktar ({stock.unit})</label>
+                                                <input autoFocus required type="number" step="0.01" min="0.01" value={transactionData.quantity} onChange={e => setTransactionData({ ...transactionData, quantity: e.target.value })}
+                                                    className="glass-input"
+                                                />
+                                            </div>
+
+                                            {transactionData.type === 'out' && (
+                                                <div className="form-group" style={{ marginBottom: 0 }}>
+                                                    <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.8rem' }}>Kullanılan Proje</label>
+                                                    <select value={transactionData.project_id} onChange={e => setTransactionData({ ...transactionData, project_id: e.target.value })} className="glass-input">
+                                                        <option value="">-- Proje Seçin --</option>
+                                                        {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                                    </select>
+                                                </div>
+                                            )}
+
+                                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                                <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.8rem' }}>Açıklama</label>
+                                                <input type="text" value={transactionData.description} onChange={e => setTransactionData({ ...transactionData, description: e.target.value })} placeholder="Kullanım yeri, tedarikçi vb."
+                                                    className="glass-input"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                                            <button type="button" onClick={cancelTransaction} className="glass-btn glass-btn-secondary">İptal</button>
+                                            <button type="submit" className={`glass-btn ${transactionData.type === 'in' ? 'glass-btn-success' : 'glass-btn-danger'}`}>
+                                                {transactionData.type === 'in' ? 'Onayla (+)' : 'Onayla (-)'}
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
                             )}
 
@@ -452,46 +513,7 @@ const StockPage = () => {
                 </div>
             )}
 
-            {/* TRANSACTION MODAL */}
-            {transactionModalOpen && (
-                <div className="modal-overlay no-print">
-                    <div className="modal-content glass-panel">
-                        <h3>{transactionData.type === 'in' ? 'Stok Girişi' : 'Stok Çıkışı'} - {currentItem?.name}</h3>
-                        <form onSubmit={handleTransaction}>
-                            <div className="form-group">
-                                <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Miktar ({currentItem?.unit})</label>
-                                <input autoFocus required type="number" step="0.01" min="0.01" value={transactionData.quantity} onChange={e => setTransactionData({ ...transactionData, quantity: e.target.value })}
-                                    className="glass-input"
-                                />
-                            </div>
 
-                            {transactionData.type === 'out' && (
-                                <div className="form-group">
-                                    <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Kullanılan Proje</label>
-                                    <select value={transactionData.project_id} onChange={e => setTransactionData({ ...transactionData, project_id: e.target.value })} className="glass-input">
-                                        <option value="">-- Proje Seçin --</option>
-                                        {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                                    </select>
-                                </div>
-                            )}
-
-                            <div className="form-group">
-                                <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Açıklama</label>
-                                <textarea value={transactionData.description} onChange={e => setTransactionData({ ...transactionData, description: e.target.value })} rows={3} placeholder="Tedarikçi firma, kullanım yeri vb."
-                                    className="glass-input"
-                                ></textarea>
-                            </div>
-
-                            <div className="modal-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                                <button type="button" onClick={() => setTransactionModalOpen(false)} className="glass-btn glass-btn-secondary">İptal</button>
-                                <button type="submit" className={`glass-btn ${transactionData.type === 'in' ? 'glass-btn-success' : 'glass-btn-danger'}`}>
-                                    {transactionData.type === 'in' ? 'Ekle (+)' : 'Düş (-)'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
 
             {/* HISTORY MODAL */}
             {historyModalOpen && (
