@@ -20,7 +20,7 @@ function App() {
           <Route path="/login" element={<Login />} />
 
           {/* Admin Routes (Managed by AdminLayout) */}
-          <Route element={<PrivateRoute allowedRoles={['admin']} />}>
+          <Route element={<PrivateRoute allowedRoles={['admin', 'depocu']} />}>
             <Route path="/admin/*" element={<AdminLayout />} />
           </Route>
 

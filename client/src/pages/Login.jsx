@@ -17,6 +17,7 @@ const Login = () => {
             const role = await login(formData.username, formData.password);
             // ...
             if (role === 'admin') navigate('/admin');
+            else if (role === 'depocu') navigate('/admin/stocks');
             else navigate('/tech');
         } catch (err) {
             console.error(err);
