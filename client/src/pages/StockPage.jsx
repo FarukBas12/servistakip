@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Search, Archive, AlertTriangle, History, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Package, Plus, Search, Archive, AlertTriangle, History, ArrowRight, ArrowLeft, Upload } from 'lucide-react';
 
 const StockPage = () => {
     const [stocks, setStocks] = useState([]);
@@ -10,6 +10,7 @@ const StockPage = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [transactionModalOpen, setTransactionModalOpen] = useState(false);
     const [historyModalOpen, setHistoryModalOpen] = useState(false);
+    const [importModalOpen, setImportModalOpen] = useState(false); // NEW
 
     // Form Data
     const [currentItem, setCurrentItem] = useState(null);
@@ -125,12 +126,21 @@ const StockPage = () => {
                 <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <Package /> Stok Takibi
                 </h2>
-                <button
-                    onClick={() => { setCurrentItem(null); setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel' }); setModalOpen(true); }}
-                    className="action-btn"
-                >
-                    <Plus size={18} /> Yeni Stok Ekle
-                </button>
+                <div>
+                    <button
+                        onClick={() => { setCurrentItem(null); setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel' }); setModalOpen(true); }}
+                        className="action-btn"
+                    >
+                        <Plus size={18} /> Yeni Stok Ekle
+                    </button>
+                    <button
+                        onClick={() => setImportModalOpen(true)}
+                        className="action-btn"
+                        style={{ marginLeft: '10px', background: '#2563eb' }}
+                    >
+                        <Upload size={18} /> Excel Yükle
+                    </button>
+                </div>
             </div>
 
             <div className="glass-panel" style={{ padding: '20px', marginBottom: '20px' }}>
@@ -138,7 +148,7 @@ const StockPage = () => {
                     <Search style={{ position: 'absolute', left: '10px', top: '10px', color: '#aaa' }} size={20} />
                     <input
                         type="text"
-                        placeholder="Stok adı veya kategori ara..."
+                        placeholder="Ürün adı veya kategori ara..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         style={{
@@ -211,12 +221,30 @@ const StockPage = () => {
                         <h3>{currentItem ? 'Stoğu Düzenle' : 'Yeni Stok Ekle'}</h3>
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
-                                <label>Stok Adı</label>
-                                <input required type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                                <label>Ürün Adı</label>
+                                <input required type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                    style={{
+                                        width: '100%',
+                                        padding: '8px',
+                                        background: '#333',
+                                        color: 'white',
+                                        border: '1px solid #555',
+                                        borderRadius: '5px'
+                                    }}
+                                />
                             </div>
                             <div className="form-group">
                                 <label>Kategori</label>
-                                <input type="text" list="categories" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} />
+                                <input type="text" list="categories" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}
+                                    style={{
+                                        width: '100%',
+                                        padding: '8px',
+                                        background: '#333',
+                                        color: 'white',
+                                        border: '1px solid #555',
+                                        borderRadius: '5px'
+                                    }}
+                                />
                                 <datalist id="categories">
                                     <option value="Genel" />
                                     <option value="Kablo" />
@@ -227,7 +255,16 @@ const StockPage = () => {
                             <div style={{ display: 'flex', gap: '10px' }}>
                                 <div className="form-group">
                                     <label>Miktar</label>
-                                    <input type="number" step="0.01" value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: e.target.value })} disabled={!!currentItem} />
+                                    <input type="number" step="0.01" value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: e.target.value })} disabled={!!currentItem}
+                                        style={{
+                                            width: '100%',
+                                            padding: '8px',
+                                            background: '#333',
+                                            color: '#eee',
+                                            border: '1px solid #555',
+                                            borderRadius: '5px'
+                                        }}
+                                    />
                                     {currentItem && <small style={{ color: '#aaa' }}>Miktar sadece giriş/çıkış ile değişir.</small>}
                                 </div>
                                 <div className="form-group">
@@ -243,7 +280,16 @@ const StockPage = () => {
                             </div>
                             <div className="form-group">
                                 <label>Kritik Seviye (Uyarı Limiti)</label>
-                                <input type="number" value={formData.critical_level} onChange={e => setFormData({ ...formData, critical_level: e.target.value })} />
+                                <input type="number" value={formData.critical_level} onChange={e => setFormData({ ...formData, critical_level: e.target.value })}
+                                    style={{
+                                        width: '100%',
+                                        padding: '8px',
+                                        background: '#333',
+                                        color: 'white',
+                                        border: '1px solid #555',
+                                        borderRadius: '5px'
+                                    }}
+                                />
                             </div>
 
                             <div className="modal-actions">
@@ -266,7 +312,16 @@ const StockPage = () => {
                         <form onSubmit={handleTransaction}>
                             <div className="form-group">
                                 <label>Miktar ({currentItem?.unit})</label>
-                                <input autoFocus required type="number" step="0.01" min="0.01" value={transactionData.quantity} onChange={e => setTransactionData({ ...transactionData, quantity: e.target.value })} />
+                                <input autoFocus required type="number" step="0.01" min="0.01" value={transactionData.quantity} onChange={e => setTransactionData({ ...transactionData, quantity: e.target.value })}
+                                    style={{
+                                        width: '100%',
+                                        padding: '8px',
+                                        background: '#333',
+                                        color: 'white',
+                                        border: '1px solid #555',
+                                        borderRadius: '5px'
+                                    }}
+                                />
                             </div>
 
                             {transactionData.type === 'out' && (
@@ -281,7 +336,16 @@ const StockPage = () => {
 
                             <div className="form-group">
                                 <label>Açıklama</label>
-                                <textarea value={transactionData.description} onChange={e => setTransactionData({ ...transactionData, description: e.target.value })} rows={3} placeholder="Tedarikçi firma, kullanım yeri vb." ></textarea>
+                                <textarea value={transactionData.description} onChange={e => setTransactionData({ ...transactionData, description: e.target.value })} rows={3} placeholder="Tedarikçi firma, kullanım yeri vb."
+                                    style={{
+                                        width: '100%',
+                                        padding: '8px',
+                                        background: '#333',
+                                        color: 'white',
+                                        border: '1px solid #555',
+                                        borderRadius: '5px'
+                                    }}
+                                ></textarea>
                             </div>
 
                             <div className="modal-actions">
@@ -336,6 +400,52 @@ const StockPage = () => {
                             </table>
                         </div>
                         <button onClick={() => setHistoryModalOpen(false)} style={{ width: '100%', marginTop: '15px', padding: '10px', background: '#555', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Kapat</button>
+                    </div>
+                </div>
+            {/* IMPORT MODAL */}
+            {importModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal-content glass-panel">
+                        <h3>Excel ile Toplu Stok Yükle</h3>
+                        <p style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '15px' }}>
+                            Excel dosyanızda şu sütunlar olmalı: <br />
+                            <b>Ürün Adı, Kategori, Miktar, Birim, Kritik</b>
+                        </p>
+                        <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            const formData = new FormData();
+                            const file = e.target.file.files[0];
+                            if (!file) return alert('Dosya seçin.');
+                            formData.append('file', file);
+
+                            try {
+                                const res = await fetch('/api/stock-tracking/bulk', {
+                                    method: 'POST',
+                                    body: formData
+                                });
+                                const data = await res.json();
+                                if (res.ok) {
+                                    alert(data.message);
+                                    setImportModalOpen(false);
+                                    fetchStocks();
+                                } else {
+                                    alert(data.message);
+                                }
+                            } catch (err) {
+                                alert('Yükleme hatası');
+                            }
+                        }}>
+                            <div className="form-group">
+                                <label>Excel Dosyası (.xlsx)</label>
+                                <input name="file" type="file" accept=".xlsx, .xls" required
+                                    style={{ padding: '10px', background: '#333', borderRadius: '5px', width: '100%' }}
+                                />
+                            </div>
+                            <div className="modal-actions">
+                                <button type="button" onClick={() => setImportModalOpen(false)} style={{ background: '#555' }}>İptal</button>
+                                <button type="submit" className="action-btn">Yükle</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}
