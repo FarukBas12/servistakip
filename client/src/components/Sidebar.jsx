@@ -7,6 +7,28 @@ const Sidebar = () => {
     const { user, logout } = useAuth();
     const isTech = user?.role === 'technician';
 
+    // AUTO-UPDATE LOGIC
+    const APP_VERSION = '1.1.0'; // MUST MATCH SERVER
+    const [updateAvailable, setUpdateAvailable] = React.useState(false);
+
+    React.useEffect(() => {
+        const checkVersion = async () => {
+            try {
+                const res = await fetch('/api/version');
+                const data = await res.json();
+                if (data.version && data.version !== APP_VERSION) {
+                    setUpdateAvailable(true);
+                }
+            } catch (err) {
+                // Ignore errors (offline etc)
+            }
+        };
+
+        checkVersion(); // Initial check
+        const interval = setInterval(checkVersion, 60000); // Check every minute
+        return () => clearInterval(interval);
+    }, []);
+
     const menuItems = [
         { path: '/admin', icon: <LayoutDashboard size={24} />, label: 'Panel', exact: true },
         { path: '/admin/pool', icon: <Inbox size={24} />, label: 'Havuz' },
@@ -69,22 +91,26 @@ const Sidebar = () => {
                 onClick={() => window.location.reload(true)}
                 style={{
                     marginBottom: '10px',
-                    background: 'none',
+                    background: updateAvailable ? '#ef4444' : 'none',
                     border: 'none',
                     cursor: 'pointer',
-                    color: '#e0e0e0',
-                    opacity: 0.5,
+                    color: updateAvailable ? 'white' : '#e0e0e0',
+                    opacity: updateAvailable ? 1 : 0.5,
                     padding: '10px',
-                    transition: 'opacity 0.2s',
+                    borderRadius: updateAvailable ? '10px' : '0',
+                    transition: 'all 0.2s',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: '2px'
+                    gap: '2px',
+                    animation: updateAvailable ? 'pulse 2s infinite' : 'none'
                 }}
-                title="Güncellemeleri Kontrol Et (Yenile)"
+                title={updateAvailable ? "YENİ GÜNCELLEME MEVCUT! TIKLA" : "Güncellemeleri Kontrol Et (Yenile)"}
             >
                 <Activity size={20} />
-                <span style={{ fontSize: '0.6rem' }}>Yenile</span>
+                <span style={{ fontSize: '0.6rem', fontWeight: updateAvailable ? 'bold' : 'normal' }}>
+                    {updateAvailable ? 'GÜNCELLE' : 'Yenile'}
+                </span>
             </button>
 
             <button
@@ -120,6 +146,11 @@ const Sidebar = () => {
                 }
                 button:hover {
                     opacity: 1 !important;
+                }
+                @keyframes pulse {
+                    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+                    70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+                    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
                 }
             `}</style>
         </div>

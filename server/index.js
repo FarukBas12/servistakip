@@ -33,9 +33,9 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/subs', require('./routes/subs')); // Unified Route
 // app.use('/api/subcontractors', ...); // REMOVED invalid route
 
-// Version Endpoint for Debugging
+// Version Endpoint for Auto-Update
 app.get('/api/version', (req, res) => {
-    res.json({ timestamp: new Date().toISOString(), version: '1.0.1-fix-cache' });
+    res.json({ version: '1.1.0' });
 });
 
 // The "catchall" handler: for any request that doesn't
