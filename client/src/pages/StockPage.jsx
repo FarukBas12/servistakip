@@ -62,10 +62,17 @@ const StockPage = () => {
                 setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel' });
                 setCurrentItem(null);
             } else {
-                alert('Hata oluştu');
+                const text = await res.text();
+                try {
+                    const json = JSON.parse(text);
+                    alert(json.message || 'Bir hata oluştu: ' + text);
+                } catch {
+                    alert('Sunucu Hatası: ' + text);
+                }
             }
         } catch (err) {
             console.error(err);
+            alert('Beklenmedik bir hata oluştu: ' + err.message);
         }
     };
 
@@ -124,7 +131,7 @@ const StockPage = () => {
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.2.7</span>
+                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.2.8</span>
                 </h2>
                 <div>
                     <button
@@ -158,6 +165,13 @@ const StockPage = () => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                {filteredStocks.length === 0 && (
+                    <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: '#aaa', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
+                        <Package size={48} style={{ opacity: 0.5, marginBottom: '10px' }} />
+                        <p>Henüz görüntülenecek stok yok veya arama sonucu boş.</p>
+                        <p style={{ fontSize: '0.8rem' }}>Yeni stok eklemek için sağ üstteki düğmeyi kullanın.</p>
+                    </div>
+                )}
                 {filteredStocks.map(stock => {
                     const isCritical = parseFloat(stock.quantity) <= parseFloat(stock.critical_level);
                     return (
