@@ -130,6 +130,7 @@ exports.getStockHistory = async (req, res) => {
 };
 
 // Bulk Import Logic
+// Bulk Import Logic
 exports.bulkImport = async (req, res) => {
     try {
         if (!req.file) {
@@ -141,26 +142,63 @@ exports.bulkImport = async (req, res) => {
         const rows = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
         if (rows.length === 0) {
-            return res.status(400).json({ message: 'Dosya boş.' });
+            return res.status(400).json({ message: 'Dosya boş veya okunabilir veri içermiyor.' });
+        }
+
+        // Helper: Normalize string (lowercase, remove spaces and turkish chars)
+        const normalize = (str) => {
+            if (!str) return '';
+            return str.toString().toLowerCase()
+                .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+                .replace(/ı/g, 'i').replace(/İ/g, 'i').replace(/ö/g, 'o')
+                .replace(/ç/g, 'c').replace(/\s+/g, '');
+        };
+
+        // Find keys in the first row to determine mapping
+        const fileKeys = Object.keys(rows[0]);
+        const normalizedKeys = fileKeys.reduce((acc, key) => {
+            acc[normalize(key)] = key; // map normalized -> pointer to original key
+            return acc;
+        }, {});
+
+        // Define possible aliases for each target field
+        const mapField = (aliases) => {
+            for (const alias of aliases) {
+                const nAlias = normalize(alias);
+                if (normalizedKeys[nAlias]) return normalizedKeys[nAlias];
+            }
+            return null;
+        };
+
+        const keyName = mapField(['Ürün Adı', 'Urun Adi', 'Stok Adı', 'Stok Ismi', 'Name', 'Malzeme']);
+        const keyCategory = mapField(['Kategori', 'Category', 'Tur', 'Cins']);
+        const keyQuantity = mapField(['Miktar', 'Adet', 'Sayi', 'Quantity']);
+        const keyUnit = mapField(['Birim', 'Unit', 'Olcu']);
+        const keyCritical = mapField(['Kritik', 'Kritik Seviye', 'Uyarı', 'Limit', 'Critical']);
+
+        // Debug: If main key is missing, fail early
+        if (!keyName) {
+            return res.status(400).json({
+                message: `Hata: 'Ürün Adı' sütunu bulunamadı. Dosyanızdaki sütunlar: ${fileKeys.join(', ')}`
+            });
         }
 
         const client = await db.pool.connect();
         try {
             await client.query('BEGIN');
             let addedCount = 0;
+            let updatedCount = 0;
 
             for (const row of rows) {
-                // Map Excel Columns -> DB Columns
-                // Expecting: "Ürün Adı", "Kategori", "Miktar", "Birim", "Kritik"
-                const name = row['Ürün Adı'] || row['Stok Adı'] || row['Urun Adi'];
-                if (!name) continue; // Skip invalid rows
+                const name = row[keyName];
+                if (!name) continue;
 
-                const category = row['Kategori'] || 'Genel';
-                const quantity = parseFloat(row['Miktar']) || 0;
-                const unit = row['Birim'] || 'Adet';
-                const critical_level = parseFloat(row['Kritik']) || parseFloat(row['Kritik Seviye']) || 5;
+                const category = keyCategory ? (row[keyCategory] || 'Genel') : 'Genel';
+                const quantity = keyQuantity ? (parseFloat(row[keyQuantity]) || 0) : 0;
+                const unit = keyUnit ? (row[keyUnit] || 'Adet') : 'Adet';
+                const critical_level = keyCritical ? (parseFloat(row[keyCritical]) || 5) : 5;
 
-                // Check existence first to avoid duplicate errors or decide update logic
+                // Check existence
                 const check = await client.query('SELECT id FROM stocks WHERE name = $1', [name]);
 
                 if (check.rows.length === 0) {
@@ -170,17 +208,24 @@ exports.bulkImport = async (req, res) => {
                     `, [name, category, quantity, unit, critical_level]);
                     addedCount++;
                 } else {
-                    // Start Update quantity if needed? For now just skip or maybe update params.
-                    // Let's just update info (critical level, category), NOT quantity to avoid messing up tracking.
+                    // Update info but ADD quantity
+                    // Strategy: If user uploads excel, maybe they are adding stock OR setting initial stock.
+                    // For safety, let's UPDATE params and ADD quantity if > 0
                     await client.query(`
-                        UPDATE stocks SET category = $2, critical_level = $3
+                        UPDATE stocks SET 
+                            category = $2, 
+                            critical_level = $3,
+                            quantity = quantity + $4 
                         WHERE id = $1
-                    `, [check.rows[0].id, category, critical_level]);
+                    `, [check.rows[0].id, category, critical_level, quantity]); // Add quantity!
+                    updatedCount++;
                 }
             }
 
             await client.query('COMMIT');
-            res.json({ message: `${addedCount} yeni ürün eklendi. Mevcut ürünlerin bilgileri güncellendi.` });
+            res.json({
+                message: `İşlem Başarılı!\n${addedCount} yeni ürün eklendi.\n${updatedCount} mevcut ürün güncellendi (miktarlar eklendi).`
+            });
 
         } catch (err) {
             await client.query('ROLLBACK');
