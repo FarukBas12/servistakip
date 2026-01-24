@@ -374,20 +374,35 @@ h3 {
     }
 
     /* Adjust Navigation Layout */
+    /* Scrollable Horizontal Nav */
     .sidebar-nav {
         width: 100% !important;
         flex-direction: row !important;
-        justify-content: space-around !important;
+        justify-content: flex-start !important;
+        /* Start from left */
         align-items: center !important;
-        gap: 0 !important;
+        gap: 10px !important;
+        overflow-x: auto !important;
+        /* Enable Scroll */
+        padding: 0 10px !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Hide Scrollbar */
+    .sidebar-nav::-webkit-scrollbar {
+        display: none;
     }
 
     .sidebar-link {
-        width: 100% !important;
+        width: auto !important;
+        min-width: 64px !important;
+        /* Minimum touch target width */
         height: 100% !important;
         padding: 5px 0 !important;
         border-radius: 0 !important;
         background: transparent !important;
+        flex-shrink: 0 !important;
+        /* Prevent shrinking */
     }
 
     .sidebar-link.active {
@@ -396,7 +411,10 @@ h3 {
     }
 
     .sidebar-link span {
-        font-size: 0.6rem !important;
+        font-size: 0.65rem !important;
+        /* Slightly larger text */
+        white-space: nowrap;
+        /* Prevent text wrap */
     }
 
     /* Hide the Update Button on Mobile Bottom Bar */
