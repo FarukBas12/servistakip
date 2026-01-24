@@ -15,6 +15,9 @@ const StockPage = () => {
     const [historyModalOpen, setHistoryModalOpen] = useState(false);
     const [importModalOpen, setImportModalOpen] = useState(false);
 
+    // Inline Edit State
+    const [editingId, setEditingId] = useState(null);
+
     // Form Data
     const [currentItem, setCurrentItem] = useState(null);
     const [formData, setFormData] = useState({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel' });
@@ -64,6 +67,7 @@ const StockPage = () => {
 
             fetchStocks();
             setModalOpen(false);
+            setEditingId(null); // Close inline edit
             setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel' });
             setCurrentItem(null);
         } catch (err) {
@@ -107,6 +111,18 @@ const StockPage = () => {
         }
     };
 
+    const startInlineEdit = (stock) => {
+        setCurrentItem(stock);
+        setFormData({ ...stock });
+        setEditingId(stock.id);
+    };
+
+    const cancelInlineEdit = () => {
+        setEditingId(null);
+        setCurrentItem(null);
+        setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel' });
+    };
+
     // Filtered Stocks
     const filteredStocks = stocks.filter(s =>
         s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -133,6 +149,18 @@ const StockPage = () => {
                     .print-header { display: block !important; margin-bottom: 20px; text-align: center; }
                 }
                 .print-header { display: none; }
+                .inline-edit-form {
+                    background: rgba(0,0,0,0.3);
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin-top: 10px;
+                    border: 1px solid rgba(255,255,255,0.1);
+                    animation: slideDown 0.2s ease-out;
+                }
+                @keyframes slideDown {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
             `}</style>
 
             <div className="print-header">
@@ -142,7 +170,7 @@ const StockPage = () => {
 
             <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.6 (Print)</span>
+                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.7 (Inline Edit)</span>
                 </h2>
                 <div>
                     <button
@@ -196,69 +224,118 @@ const StockPage = () => {
                         <div key={stock.id} className="glass-panel" style={{
                             padding: '12px 20px',
                             borderLeft: isCritical ? '4px solid #ef4444' : '4px solid #22c55e',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            flexWrap: 'wrap',
-                            gap: '15px'
+                            transition: 'all 0.3s ease'
                         }}>
-                            {/* Left: Info */}
-                            <div style={{ flex: 1, minWidth: '200px' }}>
-                                <h3 style={{ margin: '0 0 4px 0', color: 'white', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    {stock.name}
-                                    {isCritical && <span style={{ fontSize: '0.7rem', color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '3px' }}><AlertTriangle size={10} /> Kritik</span>}
-                                </h3>
-                                <span style={{ fontSize: '0.75rem', color: '#aaa', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px' }}>
-                                    {stock.category}
-                                </span>
-                            </div>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                flexWrap: 'wrap',
+                                gap: '15px'
+                            }}>
+                                {/* Left: Info */}
+                                <div style={{ flex: 1, minWidth: '200px' }}>
+                                    <h3 style={{ margin: '0 0 4px 0', color: 'white', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        {stock.name}
+                                        {isCritical && <span style={{ fontSize: '0.7rem', color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '3px' }}><AlertTriangle size={10} /> Kritik</span>}
+                                    </h3>
+                                    <span style={{ fontSize: '0.75rem', color: '#aaa', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px' }}>
+                                        {stock.category}
+                                    </span>
+                                </div>
 
-                            {/* Middle: Quantity */}
-                            <div style={{ textAlign: 'right', minWidth: '100px' }}>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: isCritical ? '#ef4444' : 'white' }}>
-                                    {stock.quantity} <span style={{ fontSize: '0.8rem', fontWeight: 'normal', color: '#888' }}>{stock.unit}</span>
+                                {/* Middle: Quantity */}
+                                <div style={{ textAlign: 'right', minWidth: '100px' }}>
+                                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: isCritical ? '#ef4444' : 'white' }}>
+                                        {stock.quantity} <span style={{ fontSize: '0.8rem', fontWeight: 'normal', color: '#888' }}>{stock.unit}</span>
+                                    </div>
+                                </div>
+
+                                {/* Right: Actions */}
+                                <div className="no-print" style={{ display: 'flex', gap: '8px' }}>
+                                    <button
+                                        onClick={() => { setCurrentItem(stock); setTransactionData({ type: 'in', quantity: 1, description: '', project_id: '' }); setTransactionModalOpen(true); }}
+                                        className="glass-btn glass-btn-success" style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                                        title="Stok Girişi"
+                                    >
+                                        +
+                                    </button>
+                                    <button
+                                        onClick={() => { setCurrentItem(stock); setTransactionData({ type: 'out', quantity: 1, description: '', project_id: '' }); setTransactionModalOpen(true); }}
+                                        className="glass-btn glass-btn-danger" style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                                        title="Stok Çıkışı"
+                                    >
+                                        -
+                                    </button>
+                                    <button
+                                        onClick={() => openHistory(stock)}
+                                        className="glass-btn glass-btn-secondary" style={{ padding: '6px 10px' }} title="Hareket Geçmişi"
+                                    >
+                                        <History size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => startInlineEdit(stock)}
+                                        className="glass-btn glass-btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} title="Düzenle"
+                                    >
+                                        Edit
+                                    </button>
                                 </div>
                             </div>
 
-                            {/* Right: Actions */}
-                            <div className="no-print" style={{ display: 'flex', gap: '8px' }}>
-                                <button
-                                    onClick={() => { setCurrentItem(stock); setTransactionData({ type: 'in', quantity: 1, description: '', project_id: '' }); setTransactionModalOpen(true); }}
-                                    className="glass-btn glass-btn-success" style={{ padding: '6px 12px', fontSize: '0.8rem' }}
-                                    title="Stok Girişi"
-                                >
-                                    +
-                                </button>
-                                <button
-                                    onClick={() => { setCurrentItem(stock); setTransactionData({ type: 'out', quantity: 1, description: '', project_id: '' }); setTransactionModalOpen(true); }}
-                                    className="glass-btn glass-btn-danger" style={{ padding: '6px 12px', fontSize: '0.8rem' }}
-                                    title="Stok Çıkışı"
-                                >
-                                    -
-                                </button>
-                                <button
-                                    onClick={() => openHistory(stock)}
-                                    className="glass-btn glass-btn-secondary" style={{ padding: '6px 10px' }} title="Hareket Geçmişi"
-                                >
-                                    <History size={16} />
-                                </button>
-                                <button
-                                    onClick={() => { setCurrentItem(stock); setFormData({ ...stock }); setModalOpen(true); }}
-                                    className="glass-btn glass-btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} title="Düzenle"
-                                >
-                                    Edit
-                                </button>
-                            </div>
+                            {/* INLINE EDIT FORM */}
+                            {editingId === stock.id && (
+                                <form onSubmit={handleSubmit} className="inline-edit-form no-print">
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '15px' }}>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.8rem' }}>Ürün Adı</label>
+                                            <input required type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                                className="glass-input" style={{ width: '100%' }}
+                                            />
+                                        </div>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.8rem' }}>Kategori</label>
+                                            <input type="text" list="categories" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}
+                                                className="glass-input" style={{ width: '100%' }}
+                                            />
+                                        </div>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.8rem' }}>Birim</label>
+                                            <select value={formData.unit} onChange={e => setFormData({ ...formData, unit: e.target.value })}
+                                                className="glass-input" style={{ width: '100%' }}
+                                            >
+                                                <option value="Adet">Adet</option>
+                                                <option value="Metre">Metre</option>
+                                                <option value="Kg">Kg</option>
+                                                <option value="Kutu">Kutu</option>
+                                                <option value="Top">Top</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.8rem' }}>Kritik Seviye</label>
+                                            <input type="number" value={formData.critical_level} onChange={e => setFormData({ ...formData, critical_level: e.target.value })}
+                                                className="glass-input" style={{ width: '100%' }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                                        <button type="button" onClick={() => handleDelete(stock.id)} className="glass-btn glass-btn-danger" style={{ marginRight: 'auto' }}>
+                                            Sil
+                                        </button>
+                                        <button type="button" onClick={cancelInlineEdit} className="glass-btn glass-btn-secondary">İptal</button>
+                                        <button type="submit" className="glass-btn glass-btn-primary">Değişiklikleri Kaydet</button>
+                                    </div>
+                                </form>
+                            )}
                         </div>
                     );
                 })}
             </div>
 
-            {/* CREATE/EDIT MODAL */}
+            {/* CREATE MODAL (Only for New Stock now) */}
             {modalOpen && (
                 <div className="modal-overlay no-print">
                     <div className="modal-content glass-panel">
-                        <h3>{currentItem ? 'Stoğu Düzenle' : 'Yeni Stok Ekle'}</h3>
+                        <h3>Yeni Stok Ekle</h3>
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
                                 <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Ürün Adı</label>
@@ -281,11 +358,9 @@ const StockPage = () => {
                             <div style={{ display: 'flex', gap: '10px' }}>
                                 <div className="form-group" style={{ flex: 1 }}>
                                     <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Miktar</label>
-                                    <input type="number" step="0.01" value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: e.target.value })} disabled={!!currentItem}
+                                    <input type="number" step="0.01" value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: e.target.value })}
                                         className="glass-input"
-                                        style={!!currentItem ? { opacity: 0.5 } : {}}
                                     />
-                                    {currentItem && <small style={{ color: '#aaa' }}>Miktar sadece giriş/çıkış ile değişir.</small>}
                                 </div>
                                 <div className="form-group" style={{ flex: 1 }}>
                                     <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Birim</label>
@@ -308,9 +383,6 @@ const StockPage = () => {
                             <div className="modal-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                                 <button type="button" onClick={() => setModalOpen(false)} className="glass-btn glass-btn-secondary">İptal</button>
                                 <button type="submit" className="glass-btn glass-btn-primary">Kaydet</button>
-                                {currentItem && (
-                                    <button type="button" onClick={() => handleDelete(currentItem.id)} className="glass-btn glass-btn-danger" style={{ marginLeft: 'auto' }}>Sil</button>
-                                )}
                             </div>
                         </form>
                     </div>
