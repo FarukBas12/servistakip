@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, Inbox, Map, FileBarChart, Users, LogOut, Activity, FolderArchive, Wallet, Database, Shield, FolderOpen } from 'lucide-react'; // Added Wallet
 
 const Sidebar = () => {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const isTech = user?.role === 'technician';
 
     const menuItems = [
