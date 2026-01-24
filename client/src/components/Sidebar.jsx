@@ -48,32 +48,15 @@ const Sidebar = () => {
     });
 
     return (
-        <div style={{
-            width: '80px',
-            height: '100vh',
-            background: 'rgba(255, 255, 255, 0.02)',
-            backdropFilter: 'blur(10px)',
-            borderRight: '1px solid rgba(255, 255, 255, 0.08)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            paddingTop: '30px',
-            position: 'fixed',
-            left: 0,
-            top: 0,
-            zIndex: 1000,
-            transition: 'width 0.3s ease'
-        }}
-            className="sidebar"
-        >
-            <div style={{ marginBottom: '40px', opacity: 0.8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+        <div className="sidebar sidebar-container">
+            <div className="sidebar-header" style={{ marginBottom: '40px', opacity: 0.8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
                 <img src="/logo.png" alt="Logo" style={{ width: '56px', filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.4))' }} />
                 <div style={{ color: 'white' }}>
                     <NotificationBell placement="right-start" />
                 </div>
             </div>
 
-            <nav style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
+            <nav className="sidebar-nav" style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
                 {menuItems.map((item) => (
                     <NavLink
                         key={item.path}
@@ -85,8 +68,7 @@ const Sidebar = () => {
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            width: '50px',
-                            height: '50px',
+                            // width/height handled by CSS class now
                             textDecoration: 'none',
                             color: '#e0e0e0',
                             borderRadius: '10px',
@@ -100,6 +82,7 @@ const Sidebar = () => {
             </nav>
 
             <button
+                className="sidebar-update-btn"
                 onClick={() => window.location.reload(true)}
                 style={{
                     marginBottom: '10px',
@@ -126,6 +109,7 @@ const Sidebar = () => {
             </button>
 
             <button
+                className="sidebar-update-btn"
                 onClick={logout}
                 style={{
                     marginBottom: '30px',
