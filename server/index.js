@@ -26,11 +26,12 @@ app.use(express.static(path.join(__dirname, '../client/dist'), {
 // API Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
-app.use('/api/subcontractors', require('./routes/subcontractors'));
+app.use('/api/stores', require('./routes/stores')); // Restored
 app.use('/api/definitions', require('./routes/definitions'));
 app.use('/api/projects', require('./routes/projects'));
-app.use('/api/payments', require('./routes/payments')); // Add this line
-app.use('/api/subs', require('./routes/subs')); // Add this line
+app.use('/api/payments', require('./routes/payments'));
+app.use('/api/subs', require('./routes/subs')); // Unified Route
+// app.use('/api/subcontractors', ...); // REMOVED invalid route
 
 // Version Endpoint for Debugging
 app.get('/api/version', (req, res) => {
