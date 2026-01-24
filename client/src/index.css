@@ -454,6 +454,43 @@ h3 {
     }
 }
 
+/* --- DESKTOP SIDEBAR ITEMS --- */
+.sidebar-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    text-decoration: none;
+    color: #e0e0e0;
+    border-radius: 16px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+    /* Reserve space for border */
+}
+
+.sidebar-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.sidebar-link.active {
+    background: rgba(99, 102, 241, 0.15);
+    /* Primary Glass */
+    color: white;
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+}
+
 /* Sidebar Container (Desktop Default) */
 .sidebar-container {
     width: 80px;
