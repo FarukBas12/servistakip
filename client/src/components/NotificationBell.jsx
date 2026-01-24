@@ -153,8 +153,12 @@ const NotificationBell = ({ placement = 'bottom-right' }) => {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         backgroundColor: '#f9fafb'
+                        // ...
                     }}>
-                        <h4 style={{ margin: 0, fontSize: '14px', color: '#333' }}>Bildirimler</h4>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                            <h4 style={{ margin: 0, fontSize: '14px', color: '#333' }}>Bildirimler</h4>
+                            <button onClick={playSound} style={{ fontSize: '10px', padding: '2px 5px', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer' }} title="Sesi Test Et">🔊 Test</button>
+                        </div>
                         {unreadCount > 0 && (
                             <button
                                 onClick={markAllRead}
