@@ -1,34 +1,41 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --bg-dark: #0f172a; /* Slate 900 */
-    --bg-darker: #020617; /* Slate 950 */
-    
+    --bg-dark: #0f172a;
+    /* Slate 900 */
+    --bg-darker: #020617;
+    /* Slate 950 */
+
     /* Modern Accent Colors */
-    --primary: #6366f1; /* Indigo */
-    --secondary: #d946ef; /* Fuchsia */
-    --success: #10b981; /* Emerald */
-    --danger: #ef4444; /* Red */
-    
+    --primary: #6366f1;
+    /* Indigo */
+    --secondary: #d946ef;
+    /* Fuchsia */
+    --success: #10b981;
+    /* Emerald */
+    --danger: #ef4444;
+    /* Red */
+
     /* Glass System */
     --glass-bg: rgba(15, 23, 42, 0.65);
     --glass-border: 1px solid rgba(255, 255, 255, 0.08);
     --glass-highlight: rgba(255, 255, 255, 0.05);
     --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    
+
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
 }
 
 body {
     margin: 0;
-    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif; /* Modern Font */
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    /* Modern Font */
     color: var(--text-primary);
     min-height: 100vh;
     background-color: var(--bg-darker);
-    
+
     /* ANIMATED MESH GRADIENT BACKGROUND */
-    background-image: 
+    background-image:
         radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.15), transparent 25%),
         radial-gradient(circle at 85% 30%, rgba(217, 70, 239, 0.15), transparent 25%);
     background-attachment: fixed;
@@ -37,15 +44,29 @@ body {
 
 /* Subtle ambient animation */
 @keyframes ambient-pulse {
-    0% { opacity: 0.5; transform: scale(1); }
-    50% { opacity: 0.8; transform: scale(1.1); }
-    100% { opacity: 0.5; transform: scale(1); }
+    0% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
 }
 
 body::before {
     content: "";
     position: fixed;
-    top: -50%; left: -50%; right: -50%; bottom: -50%;
+    top: -50%;
+    left: -50%;
+    right: -50%;
+    bottom: -50%;
     background: radial-gradient(circle at center, rgba(99, 102, 241, 0.08), transparent 70%);
     z-index: -1;
     animation: ambient-pulse 10s infinite ease-in-out;
@@ -66,7 +87,7 @@ body::before {
 }
 
 .glass-panel:hover {
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 30px 60px -12px rgba(0,0,0,0.6);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 30px 60px -12px rgba(0, 0, 0, 0.6);
 }
 
 /* Buttons */
@@ -93,8 +114,11 @@ body::before {
 .glass-btn::after {
     content: '';
     position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
     transform: translateX(-100%);
     transition: 0.5s;
 }
@@ -114,10 +138,82 @@ body::before {
     transform: translateY(0);
 }
 
+/* Button Variants */
+.glass-btn-primary {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.4);
+    color: #a5b4fc;
+}
+
+.glass-btn-primary:hover {
+    background: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+    color: white;
+}
+
+.glass-btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+}
+
+.glass-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.glass-btn-danger {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+}
+
+.glass-btn-danger:hover {
+    background: rgba(239, 68, 68, 0.3);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+    color: white;
+}
+
+.glass-btn-success {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.4);
+    color: #86efac;
+}
+
+.glass-btn-success:hover {
+    background: rgba(34, 197, 94, 0.3);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+    color: white;
+}
+
+/* File Input Hack */
+.file-upload-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+    color: #94a3b8;
+}
+
+.file-upload-label:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary);
+    color: white;
+}
+
 /* Inputs */
 /* Inputs Premium Upgrade */
 .glass-input {
-    background: rgba(255, 255, 255, 0.05); /* Lighter, more glassy */
+    background: rgba(255, 255, 255, 0.05);
+    /* Lighter, more glassy */
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 14px 16px;
@@ -136,9 +232,11 @@ body::before {
 }
 
 .glass-input:focus {
-    background: rgba(255, 255, 255, 0.1); /* Slightly brighter on focus */
+    background: rgba(255, 255, 255, 0.1);
+    /* Slightly brighter on focus */
     border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2); /* Soft glow ring */
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+    /* Soft glow ring */
     transform: translateY(-1px);
 }
 
@@ -160,7 +258,7 @@ body::before {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background: radial-gradient(circle at center, rgba(99,102,241,0.1) 0%, transparent 60%);
+    background: radial-gradient(circle at center, rgba(99, 102, 241, 0.1) 0%, transparent 60%);
 }
 
 .login-form {
@@ -176,7 +274,8 @@ body::before {
 table {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0 12px; /* Drows arası boşluk */
+    border-spacing: 0 12px;
+    /* Drows arası boşluk */
 }
 
 th {
@@ -212,7 +311,8 @@ tr td:last-child {
 
 tr:hover td {
     background: rgba(255, 255, 255, 0.05);
-    transform: scale(1.01); /* Hoverda hafif büyüme */
+    transform: scale(1.01);
+    /* Hoverda hafif büyüme */
     border-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -228,7 +328,9 @@ a:hover {
 }
 
 /* Titles */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
     font-weight: 600;
     letter-spacing: -0.5px;
     background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);

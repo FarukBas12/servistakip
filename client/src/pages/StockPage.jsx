@@ -124,19 +124,19 @@ const StockPage = () => {
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.2.4</span>
+                    <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.2.5</span>
                 </h2>
                 <div>
                     <button
                         onClick={() => { setCurrentItem(null); setFormData({ name: '', unit: 'Adet', quantity: 0, critical_level: 5, category: 'Genel' }); setModalOpen(true); }}
-                        className="action-btn"
+                        className="glass-btn glass-btn-success"
                     >
                         <Plus size={18} /> Yeni Stok Ekle
                     </button>
                     <button
                         onClick={() => setImportModalOpen(true)}
-                        className="action-btn"
-                        style={{ marginLeft: '10px', background: '#2563eb' }}
+                        className="glass-btn glass-btn-primary"
+                        style={{ marginLeft: '10px' }}
                     >
                         <Upload size={18} /> Excel Yükle
                     </button>
@@ -180,25 +180,25 @@ const StockPage = () => {
                             <div style={{ marginTop: '15px', display: 'flex', gap: '10px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px' }}>
                                 <button
                                     onClick={() => { setCurrentItem(stock); setTransactionData({ type: 'in', quantity: 1, description: '', project_id: '' }); setTransactionModalOpen(true); }}
-                                    style={{ flex: 1, background: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', border: '1px solid rgba(34, 197, 94, 0.3)', padding: '5px', borderRadius: '4px', cursor: 'pointer' }}
+                                    className="glass-btn glass-btn-success" style={{ flex: 1, justifyContent: 'center', fontSize: '0.85rem' }}
                                 >
                                     + Giriş
                                 </button>
                                 <button
                                     onClick={() => { setCurrentItem(stock); setTransactionData({ type: 'out', quantity: 1, description: '', project_id: '' }); setTransactionModalOpen(true); }}
-                                    style={{ flex: 1, background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '5px', borderRadius: '4px', cursor: 'pointer' }}
+                                    className="glass-btn glass-btn-danger" style={{ flex: 1, justifyContent: 'center', fontSize: '0.85rem' }}
                                 >
                                     - Çıkış
                                 </button>
                                 <button
                                     onClick={() => openHistory(stock)}
-                                    style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer' }} title="Hareket Geçmişi"
+                                    className="glass-btn glass-btn-secondary" style={{ padding: '10px' }} title="Hareket Geçmişi"
                                 >
                                     <History size={18} />
                                 </button>
                                 <button
                                     onClick={() => { setCurrentItem(stock); setFormData({ ...stock }); setModalOpen(true); }}
-                                    style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer' }} title="Düzenle"
+                                    className="glass-btn glass-btn-secondary" style={{ padding: '10px', fontSize: '0.8rem' }} title="Düzenle"
                                 >
                                     Edit
                                 </button>
@@ -259,11 +259,11 @@ const StockPage = () => {
                                 />
                             </div>
 
-                            <div className="modal-actions">
-                                <button type="button" onClick={() => setModalOpen(false)} style={{ background: '#555' }}>İptal</button>
-                                <button type="submit" className="action-btn">Kaydet</button>
+                            <div className="modal-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                                <button type="button" onClick={() => setModalOpen(false)} className="glass-btn glass-btn-secondary">İptal</button>
+                                <button type="submit" className="glass-btn glass-btn-primary">Kaydet</button>
                                 {currentItem && (
-                                    <button type="button" onClick={() => handleDelete(currentItem.id)} style={{ background: '#ef4444', marginLeft: 'auto' }}>Sil</button>
+                                    <button type="button" onClick={() => handleDelete(currentItem.id)} className="glass-btn glass-btn-danger" style={{ marginLeft: 'auto' }}>Sil</button>
                                 )}
                             </div>
                         </form>
@@ -301,9 +301,9 @@ const StockPage = () => {
                                 ></textarea>
                             </div>
 
-                            <div className="modal-actions">
-                                <button type="button" onClick={() => setTransactionModalOpen(false)} style={{ background: '#555' }}>İptal</button>
-                                <button type="submit" className="action-btn" style={{ background: transactionData.type === 'out' ? '#ef4444' : '#22c55e' }}>
+                            <div className="modal-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                                <button type="button" onClick={() => setTransactionModalOpen(false)} className="glass-btn glass-btn-secondary">İptal</button>
+                                <button type="submit" className={`glass-btn ${transactionData.type === 'in' ? 'glass-btn-success' : 'glass-btn-danger'}`}>
                                     {transactionData.type === 'in' ? 'Ekle (+)' : 'Düş (-)'}
                                 </button>
                             </div>
@@ -391,14 +391,22 @@ const StockPage = () => {
                         }}>
                             <div className="form-group">
                                 <label style={{ marginBottom: '5px', display: 'block', color: '#ccc', fontSize: '0.9rem' }}>Excel Dosyası (.xlsx)</label>
-                                <input name="file" type="file" accept=".xlsx, .xls" required
-                                    className="glass-input"
-                                    style={{ lineHeight: '20px' }}
-                                />
+                                <div style={{ position: 'relative' }}>
+                                    <input id="file-upload" name="file" type="file" accept=".xlsx, .xls" required
+                                        style={{ opacity: 0, position: 'absolute', width: '100%', height: '100%', cursor: 'pointer' }}
+                                        onChange={(e) => {
+                                            const fileName = e.target.files[0]?.name;
+                                            document.getElementById('file-label-text').innerText = fileName || 'Dosya seçilmedi';
+                                        }}
+                                    />
+                                    <label htmlFor="file-upload" className="file-upload-label">
+                                        <Upload size={18} /> <span id="file-label-text">Dosya Seçin...</span>
+                                    </label>
+                                </div>
                             </div>
-                            <div className="modal-actions">
-                                <button type="button" onClick={() => setImportModalOpen(false)} style={{ background: '#555' }}>İptal</button>
-                                <button type="submit" className="action-btn">Yükle</button>
+                            <div className="modal-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
+                                <button type="button" onClick={() => setImportModalOpen(false)} className="glass-btn glass-btn-secondary">İptal</button>
+                                <button type="submit" className="glass-btn glass-btn-primary">Yükle</button>
                             </div>
                         </form>
                     </div>
