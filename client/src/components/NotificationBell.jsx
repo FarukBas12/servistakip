@@ -1,19 +1,39 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Check } from 'lucide-react';
 
+// Simple "Ding" sound (Base64 MP3)
+const notificationSound = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWgAAAA0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQZAAABAAAAAAAAAAAAAgAAAAAAAPsABBAAAAAAAAAAEFkbWluQPC7/AAA//uQZAAABAAAAAAAAAAAAAgAAAAAAAPsABBAAAAAAAAAAEFkbWluQPC7/AAA//uQZAAABAAAAAAAAAAAAAgAAAAAAAPsABBAAAAAAAAAAEFkbWluQPC7/AAA//uQZAAABAAAAAAAAAAAAAgAAAAAAAPsABBAAAAAAAAAAEFkbWluQPC7/AAA//uQZAAABAAAAAAAAAAAAAgAAAAAAAPsABBAAAAAAAAAAEFkbWluQPC7/AAA//uQZAAABAAAAAAAAAAAAAgAAAAAAAPsABBAAAAAAAAAAEFkbWluQPC7/AAA//uQZAAABAAAAAAAAAAAAAgAAAAAAAPsABBAAAAAAAAAAEFkbWluQPC7/AAA';
+// Note: real base64 needed. I will use a simple beep function or a placeholder URL if base64 is too long.
+// Better approach: Use a standard free sound URL or just browser beep if possible. 
+// Let's use a public URL for a short beep sound for reliability.
+const NOTIFICATION_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
+
 const NotificationBell = ({ placement = 'bottom-right' }) => {
     const [notifications, setNotifications] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const dropdownRef = useRef(null);
+    const audioRef = useRef(new Audio(NOTIFICATION_SOUND_URL)); // Preload audio
 
     const fetchNotifications = async () => {
         try {
             const res = await fetch('/api/notifications');
             if (res.ok) {
                 const data = await res.json();
+
+                // Calculate new unread count
+                const newUnreadCount = data.filter(n => !n.is_read).length;
+
+                // SOUND LOGIC: If unread count INCREASED, play sound
+                setUnreadCount(prevCount => {
+                    if (newUnreadCount > prevCount) {
+                        // Play sound
+                        audioRef.current.play().catch(e => console.log('Audio play failed (interaction needed):', e));
+                    }
+                    return newUnreadCount;
+                });
+
                 setNotifications(data);
-                setUnreadCount(data.filter(n => !n.is_read).length);
             }
         } catch (err) {
             console.error('Failed to fetch notifications', err);
@@ -22,7 +42,7 @@ const NotificationBell = ({ placement = 'bottom-right' }) => {
 
     useEffect(() => {
         fetchNotifications();
-        const interval = setInterval(fetchNotifications, 30000); // Poll every 30s
+        const interval = setInterval(fetchNotifications, 5000); // 5 Seconds Polling (Faster)
         return () => clearInterval(interval);
     }, []);
 
