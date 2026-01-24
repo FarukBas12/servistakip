@@ -477,6 +477,15 @@ async function runMigrations() {
         `);
         console.log(' - Checked stock_transactions table');
 
+        // FIX: Update Users Check Constraint for new roles
+        try {
+            await db.query("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check");
+            await db.query("ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('admin', 'technician', 'depocu'))");
+            console.log(' - Updated users_role_check constraint');
+        } catch (e) {
+            console.log(' - Note: Could not update user constraint (might not exist or different name)');
+        }
+
         console.log('✅ Database Schema Verified & Updated!');
     } catch (e) {
         console.error('❌ Schema update error:', e.message);
