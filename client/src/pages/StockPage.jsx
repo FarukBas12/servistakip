@@ -588,21 +588,7 @@ const StockPage = () => {
                 </div>
             )}
 
-            {/* DEBUG PANEL - Hidden on print */}
-            <div className="no-print" style={{ marginTop: '50px', padding: '10px', background: 'rgba(0,0,0,0.5)', borderRadius: '8px', fontSize: '0.7rem', color: '#888' }}>
-                <p>Debug Info:</p>
-                <p>Stocks Loaded: {stocks.length}</p>
-                <p>Loading State: {loading ? 'True' : 'False'}</p>
-                <p>Search Term: "{searchTerm}"</p>
-                <p>Filtered Count: {filteredStocks.length}</p>
-                {debugError && <p style={{ color: '#ef4444' }}>Error: {debugError}</p>}
-                <p style={{ fontWeight: 'bold' }}>
-                    Server Version: {serverVersion}
-                </p>
-                <div style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
-                    <button onClick={fetchStocks} style={{ padding: '5px', cursor: 'pointer' }}>Force Refresh</button>
-                </div>
-            </div>
+
         </div>
     );
 };
