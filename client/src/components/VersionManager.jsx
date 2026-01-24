@@ -3,7 +3,7 @@ import { Activity } from 'lucide-react';
 
 const VersionManager = () => {
     // AUTO-UPDATE LOGIC
-    const APP_VERSION = '1.3.8'; // Client Version
+    const APP_VERSION = '1.3.9'; // Client Version
     const [updateAvailable, setUpdateAvailable] = useState(false);
 
     useEffect(() => {
@@ -24,6 +24,27 @@ const VersionManager = () => {
         return () => clearInterval(interval);
     }, []);
 
+    const handleHardReload = async () => {
+        // 1. Unregister Service Workers
+        if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+                await registration.unregister();
+            }
+        }
+
+        // 2. Clear All Caches
+        if ('caches' in window) {
+            const cacheNames = await caches.keys();
+            await Promise.all(
+                cacheNames.map(name => caches.delete(name))
+            );
+        }
+
+        // 3. Force Reload
+        window.location.reload(true);
+    };
+
     // Styles for fixed position (bottom-right)
     const containerStyle = {
         position: 'fixed',
@@ -40,7 +61,7 @@ const VersionManager = () => {
         return (
             <div style={containerStyle}>
                 <button
-                    onClick={() => window.location.reload(true)}
+                    onClick={handleHardReload}
                     className="glass-btn"
                     style={{
                         background: '#ef4444', // Red
