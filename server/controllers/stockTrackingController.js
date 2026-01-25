@@ -64,6 +64,7 @@ exports.deleteStock = async (req, res) => {
 };
 
 // Add Transaction (Giriş/Çıkış)
+// Add Transaction (Giriş/Çıkış)
 exports.addTransaction = async (req, res) => {
     const client = await db.pool.connect();
     try {
@@ -72,6 +73,13 @@ exports.addTransaction = async (req, res) => {
         const amount = parseFloat(quantity);
 
         if (amount <= 0) return res.status(400).json({ message: 'Miktar 0 dan büyük olmalı.' });
+
+        // Get Stock Details for Price Calculation
+        const stockRes = await client.query('SELECT * FROM stocks WHERE id = $1', [stock_id]);
+        if (stockRes.rows.length === 0) {
+            return res.status(404).json({ message: 'Stok bulunamadı.' });
+        }
+        const stock = stockRes.rows[0];
 
         await client.query('BEGIN');
 
@@ -93,6 +101,27 @@ exports.addTransaction = async (req, res) => {
         if (updateRes.rows[0].quantity < 0) {
             await client.query('ROLLBACK');
             return res.status(400).json({ message: 'Yetersiz stok!' });
+        }
+
+        // 3. AUTOMATION: If Stock Out + Project Selected -> Add to Project Expenses
+        if (type === 'out' && project_id) {
+            const purchasePrice = parseFloat(stock.purchase_price) || 0;
+            const cost = amount * purchasePrice;
+
+            if (cost > 0) {
+                await client.query(
+                    `INSERT INTO project_expenses 
+                    (project_id, amount, category, description, expense_date) 
+                    VALUES ($1, $2, $3, $4, CURRENT_DATE)`,
+                    [
+                        project_id,
+                        cost,
+                        'Malzeme',
+                        `Stoktan Kullanım: ${stock.name} (${amount} ${stock.unit}) - Birim Fiyat: ${purchasePrice}`
+                    ]
+                );
+                console.log(`Auto-Expense added: Project ${project_id}, Amount ${cost}`);
+            }
         }
 
         await client.query('COMMIT');
