@@ -90,7 +90,7 @@ router.post('/:id/files', upload.single('file'), async (req, res) => {
 
     try {
         // Determine resource type based on extension
-        const isRaw = req.file.originalname.match(/\.(dwg|dxf|xls|xlsx|doc|docx)$/i);
+        const isRaw = req.file.originalname.match(/\.(dwg|dxf|xls|xlsx|doc|docx|zip|rar|7z)$/i);
         const resourceType = isRaw ? 'raw' : 'auto';
 
         const uploadRes = await cloudinary.uploader.upload(req.file.path, {
