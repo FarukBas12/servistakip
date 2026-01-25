@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'Servis Takip',
-        short_name: 'Servis',
+        name: 'Opervio',
+        short_name: 'Opervio',
         description: 'Saha Servis ve Stok Takip Uygulaması',
         theme_color: '#0f172a',
         background_color: '#0f172a',
