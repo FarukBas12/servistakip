@@ -166,22 +166,45 @@ const ProjectDetail = () => {
         return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount || 0);
     };
 
-    const handleDownload = async (url, filename) => {
+    const handleDownload = async (url, filename, fileType) => {
         try {
             const response = await fetch(url);
             const blob = await response.blob();
             const blobUrl = window.URL.createObjectURL(blob);
 
+            // Determine Extension
+            let finalName = filename || 'download';
+            if (!finalName.includes('.')) {
+                // Try from fileType (e.g. 'image/png')
+                if (fileType) {
+                    if (fileType.includes('sheet') || fileType.includes('excel')) finalName += '.xlsx';
+                    else if (fileType.includes('pdf')) finalName += '.pdf';
+                    else if (fileType.includes('word') || fileType.includes('document')) finalName += '.docx';
+                    else if (fileType.includes('jpeg') || fileType.includes('jpg')) finalName += '.jpg';
+                    else if (fileType.includes('png')) finalName += '.png';
+                    else if (fileType.includes('dwg')) finalName += '.dwg';
+                    else if (fileType.includes('dxf')) finalName += '.dxf';
+                    else if (fileType.includes('text') || fileType.includes('plain')) finalName += '.txt';
+                }
+                // Fallback: Try from URL
+                if (!finalName.includes('.')) {
+                    const extFromUrl = url.split('.').pop();
+                    if (extFromUrl && extFromUrl.length < 5) {
+                        finalName += '.' + extFromUrl;
+                    }
+                }
+            }
+
             const link = document.createElement('a');
             link.href = blobUrl;
-            link.download = filename || 'download';
+            link.download = finalName;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(blobUrl);
         } catch (error) {
             console.error('Download failed:', error);
-            // Fallback to direct opening if fetch fails (e.g. CORS)
+            // Fallback
             window.open(url, '_blank');
         }
     };
@@ -300,7 +323,7 @@ const ProjectDetail = () => {
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                                     <button
-                                        onClick={() => handleDownload(file.file_url, file.file_name)}
+                                        onClick={() => handleDownload(file.file_url, file.file_name, file.file_type)}
                                         style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 10px', background: 'rgba(255,255,255,0.1)', borderRadius: '5px', color: 'white', border: 'none', cursor: 'pointer', fontSize: '0.8rem' }}>
                                         <Download size={14} /> İndir
                                     </button>
