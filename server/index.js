@@ -425,6 +425,9 @@ async function runMigrations() {
         `);
         console.log(' - Checked project_expenses table');
 
+        await db.query("ALTER TABLE project_expenses ADD COLUMN IF NOT EXISTS stock_transaction_id INTEGER REFERENCES stock_transactions(id) ON DELETE SET NULL");
+        console.log(' - Checked stock_transaction_id in project_expenses');
+
         // Check app_settings
         await db.query(`
             CREATE TABLE IF NOT EXISTS app_settings (

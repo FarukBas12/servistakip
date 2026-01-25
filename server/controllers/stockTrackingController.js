@@ -84,11 +84,12 @@ exports.addTransaction = async (req, res) => {
         await client.query('BEGIN');
 
         // 1. Record Transaction
-        await client.query(
+        const transRes = await client.query(
             `INSERT INTO stock_transactions (stock_id, user_id, type, quantity, project_id, description) 
-             VALUES ($1, $2, $3, $4, $5, $6)`,
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
             [stock_id, user_id, type, amount, project_id || null, description]
         );
+        const transId = transRes.rows[0].id;
 
         // 2. Update Stock Quantity
         let quantityChange = type === 'in' ? amount : -amount;
@@ -111,13 +112,14 @@ exports.addTransaction = async (req, res) => {
             if (cost > 0) {
                 await client.query(
                     `INSERT INTO project_expenses 
-                    (project_id, amount, category, description, expense_date) 
-                    VALUES ($1, $2, $3, $4, CURRENT_DATE)`,
+                    (project_id, amount, category, description, expense_date, stock_transaction_id) 
+                    VALUES ($1, $2, $3, $4, CURRENT_DATE, $5)`,
                     [
                         project_id,
                         cost,
                         'Malzeme',
-                        `Stoktan Kullanım: ${stock.name} (${amount} ${stock.unit}) - Birim Fiyat: ${purchasePrice}`
+                        `Stoktan Kullanım: ${stock.name} (${amount} ${stock.unit}) - Birim Fiyat: ${purchasePrice}`,
+                        transId
                     ]
                 );
                 console.log(`Auto-Expense added: Project ${project_id}, Amount ${cost}`);

@@ -174,15 +174,65 @@ router.put('/:id/expenses/:expenseId', async (req, res) => {
     }
 });
 
-// DELETE Expense
+// DELETE Expense (with Stock Rollback)
 router.delete('/:id/expenses/:expenseId', async (req, res) => {
     const { expenseId } = req.params;
+    const client = await db.pool.connect();
+
     try {
-        await db.query('DELETE FROM project_expenses WHERE id = $1', [expenseId]);
-        res.json({ message: 'Gider silindi' });
+        await client.query('BEGIN');
+
+        // 1. Get Expense Details
+        const expenseRes = await client.query('SELECT * FROM project_expenses WHERE id = $1', [expenseId]);
+        if (expenseRes.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ message: 'Gider bulunamadı' });
+        }
+        const expense = expenseRes.rows[0];
+
+        // 2. Check for Linked Stock Transaction
+        if (expense.stock_transaction_id) {
+            const transRes = await client.query('SELECT * FROM stock_transactions WHERE id = $1', [expense.stock_transaction_id]);
+
+            if (transRes.rows.length > 0) {
+                const trans = transRes.rows[0];
+                console.log(`Rolling back stock transaction: ${trans.id} for item ${trans.stock_id}`);
+
+                // 2a. Add Stock Back (Reverse the 'out' operation)
+                await client.query(
+                    'UPDATE stocks SET quantity = quantity + $1 WHERE id = $2',
+                    [trans.quantity, trans.stock_id] // Add quantity back
+                );
+
+                // 2b. Log the Refund Transaction (Optional but good for history)
+                // We don't delete the old transaction, we add a compensating one or leave it be.
+                // Let's add a log so user knows why stock increased.
+                await client.query(
+                    `INSERT INTO stock_transactions (stock_id, user_id, type, quantity, project_id, description) 
+                     VALUES ($1, $2, 'in', $3, $4, $5)`,
+                    [
+                        trans.stock_id,
+                        trans.user_id,
+                        trans.quantity,
+                        trans.project_id,
+                        `İptal: Gider Silindi (Ref #${expenseId})`
+                    ]
+                );
+            }
+        }
+
+        // 3. Delete the Expense
+        await client.query('DELETE FROM project_expenses WHERE id = $1', [expenseId]);
+
+        await client.query('COMMIT');
+        res.json({ message: 'Gider silindi ve ilgili stok iade edildi.' });
+
     } catch (err) {
+        await client.query('ROLLBACK');
         console.error(err);
         res.status(500).send('Server Error');
+    } finally {
+        client.release();
     }
 });
 
