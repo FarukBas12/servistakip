@@ -169,10 +169,21 @@ const ProjectDetail = () => {
     const handleDownload = (url, filename, fileType) => {
         if (!url) return;
 
-        // Determine correct extension if missing
         let finalName = filename || 'download';
-        if (!finalName.includes('.')) {
-            if (fileType) {
+
+        // Check if filename already has a valid extension (2-4 chars)
+        const hasExtension = /\.[a-z0-9]{2,5}$/i.test(finalName);
+
+        if (!hasExtension) {
+            // 1. Try to get extension from URL (ignore query params)
+            const urlPath = url.split('?')[0];
+            const extFromUrl = urlPath.split('.').pop();
+
+            if (extFromUrl && extFromUrl.length >= 2 && extFromUrl.length <= 4) {
+                finalName += `.${extFromUrl}`;
+            }
+            // 2. Fallback to fileType matching
+            else if (fileType) {
                 if (fileType.includes('sheet') || fileType.includes('excel')) finalName += '.xlsx';
                 else if (fileType.includes('pdf')) finalName += '.pdf';
                 else if (fileType.includes('word') || fileType.includes('document')) finalName += '.docx';
@@ -180,34 +191,25 @@ const ProjectDetail = () => {
                 else if (fileType.includes('png')) finalName += '.png';
                 else if (fileType.includes('dwg')) finalName += '.dwg';
                 else if (fileType.includes('dxf')) finalName += '.dxf';
-                else if (fileType.includes('text') || fileType.includes('plain')) finalName += '.txt';
-            }
-            // Fallback: Try from URL
-            if (!finalName.includes('.')) {
-                const extFromUrl = url.split('.').pop();
-                if (extFromUrl && extFromUrl.length < 5) {
-                    finalName += '.' + extFromUrl;
-                }
+                else if (fileType.includes('zip')) finalName += '.zip';
+                else if (fileType.includes('rar')) finalName += '.rar';
             }
         }
 
-        // CLOUDINARY LOGIC
+        // Cloudinary Logic
         if (url.includes('cloudinary.com') && url.includes('/upload/')) {
-            // Cloudinary supports forcing download via URL transformation: /fl_attachment:filename/
-            // We need to insert it after /upload/
-
-            // Clean filename for URL (Cloudinary might not like spaces/special chars in transformation)
-            // Ideally we keep it simple or URL encode it.
-            // Cloudinary syntax: fl_attachment:my_file_name
             const cleanName = encodeURIComponent(finalName);
-
             const newUrl = url.replace('/upload/', `/upload/fl_attachment:${cleanName}/`);
-
-            // Open directly - browser will see Content-Disposition: attachment
             window.open(newUrl, '_self');
         } else {
-            // Non-Cloudinary Fallback
-            window.open(url, '_blank');
+            // Fallback for non-cloudinary
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = finalName;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     };
 

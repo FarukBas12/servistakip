@@ -4,6 +4,7 @@ const { cloudinary } = require('../utils/cloudinary');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const fs = require('fs');
+const path = require('path');
 
 // GET All Projects
 router.get('/', async (req, res) => {
@@ -103,9 +104,16 @@ router.post('/:id/files', upload.single('file'), async (req, res) => {
         // Cleanup local file
         fs.unlinkSync(req.file.path);
 
+        // Ensure file_name has the correct extension
+        const originalExt = path.extname(req.file.originalname); // e.g. .zip
+        let finalFileName = file_name || req.file.originalname;
+        if (originalExt && !finalFileName.toLowerCase().endsWith(originalExt.toLowerCase())) {
+            finalFileName += originalExt;
+        }
+
         const result = await db.query(
             'INSERT INTO project_files (project_id, file_url, file_type, file_name) VALUES ($1, $2, $3, $4) RETURNING *',
-            [id, uploadRes.secure_url, uploadRes.format || resourceType, file_name || req.file.originalname]
+            [id, uploadRes.secure_url, uploadRes.format || resourceType, finalFileName]
         );
 
         res.json(result.rows[0]);
