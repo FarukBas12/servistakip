@@ -166,6 +166,26 @@ const ProjectDetail = () => {
         return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount || 0);
     };
 
+    const handleDownload = async (url, filename) => {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = filename || 'download';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error('Download failed:', error);
+            // Fallback to direct opening if fetch fails (e.g. CORS)
+            window.open(url, '_blank');
+        }
+    };
+
     if (loading) return <div style={{ padding: '20px', color: 'white' }}>Yükleniyor...</div>;
 
     const totalExpenses = expenses.reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
@@ -279,9 +299,11 @@ const ProjectDetail = () => {
                                     {new Date(file.uploaded_at).toLocaleDateString()}
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                                    <a href={file.file_url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 10px', background: 'rgba(255,255,255,0.1)', borderRadius: '5px', color: 'white', textDecoration: 'none', fontSize: '0.8rem' }}>
+                                    <button
+                                        onClick={() => handleDownload(file.file_url, file.file_name)}
+                                        style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 10px', background: 'rgba(255,255,255,0.1)', borderRadius: '5px', color: 'white', border: 'none', cursor: 'pointer', fontSize: '0.8rem' }}>
                                         <Download size={14} /> İndir
-                                    </a>
+                                    </button>
                                     <button
                                         onClick={async () => {
                                             if (!window.confirm('Bu dosyayı silmek istediğinize emin misiniz?')) return;
