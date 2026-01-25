@@ -166,45 +166,47 @@ const ProjectDetail = () => {
         return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount || 0);
     };
 
-    const handleDownload = async (url, filename, fileType) => {
-        try {
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
+    const handleDownload = (url, filename, fileType) => {
+        if (!url) return;
 
-            // Determine Extension
-            let finalName = filename || 'download';
+        // Determine correct extension if missing
+        let finalName = filename || 'download';
+        if (!finalName.includes('.')) {
+            if (fileType) {
+                if (fileType.includes('sheet') || fileType.includes('excel')) finalName += '.xlsx';
+                else if (fileType.includes('pdf')) finalName += '.pdf';
+                else if (fileType.includes('word') || fileType.includes('document')) finalName += '.docx';
+                else if (fileType.includes('jpeg') || fileType.includes('jpg')) finalName += '.jpg';
+                else if (fileType.includes('png')) finalName += '.png';
+                else if (fileType.includes('dwg')) finalName += '.dwg';
+                else if (fileType.includes('dxf')) finalName += '.dxf';
+                else if (fileType.includes('text') || fileType.includes('plain')) finalName += '.txt';
+            }
+            // Fallback: Try from URL
             if (!finalName.includes('.')) {
-                // Try from fileType (e.g. 'image/png')
-                if (fileType) {
-                    if (fileType.includes('sheet') || fileType.includes('excel')) finalName += '.xlsx';
-                    else if (fileType.includes('pdf')) finalName += '.pdf';
-                    else if (fileType.includes('word') || fileType.includes('document')) finalName += '.docx';
-                    else if (fileType.includes('jpeg') || fileType.includes('jpg')) finalName += '.jpg';
-                    else if (fileType.includes('png')) finalName += '.png';
-                    else if (fileType.includes('dwg')) finalName += '.dwg';
-                    else if (fileType.includes('dxf')) finalName += '.dxf';
-                    else if (fileType.includes('text') || fileType.includes('plain')) finalName += '.txt';
-                }
-                // Fallback: Try from URL
-                if (!finalName.includes('.')) {
-                    const extFromUrl = url.split('.').pop();
-                    if (extFromUrl && extFromUrl.length < 5) {
-                        finalName += '.' + extFromUrl;
-                    }
+                const extFromUrl = url.split('.').pop();
+                if (extFromUrl && extFromUrl.length < 5) {
+                    finalName += '.' + extFromUrl;
                 }
             }
+        }
 
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = finalName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(blobUrl);
-        } catch (error) {
-            console.error('Download failed:', error);
-            // Fallback
+        // CLOUDINARY LOGIC
+        if (url.includes('cloudinary.com') && url.includes('/upload/')) {
+            // Cloudinary supports forcing download via URL transformation: /fl_attachment:filename/
+            // We need to insert it after /upload/
+
+            // Clean filename for URL (Cloudinary might not like spaces/special chars in transformation)
+            // Ideally we keep it simple or URL encode it.
+            // Cloudinary syntax: fl_attachment:my_file_name
+            const cleanName = encodeURIComponent(finalName);
+
+            const newUrl = url.replace('/upload/', `/upload/fl_attachment:${cleanName}/`);
+
+            // Open directly - browser will see Content-Disposition: attachment
+            window.open(newUrl, '_self');
+        } else {
+            // Non-Cloudinary Fallback
             window.open(url, '_blank');
         }
     };
