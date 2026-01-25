@@ -37,7 +37,8 @@ const Login = () => {
         <div className="login-container">
             <form onSubmit={handleSubmit} className="glass-panel login-form">
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                    <img src="/logo.png" alt="App Logo" className="app-logo" style={{ width: '160px', marginBottom: '1.5rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.3))' }} />
+                    <img src="/logo.png" alt="App Logo" className="app-logo" style={{ width: '160px', marginBottom: '1rem', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.3))' }} />
+                    <h1 style={{ fontFamily: 'Doto, sans-serif', fontSize: '2.5rem', margin: '0 0 20px 0', color: '#fff', letterSpacing: '2px' }}>M.B-Tech</h1>
                     <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>Giriş Yap</h2>
                 </div>
                 {error && <p className="error" style={{ color: '#ff6b6b', textAlign: 'center' }}>{error}</p>}
