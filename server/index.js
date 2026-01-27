@@ -104,6 +104,7 @@ app.use('/api/subs', require('./routes/subs')); // Unified Route
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/stock-tracking', require('./routes/stockTracking')); // Distinct from 'stores'
 app.use('/api/backup', require('./routes/backup')); // Backup Route
+app.use('/api/suppliers', require('./routes/suppliers')); // New Suppliers Route
 // app.use('/api/subcontractors', ...); // REMOVED invalid route
 
 // Debug / Health Check Endpoint
@@ -431,6 +432,20 @@ async function runMigrations() {
             );
         `);
         console.log(' - Checked project_teams table');
+
+        // NEW: Suppliers Table (Tedarikçiler)
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS suppliers (
+                id SERIAL PRIMARY KEY,
+                company_name VARCHAR(255) NOT NULL,
+                contact_name VARCHAR(255),
+                email VARCHAR(255),
+                phone VARCHAR(50),
+                supply_items TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log(' - Checked suppliers table');
 
         // NEW: Project Expenses (Giderler)
         await db.query(`

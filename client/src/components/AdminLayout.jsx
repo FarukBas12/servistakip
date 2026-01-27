@@ -18,6 +18,7 @@ import ProjectDashboard from '../pages/ProjectDashboard';
 import ProjectDetail from '../pages/ProjectDetail';
 import StockPage from '../pages/StockPage'; // NEW
 import Settings from '../pages/Settings';
+import Suppliers from '../pages/Suppliers'; // NEW
 
 
 const AdminLayout = () => {
@@ -43,6 +44,7 @@ const AdminLayout = () => {
                     <Route path="/projects" element={<ProjectDashboard />} />
                     <Route path="/projects/:id" element={<ProjectDetail />} />
                     <Route path="/stocks" element={<StockPage />} />
+                    <Route path="/suppliers" element={<Suppliers />} />
                 </Routes>
             </div>
         </div>
