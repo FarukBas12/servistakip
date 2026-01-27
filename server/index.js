@@ -421,6 +421,17 @@ async function runMigrations() {
         `);
         console.log(' - Checked project_files table');
 
+        // NEW: Project Teams (Ekip)
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS project_teams (
+                project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (project_id, user_id)
+            );
+        `);
+        console.log(' - Checked project_teams table');
+
         // NEW: Project Expenses (Giderler)
         await db.query(`
             CREATE TABLE IF NOT EXISTS project_expenses (

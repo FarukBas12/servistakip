@@ -268,6 +268,59 @@ router.delete('/:id', async (req, res) => {
         await db.query('DELETE FROM projects WHERE id = $1', [req.params.id]);
         res.json({ message: 'Project deleted' });
     } catch (err) {
+    }
+});
+
+// --- TEAM MANAGEMENT ---
+
+// GET Assigned Users
+router.get('/:id/team', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await db.query(`
+            SELECT u.id, u.username, u.role, pt.assigned_at 
+            FROM project_teams pt
+            JOIN users u ON pt.user_id = u.id
+            WHERE pt.project_id = $1
+            ORDER BY u.username ASC
+        `, [id]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+// ADD User to Project
+router.post('/:id/team', async (req, res) => {
+    try {
+        const { id } = req.params; // project_id
+        const { user_id } = req.body;
+
+        await db.query(`
+            INSERT INTO project_teams (project_id, user_id)
+            VALUES ($1, $2)
+            ON CONFLICT (project_id, user_id) DO NOTHING
+        `, [id, user_id]);
+
+        res.json({ message: 'User assigned' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+// REMOVE User from Project
+router.delete('/:id/team/:userId', async (req, res) => {
+    try {
+        const { id, userId } = req.params;
+        await db.query(`
+            DELETE FROM project_teams 
+            WHERE project_id = $1 AND user_id = $2
+        `, [id, userId]);
+        res.json({ message: 'User removed from team' });
+    } catch (err) {
+        console.error(err);
         res.status(500).send('Server Error');
     }
 });
