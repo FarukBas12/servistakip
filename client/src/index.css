@@ -522,4 +522,81 @@ h3 {
         padding-bottom: 80px !important;
         /* Bottom Bar height space */
     }
+
+    /* --- GLOBAL MOBILE FIXES --- */
+
+    /* 1. Typography Scaling */
+    h1 {
+        font-size: 1.5rem !important;
+    }
+
+    h2 {
+        font-size: 1.25rem !important;
+    }
+
+    h3 {
+        font-size: 1.1rem !important;
+    }
+
+    p,
+    span,
+    div {
+        font-size: 0.95rem;
+    }
+
+    /* 2. Layout & Padding */
+    .dashboard {
+        padding: 15px !important;
+        margin-bottom: 80px !important;
+        /* Space for bottom nav */
+    }
+
+    .glass-panel {
+        padding: 15px !important;
+        border-radius: 16px !important;
+    }
+
+    /* 3. Grid Stacking (Force inputs to stack) */
+    .dashboard>div[style*="grid"],
+    .glass-panel>div[style*="grid"],
+    form>div[style*="grid"] {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
+
+    /* 4. Flex Wrapping (Force buttons/actions to wrap) */
+    .dashboard>div[style*="flex"],
+    .glass-panel>div[style*="flex"] {
+        flex-wrap: wrap !important;
+    }
+
+    /* 5. Tables - Horizontal Scroll */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Optional: Fix table width to prevent shrinking */
+    th,
+    td {
+        min-width: 100px;
+        /* Minimum width for readability */
+    }
+
+    /* 6. Inputs Full Width */
+    .glass-input,
+    select,
+    button {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* 7. Modal Fixes */
+    div[style*="fixed"]>.glass-panel {
+        width: 90% !important;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
 }
