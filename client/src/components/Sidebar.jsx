@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Inbox, Map, FileBarChart, Users, LogOut, Activity, FolderArchive, Wallet, Database, Shield, FolderOpen, Package } from 'lucide-react'; // Added Package
+import { LayoutDashboard, Inbox, Map, FileBarChart, Users, LogOut, Activity, FolderArchive, Wallet, Database, Shield, FolderOpen, Package, Truck } from 'lucide-react'; // Added Truck
 import NotificationBell from './NotificationBell';
 
 const Sidebar = () => {
@@ -15,7 +15,7 @@ const Sidebar = () => {
         { path: '/admin', icon: <LayoutDashboard size={24} />, label: 'Panel', exact: true },
 
         { path: '/admin/pool', icon: <Inbox size={24} />, label: 'Servisler' },
-        { path: '/admin/suppliers', icon: <Package size={24} />, label: 'Tedarikçiler' },
+        { path: '/admin/suppliers', icon: <Truck size={24} />, label: 'Tedarikçiler' },
         { path: '/admin/subs', icon: <Users size={24} />, label: 'Taşeronlar' },
         // Hide Projects for Technicians
         ...(!isTech ? [{ path: '/admin/projects', icon: <FolderOpen size={24} />, label: 'Projeler' }] : []),
