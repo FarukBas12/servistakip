@@ -63,7 +63,7 @@ const ProjectDetail = () => {
                 status: res.data.project.status,
                 tender_price: res.data.project.tender_price || '',
                 progress_payment: res.data.project.progress_payment || ''
-                progress_payment: res.data.project.progress_payment || ''
+
             });
 
             // Fetch Team
@@ -538,88 +538,87 @@ const ProjectDetail = () => {
                         </form>
                     </div>
                 </div>
-                </div>
-    )
-}
+            )}
 
-{/* TEAM MODAL */ }
-{
-    showTeamModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }}>
-            <div style={{ background: '#1e1e1e', padding: '30px', borderRadius: '15px', width: '400px', border: '1px solid #333', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
-                <h3>Personel Seçin</h3>
-                <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {allUsers.map(u => (
-                        <div key={u.id} onClick={() => handleAddMember(u.id)} style={{ padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid transparent' }}
-                            onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
-                            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'transparent'}>
-                            <span style={{ fontWeight: 'bold' }}>{u.username}</span>
-                            <span style={{ fontSize: '0.8rem', color: '#aaa' }}>{u.role}</span>
-                        </div>
-                    ))}
-                    {allUsers.length === 0 && <p style={{ color: '#aaa', textAlign: 'center' }}>Eklenebilecek personel bulunamadı.</p>}
-                </div>
-                <button onClick={() => setShowTeamModal(false)} style={{ marginTop: '20px', width: '100%', padding: '10px', background: '#444', border: 'none', color: 'white', borderRadius: '5px', cursor: 'pointer' }}>Kapat</button>
-            </div>
-        </div>
-    )
-}
 
-{/* PREVIEW MODAL */ }
-{
-    showPreviewModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.9)', zIndex: 1100, overflowY: 'auto' }}>
-            <div style={{ width: '800px', margin: '50px auto', background: 'white', color: 'black', padding: '40px', borderRadius: '5px', boxShadow: '0 0 20px rgba(0,0,0,0.5)' }}>
-                <div className="no-print" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-                    <button onClick={handlePrint} style={{ marginRight: '10px', padding: '10px 20px', background: '#333', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}><Printer size={16} /> Yazdır</button>
-                    <button onClick={() => setShowPreviewModal(false)} style={{ padding: '10px', background: '#e74c3c', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}><X size={16} /></button>
-                </div>
-
-                <div className="print-section" style={{ color: '#000' }}>
-                    <h1 style={{ borderBottom: '2px solid #333', paddingBottom: '10px', color: '#000', background: 'none', WebkitTextFillColor: 'initial' }}>{project.name}</h1>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontSize: '0.9rem', color: '#000' }}>
-                        <span><strong>Tarih:</strong> {new Date(project.start_date).toLocaleDateString()} - {new Date(project.end_date).toLocaleDateString()}</span>
-                        <span><strong>Durum:</strong> {project.status}</span>
-                    </div>
-                    <p style={{ marginBottom: '30px', padding: '15px', background: '#f5f5f5', borderRadius: '5px', color: '#000' }}>{project.description}</p>
-
-                    <h3 style={{ color: '#000', background: 'none', WebkitTextFillColor: 'initial' }}>Finansal Özet</h3>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '30px', border: '1px solid #ddd', padding: '10px' }}>
-                        <div><strong style={{ display: 'block', fontSize: '0.8rem', color: '#555' }}>İhale Bedeli</strong> {formatCurrency(project.tender_price)}</div>
-                        <div><strong style={{ display: 'block', fontSize: '0.8rem', color: '#555' }}>Hakediş</strong> {formatCurrency(project.progress_payment)}</div>
-                        <div><strong style={{ display: 'block', fontSize: '0.8rem', color: '#555' }}>Toplam Gider</strong> {formatCurrency(totalExpenses)}</div>
-                        <div style={{ color: isProfitable ? 'green' : 'red' }}>
-                            <strong style={{ display: 'block', fontSize: '0.8rem', color: '#555' }}>Net Kar</strong> {formatCurrency(netProfit)}
+            {/* TEAM MODAL */}
+            {
+                showTeamModal && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }}>
+                        <div style={{ background: '#1e1e1e', padding: '30px', borderRadius: '15px', width: '400px', border: '1px solid #333', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+                            <h3>Personel Seçin</h3>
+                            <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {allUsers.map(u => (
+                                    <div key={u.id} onClick={() => handleAddMember(u.id)} style={{ padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid transparent' }}
+                                        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
+                                        onMouseLeave={(e) => e.currentTarget.style.borderColor = 'transparent'}>
+                                        <span style={{ fontWeight: 'bold' }}>{u.username}</span>
+                                        <span style={{ fontSize: '0.8rem', color: '#aaa' }}>{u.role}</span>
+                                    </div>
+                                ))}
+                                {allUsers.length === 0 && <p style={{ color: '#aaa', textAlign: 'center' }}>Eklenebilecek personel bulunamadı.</p>}
+                            </div>
+                            <button onClick={() => setShowTeamModal(false)} style={{ marginTop: '20px', width: '100%', padding: '10px', background: '#444', border: 'none', color: 'white', borderRadius: '5px', cursor: 'pointer' }}>Kapat</button>
                         </div>
                     </div>
+                )
+            }
 
-                    <h3 style={{ color: '#000', background: 'none', WebkitTextFillColor: 'initial' }}>Gider Listesi</h3>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', color: '#000' }}>
-                        <thead>
-                            <tr style={{ background: '#333', color: 'white' }}>
-                                <th style={{ padding: '8px', textAlign: 'left', color: '#fff' }}>Tarih</th>
-                                <th style={{ padding: '8px', textAlign: 'left', color: '#fff' }}>Kategori</th>
-                                <th style={{ padding: '8px', textAlign: 'left', color: '#fff' }}>Açıklama</th>
-                                <th style={{ padding: '8px', textAlign: 'right', color: '#fff' }}>Tutar</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {expenses.map(exp => (
-                                <tr key={exp.id} style={{ borderBottom: '1px solid #ddd' }}>
-                                    <td style={{ padding: '8px', color: '#000' }}>{new Date(exp.expense_date).toLocaleDateString()}</td>
-                                    <td style={{ padding: '8px', color: '#000' }}>{exp.category}</td>
-                                    <td style={{ padding: '8px', color: '#000' }}>{exp.description}</td>
-                                    <td style={{ padding: '8px', textAlign: 'right', color: '#000' }}>{formatCurrency(exp.amount)}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    )
-}
+            {/* PREVIEW MODAL */}
+            {
+                showPreviewModal && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.9)', zIndex: 1100, overflowY: 'auto' }}>
+                        <div style={{ width: '800px', margin: '50px auto', background: 'white', color: 'black', padding: '40px', borderRadius: '5px', boxShadow: '0 0 20px rgba(0,0,0,0.5)' }}>
+                            <div className="no-print" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+                                <button onClick={handlePrint} style={{ marginRight: '10px', padding: '10px 20px', background: '#333', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}><Printer size={16} /> Yazdır</button>
+                                <button onClick={() => setShowPreviewModal(false)} style={{ padding: '10px', background: '#e74c3c', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}><X size={16} /></button>
+                            </div>
+
+                            <div className="print-section" style={{ color: '#000' }}>
+                                <h1 style={{ borderBottom: '2px solid #333', paddingBottom: '10px', color: '#000', background: 'none', WebkitTextFillColor: 'initial' }}>{project.name}</h1>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontSize: '0.9rem', color: '#000' }}>
+                                    <span><strong>Tarih:</strong> {new Date(project.start_date).toLocaleDateString()} - {new Date(project.end_date).toLocaleDateString()}</span>
+                                    <span><strong>Durum:</strong> {project.status}</span>
+                                </div>
+                                <p style={{ marginBottom: '30px', padding: '15px', background: '#f5f5f5', borderRadius: '5px', color: '#000' }}>{project.description}</p>
+
+                                <h3 style={{ color: '#000', background: 'none', WebkitTextFillColor: 'initial' }}>Finansal Özet</h3>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '30px', border: '1px solid #ddd', padding: '10px' }}>
+                                    <div><strong style={{ display: 'block', fontSize: '0.8rem', color: '#555' }}>İhale Bedeli</strong> {formatCurrency(project.tender_price)}</div>
+                                    <div><strong style={{ display: 'block', fontSize: '0.8rem', color: '#555' }}>Hakediş</strong> {formatCurrency(project.progress_payment)}</div>
+                                    <div><strong style={{ display: 'block', fontSize: '0.8rem', color: '#555' }}>Toplam Gider</strong> {formatCurrency(totalExpenses)}</div>
+                                    <div style={{ color: isProfitable ? 'green' : 'red' }}>
+                                        <strong style={{ display: 'block', fontSize: '0.8rem', color: '#555' }}>Net Kar</strong> {formatCurrency(netProfit)}
+                                    </div>
+                                </div>
+
+                                <h3 style={{ color: '#000', background: 'none', WebkitTextFillColor: 'initial' }}>Gider Listesi</h3>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', color: '#000' }}>
+                                    <thead>
+                                        <tr style={{ background: '#333', color: 'white' }}>
+                                            <th style={{ padding: '8px', textAlign: 'left', color: '#fff' }}>Tarih</th>
+                                            <th style={{ padding: '8px', textAlign: 'left', color: '#fff' }}>Kategori</th>
+                                            <th style={{ padding: '8px', textAlign: 'left', color: '#fff' }}>Açıklama</th>
+                                            <th style={{ padding: '8px', textAlign: 'right', color: '#fff' }}>Tutar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {expenses.map(exp => (
+                                            <tr key={exp.id} style={{ borderBottom: '1px solid #ddd' }}>
+                                                <td style={{ padding: '8px', color: '#000' }}>{new Date(exp.expense_date).toLocaleDateString()}</td>
+                                                <td style={{ padding: '8px', color: '#000' }}>{exp.category}</td>
+                                                <td style={{ padding: '8px', color: '#000' }}>{exp.description}</td>
+                                                <td style={{ padding: '8px', textAlign: 'right', color: '#000' }}>{formatCurrency(exp.amount)}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
         </div >
     );
 };
