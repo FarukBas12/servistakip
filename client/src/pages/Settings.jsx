@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
-import { Save, Lock, Shield, Database } from 'lucide-react';
+import { Save, Lock, Shield, Database, Users, Trash2, PlusCircle } from 'lucide-react';
 
 const Settings = () => {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(true);
 
+    // User Management State
+    const [users, setUsers] = useState([]);
+    const [formData, setFormData] = useState({ username: '', password: '', role: 'technician' });
+
     useEffect(() => {
         fetchSettings();
+        fetchUsers();
     }, []);
 
     const fetchSettings = async () => {
@@ -15,6 +20,40 @@ const Settings = () => {
             const res = await api.get('/subs/settings/all');
             setPassword(res.data.delete_password);
         } catch (err) { console.error(err); } finally { setLoading(false); }
+    };
+
+    const fetchUsers = async () => {
+        try {
+            const res = await api.get('/auth/users');
+            setUsers(res.data);
+        } catch (err) { console.error(err); }
+    };
+
+    const handleUserChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleCreateUser = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/auth/register', formData);
+            alert('Kullanıcı oluşturuldu!');
+            setFormData({ username: '', password: '', role: 'technician' });
+            fetchUsers();
+        } catch (err) {
+            alert('Hata: Kullanıcı oluşturulamadı.');
+        }
+    };
+
+    const handleDeleteUser = async (id) => {
+        if (window.confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) {
+            try {
+                await api.delete(`/auth/${id}`);
+                fetchUsers();
+            } catch (err) {
+                alert('Silme başarısız');
+            }
+        }
     };
 
     const handleSave = async () => {
@@ -31,6 +70,84 @@ const Settings = () => {
             <h2 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Shield size={28} color="#4caf50" />
                 Güvenlik Ayarları
+            </h2>
+
+            {/* USER MANAGEMENT SECTION */}
+            <div className="glass-panel" style={{ padding: '30px', marginBottom: '40px' }}>
+                <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Users size={20} />
+                    Kullanıcı Yönetimi
+                </h3>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }}>
+                    {/* Create User */}
+                    <div>
+                        <h4 style={{ marginBottom: '15px', color: '#aaa' }}>Yeni Kullanıcı Ekle</h4>
+                        <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <input
+                                className="glass-input"
+                                name="username"
+                                placeholder="Kullanıcı Adı"
+                                value={formData.username}
+                                onChange={handleUserChange}
+                                required
+                            />
+                            <input
+                                className="glass-input"
+                                name="password"
+                                type="password"
+                                placeholder="Şifre"
+                                value={formData.password}
+                                onChange={handleUserChange}
+                                required
+                            />
+                            <select
+                                className="glass-input"
+                                name="role"
+                                value={formData.role}
+                                onChange={handleUserChange}
+                                style={{ background: 'rgba(255,255,255,0.05)', color: 'white' }}
+                            >
+                                <option value="technician" style={{ color: 'black' }}>Teknisyen</option>
+                                <option value="depocu" style={{ color: 'black' }}>Depocu</option>
+                                <option value="admin" style={{ color: 'black' }}>Admin</option>
+                            </select>
+                            <button type="submit" className="glass-btn" style={{ background: 'rgba(76, 175, 80, 0.3)', justifyContent: 'center' }}>
+                                <PlusCircle size={18} style={{ marginRight: '5px' }} /> Kullanıcı Oluştur
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* User List */}
+                    <div>
+                        <h4 style={{ marginBottom: '15px', color: '#aaa' }}>Mevcut Kullanıcılar</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
+                            {users.map(u => (
+                                <div key={u.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '10px 15px', borderRadius: '8px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                                            {u.username.substring(0, 1).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <div style={{ fontWeight: 'bold' }}>{u.username}</div>
+                                            <div style={{ fontSize: '0.8rem', color: '#aaa' }}>{u.role}</div>
+                                        </div>
+                                    </div>
+                                    {u.username !== 'admin' && (
+                                        <button onClick={() => handleDeleteUser(u.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', opacity: 0.7 }}>
+                                            <Trash2 size={18} />
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style={{ marginBottom: '20px', marginTop: '40px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Shield size={28} color="#4caf50" />
+                Diğer Güvenlik Ayarları
             </h2>
 
             <div className="glass-panel" style={{ padding: '30px', maxWidth: '500px' }}>
