@@ -15,6 +15,7 @@ const Sidebar = () => {
         { path: '/admin', icon: <LayoutDashboard size={24} />, label: 'Panel', exact: true },
 
         { path: '/admin/pool', icon: <Inbox size={24} />, label: 'Servisler' },
+        { path: '/admin/create-user', icon: <Users size={24} />, label: 'Kullanıcılar' },
         { path: '/admin/subs', icon: <Users size={24} />, label: 'Taşeronlar' },
         // Hide Projects for Technicians
         ...(!isTech ? [{ path: '/admin/projects', icon: <FolderOpen size={24} />, label: 'Projeler' }] : []),
