@@ -348,6 +348,14 @@ const ProjectDetail = () => {
                         💰 GİDERLER & FİŞLER
                     </button>
                 )}
+                {!isTech && (
+                    <button
+                        onClick={() => setActiveTab('team')}
+                        style={{ padding: '10px 20px', background: 'transparent', border: 'none', borderBottom: activeTab === 'team' ? '2px solid #8b5cf6' : 'none', color: activeTab === 'team' ? '#8b5cf6' : '#aaa', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.3s' }}
+                    >
+                        👷 EKİP & PLANLAMA
+                    </button>
+                )}
             </div>
 
             {/* FILES CONTENT */}
@@ -443,6 +451,35 @@ const ProjectDetail = () => {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            )}
+
+            {/* TEAM CONTENT */}
+            {activeTab === 'team' && !isTech && (
+                <div>
+                    <button onClick={openTeamModal} className="glass-btn" style={{ marginBottom: '20px', background: 'rgba(139, 92, 246, 0.2)', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
+                        <UserPlus size={16} style={{ marginRight: '5px' }} /> Personel Ekle
+                    </button>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px' }}>
+                        {team.map(member => (
+                            <div key={member.id} className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#fff' }}>
+                                        {member.username.substring(0, 2).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: 'bold' }}>{member.username}</div>
+                                        <div style={{ fontSize: '0.8rem', color: '#aaa' }}>{member.role === 'technician' ? 'Tekniker' : member.role}</div>
+                                    </div>
+                                </div>
+                                <button onClick={() => handleRemoveMember(member.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', opacity: 0.7 }}>
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+                        ))}
+                        {team.length === 0 && <p style={{ color: '#666' }}>Bu projeye atanmış personel yok.</p>}
                     </div>
                 </div>
             )}
