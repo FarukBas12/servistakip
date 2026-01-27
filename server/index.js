@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const compression = require('compression');
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
@@ -43,6 +44,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
+app.use(compression());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -491,6 +493,17 @@ async function runMigrations() {
         } catch (e) {
             console.log(' - Note: Could not update user constraint (might not exist or different name)');
         }
+
+        // Create Indexes for Performance
+        try {
+            await db.query(`CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status)`);
+            await db.query(`CREATE INDEX IF NOT EXISTS idx_projects_clientId ON projects(name)`); // Assuming name is key for now
+            await db.query(`CREATE INDEX IF NOT EXISTS idx_tasks_assignedTo ON tasks(assigned_to)`);
+            await db.query(`CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status)`);
+            await db.query(`CREATE INDEX IF NOT EXISTS idx_stock_transactions_stockId ON stock_transactions(stock_id)`);
+            await db.query(`CREATE INDEX IF NOT EXISTS idx_project_expenses_projectId ON project_expenses(project_id)`);
+            console.log(' - Checked database indexes');
+        } catch (e) { console.log(' - Note: Index creation failed or skipped (' + e.message + ')'); }
 
         console.log('✅ Database Schema Verified & Updated!');
     } catch (e) {

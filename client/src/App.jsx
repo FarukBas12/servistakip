@@ -1,47 +1,52 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import Login from './pages/Login';
-import AdminLayout from './components/AdminLayout';
-import TechDashboard from './pages/TechDashboard';
-import TechTaskDetail from './pages/TechTaskDetail';
-import ProjectDashboard from './pages/ProjectDashboard';
-import ProjectDetail from './pages/ProjectDetail';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import VersionManager from './components/VersionManager';
+import LoadingSpinner from './components/LoadingSpinner';
+
+// Lazy Load Pages
+const Login = React.lazy(() => import('./pages/Login'));
+const AdminLayout = React.lazy(() => import('./components/AdminLayout'));
+const TechDashboard = React.lazy(() => import('./pages/TechDashboard'));
+const TechTaskDetail = React.lazy(() => import('./pages/TechTaskDetail'));
+const ProjectDashboard = React.lazy(() => import('./pages/ProjectDashboard'));
+const ProjectDetail = React.lazy(() => import('./pages/ProjectDetail'));
 
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
 
-          {/* Admin Routes (Managed by AdminLayout) */}
-          <Route element={<PrivateRoute allowedRoles={['admin', 'depocu']} />}>
-            <Route path="/admin/*" element={<AdminLayout />} />
-          </Route>
+            {/* Admin Routes (Managed by AdminLayout) */}
+            <Route element={<PrivateRoute allowedRoles={['admin', 'depocu']} />}>
+              <Route path="/admin/*" element={<AdminLayout />} />
+            </Route>
 
-          {/* Technician Routes */}
-          <Route element={<PrivateRoute allowedRoles={['technician']} />}>
-            <Route path="/tech/*" element={
-              <>
-                <Navbar />
-                <Routes>
-                  <Route path="/" element={<TechDashboard />} />
-                  <Route path="/task/:id" element={<TechTaskDetail />} />
-                  <Route path="/projects" element={<ProjectDashboard />} />
-                  <Route path="/projects/:id" element={<ProjectDetail />} />
-                </Routes>
-              </>
-            } />
-          </Route>
+            {/* Technician Routes */}
+            <Route element={<PrivateRoute allowedRoles={['technician']} />}>
+              <Route path="/tech/*" element={
+                <>
+                  <Navbar />
+                  <Routes>
+                    <Route path="/" element={<TechDashboard />} />
+                    <Route path="/task/:id" element={<TechTaskDetail />} />
+                    <Route path="/projects" element={<ProjectDashboard />} />
+                    <Route path="/projects/:id" element={<ProjectDetail />} />
+                  </Routes>
+                </>
+              } />
+            </Route>
 
-          <Route path="/" element={<Navigate to="/login" />} />
-        </Routes>
+            <Route path="/" element={<Navigate to="/login" />} />
+          </Routes>
+        </Suspense>
         <PWAInstallPrompt />
         <VersionManager />
       </Router>
