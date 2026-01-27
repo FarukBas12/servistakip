@@ -103,10 +103,21 @@ const SubPaymentPage = () => {
         } catch (err) { alert('Hata'); }
     };
 
-    const deleteItem = (id) => {
-        const newSet = new Set(deletedItemIds);
-        newSet.add(id);
-        setDeletedItemIds(newSet);
+    const deleteItem = async (id) => {
+        if (!window.confirm('Bu kalemi KALICI olarak silmek istediğinize emin misiniz?')) return;
+
+        try {
+            await api.delete(`/subs/prices/${id}`);
+            // Remove from local state immediately for better UX
+            setPrices(prev => prev.filter(p => p.id !== id));
+            // Also clean up any typed quantities or custom values
+            const newQuantities = { ...quantities };
+            delete newQuantities[id];
+            setQuantities(newQuantities);
+        } catch (err) {
+            console.error(err);
+            alert('Silme işlemi başarısız oldu.');
+        }
     };
 
     return (

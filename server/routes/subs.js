@@ -32,6 +32,7 @@ router.post('/cash', controller.addCash);
 // Prices
 router.get('/prices', controller.listPrices); // ?subId=
 router.post('/prices', controller.addPrice);
+router.delete('/prices/:id', controller.deletePrice);
 router.post('/prices/import', uploadMemory.single('file'), controller.importPrices);
 
 // Payments

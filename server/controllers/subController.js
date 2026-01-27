@@ -131,6 +131,14 @@ exports.addPrice = async (req, res) => {
     } catch (err) { console.error(err); res.status(500).send('Server Error'); }
 };
 
+exports.deletePrice = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await db.query('DELETE FROM price_definitions WHERE id = $1', [id]);
+        res.json({ message: 'Deleted' });
+    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+};
+
 // --- PAYMENTS (HAKEDİŞ) ---
 exports.createPayment = async (req, res) => {
     const client = await db.pool.connect();
