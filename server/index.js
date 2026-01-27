@@ -9,6 +9,14 @@ const app = express();
 const db = require('./db'); // Moved to top level for global access
 // AUTOMATED REMINDERS (Simple Cron)
 const notificationController = require('./controllers/notificationController');
+const backupController = require('./controllers/backupController');
+const cron = require('node-cron');
+
+// Schedule Daily Backup at 03:00 AM
+cron.schedule('0 3 * * *', () => {
+    console.log('Running Daily Backup...');
+    backupController.createBackup();
+});
 
 setInterval(async () => {
     const now = new Date();
@@ -95,6 +103,7 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/subs', require('./routes/subs')); // Unified Route
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/stock-tracking', require('./routes/stockTracking')); // Distinct from 'stores'
+app.use('/api/backup', require('./routes/backup')); // Backup Route
 // app.use('/api/subcontractors', ...); // REMOVED invalid route
 
 // Debug / Health Check Endpoint

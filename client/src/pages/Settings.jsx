@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
-import { Save, Lock, Shield } from 'lucide-react';
+import { Save, Lock, Shield, Database } from 'lucide-react';
 
 const Settings = () => {
     const [password, setPassword] = useState('');
@@ -55,6 +55,43 @@ const Settings = () => {
 
                 <button onClick={handleSave} className="glass-btn" style={{ background: '#4caf50', width: '100%', justifyContent: 'center' }}>
                     <Save size={18} style={{ marginRight: '10px' }} /> Kaydet
+                </button>
+            </div>
+
+            {/* Backup Section */}
+            <h2 style={{ marginBottom: '20px', marginTop: '40px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Database size={28} color="#2196f3" />
+                Veri Yönetimi
+            </h2>
+
+            <div className="glass-panel" style={{ padding: '30px', maxWidth: '500px' }}>
+                <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Database size={20} />
+                    Veritabanı Yedekle
+                </h3>
+                <p style={{ opacity: 0.7, marginBottom: '20px' }}>
+                    Tüm verileri (Kullanıcılar, Stoklar, Projeler, Hakedişler vb.) tek bir dosya olarak Cloudinary'e yedekler.
+                    Yedekleme her gece 03:00'te otomatik yapılır.
+                </p>
+
+                <button
+                    onClick={async () => {
+                        if (!window.confirm('Şimdi yedek almak istiyor musunuz?')) return;
+                        try {
+                            setLoading(true);
+                            const res = await api.post('/backup');
+                            alert('Yedek Başarıyla Oluşturuldu! URL: ' + res.data.url);
+                            window.open(res.data.url, '_blank');
+                        } catch (err) {
+                            alert('Yedekleme Başarısız: ' + (err.response?.data?.message || err.message));
+                        } finally {
+                            setLoading(false);
+                        }
+                    }}
+                    className="glass-btn"
+                    style={{ background: '#2196f3', width: '100%', justifyContent: 'center' }}
+                >
+                    <Save size={18} style={{ marginRight: '10px' }} /> Şimdi Yedekle
                 </button>
             </div>
         </div>
