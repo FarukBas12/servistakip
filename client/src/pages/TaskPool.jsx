@@ -444,11 +444,13 @@ const TaskPool = () => {
                                         </div>
                                     </form>
                                 )}
-                            </div>
+                            </>
+                        )}
                     </div>
-            )}
                 </div>
-            );
+            )}
+        </div>
+    );
 };
 
-            export default TaskPool;
+export default TaskPool;
