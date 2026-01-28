@@ -231,7 +231,12 @@ exports.deleteTransaction = async (req, res) => {
 exports.updateCashTransaction = async (req, res) => {
     try {
         const { id } = req.params;
-        const { amount, description, transaction_date } = req.body;
+        let { amount, description, transaction_date } = req.body;
+
+        // Validation
+        if (!amount || isNaN(parseFloat(amount))) amount = 0;
+        if (!transaction_date) transaction_date = new Date();
+
         await db.query(`
             UPDATE cash_transactions 
             SET amount = $1, description = $2, transaction_date = $3 
@@ -278,10 +283,12 @@ exports.updatePayment = async (req, res) => {
         // Update items (Simple approach: delete and re-insert)
         await client.query('DELETE FROM payment_items WHERE payment_id = $1', [id]);
         for (const item of items) {
+            const qty = parseFloat(item.quantity) || 0;
+            const price = parseFloat(item.unit_price) || 0;
             await client.query(`
                 INSERT INTO payment_items (payment_id, work_item, quantity, unit_price, total_price)
                 VALUES ($1, $2, $3, $4, $5)`,
-                [id, item.work_item, item.quantity, item.unit_price, (item.quantity * item.unit_price)]
+                [id, item.work_item, qty, price, (qty * price)]
             );
         }
 
