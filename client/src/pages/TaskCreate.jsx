@@ -68,7 +68,11 @@ const TaskCreate = () => {
                 fileData.append('gps_lat', 0);
                 fileData.append('gps_lng', 0);
 
-                await api.post(`/tasks/${taskId}/photos`, fileData);
+                await api.post(`/tasks/${taskId}/photos`, fileData, {
+                    headers: {
+                        'Content-Type': undefined
+                    }
+                });
             }
 
             navigate('/admin');
