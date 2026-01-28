@@ -237,73 +237,72 @@ const TaskPool = () => {
             </div>
 
             {loading ? <p>Yükleniyor...</p> : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {filteredTasks.length === 0 ? <p style={{ opacity: 0.7 }}>Bu kategoride iş yok.</p> : filteredTasks.map(task => (
                         <div key={task.id} className="glass-panel" style={{
-                            padding: '20px',
+                            padding: '15px',
                             position: 'relative',
-                            borderLeft: task.status === 'in_progress' ? '5px solid #2196f3' : '5px solid #ffb300'
+                            borderLeft: task.status === 'in_progress' ? '4px solid #2196f3' : '4px solid #ffb300',
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '15px'
                         }}>
-                            {/* CANCELLED WARNING BANNER */}
-                            {task.cancel_count > 0 && (
-                                <div style={{
-                                    background: 'rgba(255, 193, 7, 0.9)',
-                                    color: '#000',
-                                    padding: '5px 10px',
-                                    borderRadius: '5px',
-                                    marginBottom: '10px',
-                                    fontWeight: 'bold',
-                                    fontSize: '0.85rem',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '5px'
-                                }}>
-                                    ⚠️ {task.cancel_count} kez iade!
-                                    <span style={{ fontWeight: 'normal', opacity: 0.8, fontSize: '0.8rem', marginLeft: 'auto' }}>
-                                        Son: {task.last_cancel_reason?.substring(0, 10)}...
+                            {/* LEFT SIDE: Info */}
+                            <div style={{ flex: 3, minWidth: '300px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+                                    <span style={{
+                                        background: task.status === 'in_progress' ? 'rgba(33, 150, 243, 0.2)' : 'rgba(255, 193, 7, 0.2)',
+                                        color: task.status === 'in_progress' ? '#90caf9' : '#ffe082',
+                                        padding: '2px 8px',
+                                        borderRadius: '4px',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 'bold',
+                                        whiteSpace: 'nowrap'
+                                    }}>
+                                        {task.status === 'in_progress' ? 'SAHADA' : 'BEKLİYOR'}
                                     </span>
+                                    {task.cancel_count > 0 && (
+                                        <span style={{ color: '#ff5252', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                            ⚠️ {task.cancel_count} kez iade ({task.last_cancel_reason?.substring(0, 15)}...)
+                                        </span>
+                                    )}
                                 </div>
-                            )}
 
-                            <div style={{ position: 'absolute', top: 15, right: 15, display: 'flex', gap: '5px' }}>
-                                <button onClick={() => handleDelete(task.id)} style={{ background: 'rgba(244, 67, 54, 0.3)', border: '1px solid rgba(255,0,0,0.3)', color: 'white', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer' }}>Sil</button>
+                                <h3 style={{ margin: '0 0 5px 0', fontSize: '1.1rem' }}>{task.title}</h3>
+                                <p style={{ margin: 0, opacity: 0.7, fontSize: '0.9rem' }}>{task.address}</p>
+                                {task.description && <p style={{ margin: '5px 0 0 0', fontSize: '0.85rem', opacity: 0.6, fontStyle: 'italic' }}>{task.description.substring(0, 100)}{task.description.length > 100 && '...'}</p>}
                             </div>
 
-                            <span style={{
-                                background: task.status === 'in_progress' ? 'rgba(33, 150, 243, 0.2)' : 'rgba(255, 193, 7, 0.2)',
-                                padding: '2px 8px',
-                                borderRadius: '4px',
-                                fontSize: '0.8rem',
-                                color: 'white',
-                                marginBottom: '5px',
-                                display: 'inline-block'
-                            }}>
-                                {task.status === 'in_progress' ? 'SAHADA / DEVAM EDİYOR' : 'BEKLİYOR'}
-                            </span>
+                            {/* MIDDLE: Users & Date */}
+                            <div style={{ flex: 2, minWidth: '200px', display: 'flex', flexDirection: 'column', gap: '5px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '15px' }}>
+                                {activeTab === 'active' && (
+                                    <div style={{ fontSize: '0.9rem' }}>
+                                        👤 <strong>
+                                            {task.assigned_users && task.assigned_users.length > 0
+                                                ? task.assigned_users.map(u => u.username).join(', ')
+                                                : 'Atanmamış'}
+                                        </strong>
+                                    </div>
+                                )}
+                                {task.due_date && (
+                                    <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>
+                                        📅 {new Date(task.due_date).toLocaleString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                    </div>
+                                )}
+                            </div>
 
-                            <h3 style={{ marginTop: 5, paddingRight: '50px' }}>{task.title}</h3>
-                            <p style={{ opacity: 0.8, fontSize: '0.9rem' }}>{task.address}</p>
-
-                            {activeTab === 'active' && (
-                                <div style={{ background: 'rgba(255,255,255,0.1)', padding: '8px', borderRadius: '5px', marginBottom: '10px' }}>
-                                    👤 <strong>
-                                        {task.assigned_users && task.assigned_users.length > 0
-                                            ? task.assigned_users.map(u => u.username).join(', ')
-                                            : 'Atanmamış'}
-                                    </strong>
-                                </div>
-                            )}
-
-                            {task.description && <p style={{ background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '5px' }}>{task.description}</p>}
-
-                            {task.due_date && <div style={{ fontSize: '0.8rem', opacity: 0.6, marginBottom: '10px' }}>📅 {new Date(task.due_date).toLocaleString()}</div>}
-
-                            <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                                <button onClick={() => openAssignModal(task)} className="glass-btn" style={{ flex: 1, background: 'rgba(33, 150, 243, 0.3)' }}>
-                                    {activeTab === 'pool' ? '👤 Personelleri Seç' : '🔄 Personelleri Güncelle'}
+                            {/* RIGHT: Actions */}
+                            <div style={{ flex: 1.5, minWidth: '200px', display: 'flex', gap: '10px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                                <button onClick={() => openAssignModal(task)} className="glass-btn" style={{ padding: '8px 15px', background: 'rgba(33, 150, 243, 0.2)', fontSize: '0.9rem' }}>
+                                    {activeTab === 'pool' ? 'Personel Ata' : 'Güncelle'}
                                 </button>
-                                <button onClick={() => openEditModal(task)} className="glass-btn" style={{ flex: 1, background: 'rgba(255, 193, 7, 0.3)' }}>
-                                    ✏️ Düzenle
+                                <button onClick={() => openEditModal(task)} className="glass-btn" style={{ padding: '8px 15px', background: 'rgba(255, 193, 7, 0.2)', fontSize: '0.9rem' }}>
+                                    Düzenle
+                                </button>
+                                <button onClick={() => handleDelete(task.id)} style={{ background: 'transparent', border: 'none', color: '#ef5350', cursor: 'pointer', fontSize: '1.2rem', padding: '0 10px' }} title="Sil">
+                                    &times;
                                 </button>
                             </div>
                         </div>
