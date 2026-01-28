@@ -483,9 +483,7 @@ const SubLedger = () => {
                                             formData.append('waybill', editPaymentData.new_waybill);
                                         }
 
-                                        await api.put(`/subs/payment/${editPaymentData.id}`, formData, {
-                                            headers: { 'Content-Type': 'multipart/form-data' }
-                                        });
+                                        await api.put(`/subs/payment/${editPaymentData.id}`, formData);
                                         setShowEditPaymentModal(false);
                                         fetchData();
                                     } catch (e) { alert('Hata oluştu'); }
