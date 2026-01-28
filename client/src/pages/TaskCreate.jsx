@@ -56,19 +56,19 @@ const TaskCreate = () => {
             const res = await api.post('/tasks', payload);
             const taskId = res.data.id;
 
-            // 2. Upload Photos (if any)
+            // 2. Upload Photos (Bulk)
             if (files && files.length > 0) {
+                const fileData = new FormData();
+                // Append all files to the same field 'photos'
                 for (let i = 0; i < files.length; i++) {
-                    const fileData = new FormData();
                     fileData.append('photos', files[i]);
-                    fileData.append('type', 'before'); // 'before' complies with DB constraint check
-
-                    // Optional: Send dummy GPS for now as it's required by backend schema usually
-                    fileData.append('gps_lat', 0);
-                    fileData.append('gps_lng', 0);
-
-                    await api.post(`/tasks/${taskId}/photos`, fileData);
                 }
+
+                fileData.append('type', 'before'); // DB Constraint
+                fileData.append('gps_lat', 0);
+                fileData.append('gps_lng', 0);
+
+                await api.post(`/tasks/${taskId}/photos`, fileData);
             }
 
             navigate('/admin');
