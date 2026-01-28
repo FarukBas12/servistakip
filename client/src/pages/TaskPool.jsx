@@ -14,7 +14,19 @@ const TaskPool = () => {
 
     // Modal States
     const [editingTask, setEditingTask] = useState(null); // For Edit & Assign
+    const [viewTask, setViewTask] = useState(null); // For View Mode
     const [modalMode, setModalMode] = useState(null); // 'edit' or 'assign'
+
+    const openViewModal = async (task) => {
+        try {
+            // Fetch full details including photos
+            const res = await api.get(`/tasks/${task.id}`);
+            setViewTask(res.data);
+        } catch (err) {
+            console.error(err);
+            alert('Detaylar alınamadı');
+        }
+    };
 
     // Form Data
     const [editForm, setEditForm] = useState({ title: '', description: '', address: '', due_date: '' });
@@ -294,14 +306,17 @@ const TaskPool = () => {
                             </div>
 
                             {/* RIGHT: Actions */}
-                            <div style={{ flex: 1.5, minWidth: '200px', display: 'flex', gap: '10px', justifyContent: 'flex-end', alignItems: 'center' }}>
-                                <button onClick={() => openAssignModal(task)} className="glass-btn" style={{ padding: '8px 15px', background: 'rgba(33, 150, 243, 0.2)', fontSize: '0.9rem' }}>
-                                    {activeTab === 'pool' ? 'Personel Ata' : 'Güncelle'}
+                            <div style={{ flex: 1.5, minWidth: '200px', display: 'flex', gap: '5px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                                <button onClick={() => openViewModal(task)} className="glass-btn" style={{ padding: '8px 12px', background: 'rgba(255, 255, 255, 0.1)', fontSize: '0.9rem' }} title="Detay">
+                                    👁️
                                 </button>
-                                <button onClick={() => openEditModal(task)} className="glass-btn" style={{ padding: '8px 15px', background: 'rgba(255, 193, 7, 0.2)', fontSize: '0.9rem' }}>
-                                    Düzenle
+                                <button onClick={() => openAssignModal(task)} className="glass-btn" style={{ padding: '8px 12px', background: 'rgba(33, 150, 243, 0.2)', fontSize: '0.9rem' }} title="Personel">
+                                    👤
                                 </button>
-                                <button onClick={() => handleDelete(task.id)} style={{ background: 'transparent', border: 'none', color: '#ef5350', cursor: 'pointer', fontSize: '1.2rem', padding: '0 10px' }} title="Sil">
+                                <button onClick={() => openEditModal(task)} className="glass-btn" style={{ padding: '8px 12px', background: 'rgba(255, 193, 7, 0.2)', fontSize: '0.9rem' }} title="Düzenle">
+                                    ✏️
+                                </button>
+                                <button onClick={() => handleDelete(task.id)} style={{ background: 'transparent', border: 'none', color: '#ef5350', cursor: 'pointer', fontSize: '1.2rem', padding: '0 5px' }} title="Sil">
                                     &times;
                                 </button>
                             </div>
@@ -311,90 +326,129 @@ const TaskPool = () => {
             )}
 
             {/* Modal Overlay */}
-            {editingTask && (
+            {(editingTask || viewTask) && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
                     background: 'rgba(0,0,0,0.8)', zIndex: 1000,
                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>
-                    <div className="glass-panel" style={{ width: '90%', maxWidth: '500px', padding: '30px', background: '#1e1e1e' }}>
-                        <h3>{modalMode === 'edit' ? 'Görevi Düzenle' : (activeTab === 'pool' ? 'Personel Ata' : 'Personel Transfer Et')}</h3>
+                    <div className="glass-panel" style={{ width: '90%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', padding: '30px', background: '#1e1e1e', position: 'relative' }}>
+                        <button onClick={() => { setEditingTask(null); setViewTask(null); }} style={{ position: 'absolute', top: 10, right: 10, background: 'transparent', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
 
-                        {modalMode === 'edit' ? (
-                            <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Başlık</label>
-                                <input
-                                    className="glass-input"
-                                    value={editForm.title}
-                                    onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                                    required
-                                />
-                                <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Adres</label>
-                                <input
-                                    className="glass-input"
-                                    value={editForm.address}
-                                    onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                                    required
-                                />
-                                <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Tarih ve Saat</label>
-                                <input
-                                    type="datetime-local"
-                                    className="glass-input"
-                                    value={editForm.due_date}
-                                    onChange={(e) => setEditForm({ ...editForm, due_date: e.target.value })}
-                                />
-                                <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Açıklama</label>
-                                <textarea
-                                    className="glass-input"
-                                    rows="4"
-                                    value={editForm.description}
-                                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                                />
+                        {/* VIEW MODE */}
+                        {viewTask ? (
+                            <div>
+                                <h2 style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px' }}>{viewTask.title}</h2>
+                                <p style={{ color: '#aaa', fontSize: '0.9rem' }}>{viewTask.address}</p>
 
-                                <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Fotoğraf Ekle (Opsiyonel)</label>
-                                <input
-                                    type="file"
-                                    multiple
-                                    accept="image/*"
-                                    className="glass-input"
-                                    onChange={(e) => setEditFiles(e.target.files)}
-                                />
                                 <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                                    <button type="submit" className="glass-btn" style={{ flex: 1, background: 'rgba(76, 175, 80, 0.3)' }}>Kaydet</button>
-                                    <button type="button" onClick={() => setEditingTask(null)} className="glass-btn" style={{ flex: 1, background: 'rgba(255, 0, 0, 0.3)' }}>İptal</button>
+                                    <span style={{ background: 'rgba(255,255,255,0.1)', padding: '5px 10px', borderRadius: '5px' }}>
+                                        Durum: {viewTask.status === 'in_progress' ? 'Sahada' : 'Bekliyor'}
+                                    </span>
+                                    {viewTask.due_date && <span style={{ background: 'rgba(255,255,255,0.1)', padding: '5px 10px', borderRadius: '5px' }}>📅 {new Date(viewTask.due_date).toLocaleString()}</span>}
                                 </div>
-                            </form>
-                        ) : (
-                            <form onSubmit={handleAssignSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <p>"{editingTask.title}" görevi için personelleri seçiniz:</p>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '200px', overflowY: 'auto' }}>
-                                    {users.map(u => (
-                                        <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '5px', background: 'rgba(255,255,255,0.05)', borderRadius: '5px' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedAssignees.includes(u.id)}
-                                                onChange={() => handleAssignCheckboxChange(u.id)}
-                                                style={{ transform: 'scale(1.2)' }}
-                                            />
-                                            {u.username}
-                                        </label>
+                                <div style={{ marginTop: '20px', background: 'rgba(0,0,0,0.3)', padding: '15px', borderRadius: '8px' }}>
+                                    <h4 style={{ marginTop: 0 }}>Açıklama:</h4>
+                                    <p style={{ whiteSpace: 'pre-wrap' }}>{viewTask.description || 'Açıklama yok.'}</p>
+                                </div>
+
+                                {viewTask.maps_link && (
+                                    <a href={viewTask.maps_link} target="_blank" rel="noopener noreferrer" className="glass-btn" style={{ display: 'inline-block', marginTop: '10px', background: 'rgba(33, 150, 243, 0.3)' }}>
+                                        📍 Haritada Git
+                                    </a>
+                                )}
+
+                                <h4 style={{ marginTop: '20px' }}>📸 Fotoğraflar ({viewTask.photos?.length || 0})</h4>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px', marginTop: '10px' }}>
+                                    {viewTask.photos && viewTask.photos.map(photo => (
+                                        <a key={photo.id} href={photo.url} target="_blank" rel="noopener noreferrer">
+                                            <img src={photo.url} alt="Task" style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '5px', border: '1px solid #555' }} />
+                                        </a>
                                     ))}
+                                    {(!viewTask.photos || viewTask.photos.length === 0) && <p style={{ opacity: 0.5, fontSize: '0.9rem' }}>Fotoğraf yok.</p>}
                                 </div>
+                            </div>
+                        ) : (
+                            /* EDIT & ASSIGN MODES */
+                            <>
+                                <h3>{modalMode === 'edit' ? 'Görevi Düzenle' : (activeTab === 'pool' ? 'Personel Ata' : 'Personel Transfer Et')}</h3>
 
-                                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                                    <button type="submit" className="glass-btn" style={{ flex: 1, background: 'rgba(33, 150, 243, 0.3)' }}>
-                                        {activeTab === 'pool' ? 'Seçilenleri Ata' : 'Güncelle'}
-                                    </button>
-                                    <button type="button" onClick={() => setEditingTask(null)} className="glass-btn" style={{ flex: 1, background: 'rgba(255, 0, 0, 0.3)' }}>İptal</button>
-                                </div>
-                            </form>
-                        )}
+                                {modalMode === 'edit' ? (
+                                    <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                        <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Başlık</label>
+                                        <input
+                                            className="glass-input"
+                                            value={editForm.title}
+                                            onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                                            required
+                                        />
+                                        <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Adres</label>
+                                        <input
+                                            className="glass-input"
+                                            value={editForm.address}
+                                            onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                                            required
+                                        />
+                                        <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Tarih ve Saat</label>
+                                        <input
+                                            type="datetime-local"
+                                            className="glass-input"
+                                            value={editForm.due_date}
+                                            onChange={(e) => setEditForm({ ...editForm, due_date: e.target.value })}
+                                        />
+                                        <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Açıklama</label>
+                                        <textarea
+                                            className="glass-input"
+                                            rows="4"
+                                            value={editForm.description}
+                                            onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                                        />
+
+                                        <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Fotoğraf Ekle (Opsiyonel)</label>
+                                        <input
+                                            type="file"
+                                            multiple
+                                            accept="image/*"
+                                            className="glass-input"
+                                            onChange={(e) => setEditFiles(e.target.files)}
+                                        />
+                                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                            <button type="submit" className="glass-btn" style={{ flex: 1, background: 'rgba(76, 175, 80, 0.3)' }}>Kaydet</button>
+                                            <button type="button" onClick={() => setEditingTask(null)} className="glass-btn" style={{ flex: 1, background: 'rgba(255, 0, 0, 0.3)' }}>İptal</button>
+                                        </div>
+                                    </form>
+                                ) : (
+                                    <form onSubmit={handleAssignSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                        <p>"{editingTask.title}" görevi için personelleri seçiniz:</p>
+
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '200px', overflowY: 'auto' }}>
+                                            {users.map(u => (
+                                                <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '5px', background: 'rgba(255,255,255,0.05)', borderRadius: '5px' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedAssignees.includes(u.id)}
+                                                        onChange={() => handleAssignCheckboxChange(u.id)}
+                                                        style={{ transform: 'scale(1.2)' }}
+                                                    />
+                                                    {u.username}
+                                                </label>
+                                            ))}
+                                        </div>
+
+                                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                            <button type="submit" className="glass-btn" style={{ flex: 1, background: 'rgba(33, 150, 243, 0.3)' }}>
+                                                {activeTab === 'pool' ? 'Seçilenleri Ata' : 'Güncelle'}
+                                            </button>
+                                            <button type="button" onClick={() => setEditingTask(null)} className="glass-btn" style={{ flex: 1, background: 'rgba(255, 0, 0, 0.3)' }}>İptal</button>
+                                        </div>
+                                    </form>
+                                )}
+                            </div>
                     </div>
-                </div>
             )}
-        </div>
-    );
+                </div>
+            );
 };
 
-export default TaskPool;
+            export default TaskPool;
