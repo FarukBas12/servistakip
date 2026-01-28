@@ -60,16 +60,14 @@ const TaskCreate = () => {
             if (files && files.length > 0) {
                 for (let i = 0; i < files.length; i++) {
                     const fileData = new FormData();
-                    fileData.append('photo', files[i]);
-                    fileData.append('type', 'admin_attachment'); // Mark as admin upload
+                    fileData.append('photos', files[i]);
+                    fileData.append('type', 'before'); // 'before' complies with DB constraint check
 
                     // Optional: Send dummy GPS for now as it's required by backend schema usually
                     fileData.append('gps_lat', 0);
                     fileData.append('gps_lng', 0);
 
-                    await api.post(`/tasks/${taskId}/photos`, fileData, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
-                    });
+                    await api.post(`/tasks/${taskId}/photos`, fileData);
                 }
             }
 
