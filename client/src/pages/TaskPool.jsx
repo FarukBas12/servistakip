@@ -77,12 +77,20 @@ const TaskPool = () => {
 
     const openEditModal = (task) => {
         setEditingTask(task);
+
+        let formattedDate = '';
+        if (task.due_date) {
+            const d = new Date(task.due_date);
+            // Adjust for timezone offset to keep local time in ISO string
+            const localDate = new Date(d.getTime() - (d.getTimezoneOffset() * 60000));
+            formattedDate = localDate.toISOString().slice(0, 16);
+        }
+
         setEditForm({
             title: task.title,
             description: task.description || '',
             address: task.address,
-            // Format date for datetime-local input (YYYY-MM-DDTHH:mm)
-            due_date: task.due_date ? new Date(task.due_date).toISOString().slice(0, 16) : ''
+            due_date: formattedDate
         });
         setEditFiles([]); // Reset files
         setModalMode('edit');
