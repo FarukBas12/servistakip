@@ -43,7 +43,6 @@ CREATE TABLE IF NOT EXISTS stores (
 -- Password is '123456' hashed with bcrypt
 INSERT INTO users (username, password_hash, role) 
 VALUES 
-('admin', '$2b$10$sAm9ICo2YCmhwh/17vH86.5/hWz2NbtAr/EtOgVIifFSZiZpkNbW6', 'admin'),
-('tech1', '$2b$10$sAm9ICo2YCmhwh/17vH86.5/hWz2NbtAr/EtOgVIifFSZiZpkNbW6', 'technician')
+('admin', '$2b$10$sAm9ICo2YCmhwh/17vH86.5/hWz2NbtAr/EtOgVIifFSZiZpkNbW6', 'admin')
 ON CONFLICT (username) DO UPDATE 
 SET password_hash = EXCLUDED.password_hash;
