@@ -18,6 +18,7 @@ const TaskPool = () => {
 
     // Form Data
     const [editForm, setEditForm] = useState({ title: '', description: '', address: '', due_date: '' });
+    const [editFiles, setEditFiles] = useState([]); // New state for edit files
     const [assignId, setAssignId] = useState('');
 
     const [selectedRegion, setSelectedRegion] = useState('Hepsi');
@@ -71,6 +72,7 @@ const TaskPool = () => {
             // Format date for datetime-local input (YYYY-MM-DDTHH:mm)
             due_date: task.due_date ? new Date(task.due_date).toISOString().slice(0, 16) : ''
         });
+        setEditFiles([]); // Reset files
         setModalMode('edit');
     };
 
@@ -100,6 +102,21 @@ const TaskPool = () => {
         e.preventDefault();
         try {
             await api.put(`/tasks/${editingTask.id}`, editForm);
+            // 2. Upload New Photos (Bulk)
+            if (editFiles && editFiles.length > 0) {
+                const fileData = new FormData();
+                for (let i = 0; i < editFiles.length; i++) {
+                    fileData.append('photos', editFiles[i]);
+                }
+                fileData.append('type', 'before');
+                fileData.append('gps_lat', 0);
+                fileData.append('gps_lng', 0);
+
+                await api.post(`/tasks/${editingTask.id}/photos`, fileData, {
+                    headers: { 'Content-Type': undefined }
+                });
+            }
+
             alert('Görev güncellendi');
             setEditingTask(null);
             fetchTasks(); // Refresh
@@ -333,6 +350,15 @@ const TaskPool = () => {
                                     rows="4"
                                     value={editForm.description}
                                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                                />
+
+                                <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Fotoğraf Ekle (Opsiyonel)</label>
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    className="glass-input"
+                                    onChange={(e) => setEditFiles(e.target.files)}
                                 />
                                 <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                                     <button type="submit" className="glass-btn" style={{ flex: 1, background: 'rgba(76, 175, 80, 0.3)' }}>Kaydet</button>
