@@ -44,6 +44,22 @@ const ProjectDashboard = () => {
         }
     };
 
+    const handleComplete = async (id, name) => {
+        if (!window.confirm(`"${name}" projesini tamamlandı olarak işaretlemek istiyor musunuz? Bu işlem projeyi Arşiv sekmesine taşıyacaktır.`)) return;
+
+        try {
+            // We need to fetch current project data first to preserve other fields, OR if backend supports PATCH.
+            // Assuming PUT requires all fields, let's fetch first. Or stick to assume db handles partial?
+            // Safer: standard PUT to /projects/:id
+            const current = projects.find(p => p.id === id);
+            await api.put(`/projects/${id}`, { ...current, status: 'completed' });
+            fetchProjects();
+        } catch (err) {
+            console.error(err);
+            alert('Güncelleme başarısız');
+        }
+    };
+
     const calculateProgress = (start, end) => {
         const startDate = new Date(start);
         const endDate = new Date(end);
@@ -214,6 +230,29 @@ const ProjectDashboard = () => {
                                             transition: 'width 0.5s ease-in-out'
                                         }} />
                                     </div>
+
+                                    {/* Quick Action: Mark as Completed */}
+                                    {activeTab === 'active' && !isTech && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleComplete(project.id, project.name);
+                                            }}
+                                            className="glass-btn"
+                                            style={{
+                                                position: 'absolute',
+                                                bottom: '10px',
+                                                right: '10px',
+                                                padding: '5px 10px',
+                                                fontSize: '0.8rem',
+                                                background: 'rgba(16, 185, 129, 0.2)',
+                                                color: '#10b981',
+                                                border: '1px solid #10b981'
+                                            }}
+                                        >
+                                            ✓ Tamamla
+                                        </button>
+                                    )}
                                 </div>
                             );
                         })}
