@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 const ProjectDashboard = () => {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('active'); // 'active' or 'completed'
     const navigate = useNavigate();
     const { user } = useAuth();
     const isTech = user?.role === 'technician';
@@ -77,110 +78,145 @@ const ProjectDashboard = () => {
                 )}
             </div>
 
+            <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                <button
+                    onClick={() => setActiveTab('active')}
+                    style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: activeTab === 'active' ? '#4facfe' : 'white',
+                        borderBottom: activeTab === 'active' ? '2px solid #4facfe' : 'none',
+                        padding: '10px 20px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        fontSize: '1rem'
+                    }}
+                >
+                    Devam Edenler
+                </button>
+                <button
+                    onClick={() => setActiveTab('completed')}
+                    style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: activeTab === 'completed' ? '#4facfe' : 'white',
+                        borderBottom: activeTab === 'completed' ? '2px solid #4facfe' : 'none',
+                        padding: '10px 20px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        fontSize: '1rem'
+                    }}
+                >
+                    Tamamlananlar (Arşiv)
+                </button>
+            </div>
+
             {loading ? <p>Yükleniyor...</p> : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
-                    {projects.map(project => {
-                        const progress = calculateProgress(project.start_date, project.end_date);
-                        const progressColor = getProgressColor(progress);
-                        const isOverdue = new Date() > new Date(project.end_date) && project.status !== 'completed';
+                    {projects
+                        .filter(p => activeTab === 'active' ? p.status !== 'completed' : p.status === 'completed')
+                        .map(project => {
+                            const progress = calculateProgress(project.start_date, project.end_date);
+                            const progressColor = getProgressColor(progress);
+                            const isOverdue = new Date() > new Date(project.end_date) && project.status !== 'completed';
 
-                        // Financials
-                        const income = parseFloat(project.progress_payment) || parseFloat(project.tender_price) || 1; // Avoid divide by zero
-                        const expense = parseFloat(project.total_expenses) || 0;
-                        const profit = income - expense;
-                        const expensePct = Math.min(100, (expense / income) * 100);
-                        const isProfitable = profit >= 0;
+                            // Financials
+                            const income = parseFloat(project.progress_payment) || parseFloat(project.tender_price) || 1; // Avoid divide by zero
+                            const expense = parseFloat(project.total_expenses) || 0;
+                            const profit = income - expense;
+                            const expensePct = Math.min(100, (expense / income) * 100);
+                            const isProfitable = profit >= 0;
 
-                        // Circular Graph Data
-                        const radius = 30;
-                        const circumference = 2 * Math.PI * radius;
-                        const offset = circumference - (expensePct / 100) * circumference;
+                            // Circular Graph Data
+                            const radius = 30;
+                            const circumference = 2 * Math.PI * radius;
+                            const offset = circumference - (expensePct / 100) * circumference;
 
-                        return (
-                            <div
-                                key={project.id}
-                                style={{
-                                    background: 'rgba(30, 30, 30, 0.4)', // More transparent
-                                    backdropFilter: 'blur(10px)',
-                                    borderRadius: '15px',
-                                    border: '1px solid rgba(255,255,255,0.05)',
-                                    overflow: 'hidden',
-                                    cursor: 'pointer',
-                                    transition: 'transform 0.2s',
-                                    position: 'relative',
-                                    color: 'white'
-                                }}
-                                onClick={() => navigate(isTech ? `/tech/projects/${project.id}` : `/admin/projects/${project.id}`)}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(-5px)';
-                                    e.currentTarget.style.background = 'rgba(30, 30, 30, 0.6)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.background = 'rgba(30, 30, 30, 0.4)';
-                                }}
-                            >
-                                <div style={{ padding: '20px', display: 'flex', justifyContent: 'space-between' }}>
-                                    <div style={{ flex: 1, paddingRight: '10px' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                            <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '600' }}>{project.name}</h3>
-                                            {isOverdue && <span style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem' }}>SÜRE BİTTİ</span>}
+                            return (
+                                <div
+                                    key={project.id}
+                                    style={{
+                                        background: 'rgba(30, 30, 30, 0.4)', // More transparent
+                                        backdropFilter: 'blur(10px)',
+                                        borderRadius: '15px',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        overflow: 'hidden',
+                                        cursor: 'pointer',
+                                        transition: 'transform 0.2s',
+                                        position: 'relative',
+                                        color: 'white'
+                                    }}
+                                    onClick={() => navigate(isTech ? `/tech/projects/${project.id}` : `/admin/projects/${project.id}`)}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-5px)';
+                                        e.currentTarget.style.background = 'rgba(30, 30, 30, 0.6)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.background = 'rgba(30, 30, 30, 0.4)';
+                                    }}
+                                >
+                                    <div style={{ padding: '20px', display: 'flex', justifyContent: 'space-between' }}>
+                                        <div style={{ flex: 1, paddingRight: '10px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                                                <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '600' }}>{project.name}</h3>
+                                                {isOverdue && <span style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem' }}>SÜRE BİTTİ</span>}
+                                            </div>
+
+                                            <p style={{ color: '#aaa', fontSize: '0.9rem', height: '40px', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '15px' }}>
+                                                {project.description || 'Açıklama yok'}
+                                            </p>
+
+                                            <div style={{ display: 'flex', gap: '15px', fontSize: '0.85rem', color: '#888' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                    <Calendar size={14} />
+                                                    {new Date(project.start_date).toLocaleDateString('tr-TR')}
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                    <ArrowRight size={14} />
+                                                    {new Date(project.end_date).toLocaleDateString('tr-TR')}
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <p style={{ color: '#aaa', fontSize: '0.9rem', height: '40px', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '15px' }}>
-                                            {project.description || 'Açıklama yok'}
-                                        </p>
-
-                                        <div style={{ display: 'flex', gap: '15px', fontSize: '0.85rem', color: '#888' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                                <Calendar size={14} />
-                                                {new Date(project.start_date).toLocaleDateString('tr-TR')}
-                                            </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                                <ArrowRight size={14} />
-                                                {new Date(project.end_date).toLocaleDateString('tr-TR')}
+                                        {/* DONUT CHART AREA */}
+                                        <div style={{ width: '80px', height: '80px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <svg width="80" height="80">
+                                                {/* Background Circle (Profit/Income) */}
+                                                <circle cx="40" cy="40" r={radius} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="6" />
+                                                {/* Foreground Circle (Expense) */}
+                                                <circle
+                                                    cx="40" cy="40" r={radius}
+                                                    fill="none"
+                                                    stroke={isProfitable ? '#ef4444' : '#ef4444'} // Expenses usually red
+                                                    strokeWidth="6"
+                                                    strokeDasharray={circumference}
+                                                    strokeDashoffset={offset}
+                                                    strokeLinecap="round"
+                                                    transform="rotate(-90 40 40)"
+                                                />
+                                            </svg>
+                                            <div style={{ position: 'absolute', textAlign: 'center', fontSize: '0.7rem', color: '#aaa' }}>
+                                                <div style={{ fontWeight: 'bold', color: isProfitable ? '#10b981' : '#ef4444' }}>
+                                                    {isProfitable ? 'KAR' : 'ZARAR'}
+                                                </div>
+                                                <div>%{Math.round(isProfitable ? (100 - expensePct) : expensePct)}</div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* DONUT CHART AREA */}
-                                    <div style={{ width: '80px', height: '80px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <svg width="80" height="80">
-                                            {/* Background Circle (Profit/Income) */}
-                                            <circle cx="40" cy="40" r={radius} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="6" />
-                                            {/* Foreground Circle (Expense) */}
-                                            <circle
-                                                cx="40" cy="40" r={radius}
-                                                fill="none"
-                                                stroke={isProfitable ? '#ef4444' : '#ef4444'} // Expenses usually red
-                                                strokeWidth="6"
-                                                strokeDasharray={circumference}
-                                                strokeDashoffset={offset}
-                                                strokeLinecap="round"
-                                                transform="rotate(-90 40 40)"
-                                            />
-                                        </svg>
-                                        <div style={{ position: 'absolute', textAlign: 'center', fontSize: '0.7rem', color: '#aaa' }}>
-                                            <div style={{ fontWeight: 'bold', color: isProfitable ? '#10b981' : '#ef4444' }}>
-                                                {isProfitable ? 'KAR' : 'ZARAR'}
-                                            </div>
-                                            <div>%{Math.round(isProfitable ? (100 - expensePct) : expensePct)}</div>
-                                        </div>
+                                    {/* Progress Bar Container */}
+                                    <div style={{ background: 'rgba(255,255,255,0.1)', height: '4px', width: '100%' }}>
+                                        <div style={{
+                                            width: `${progress}%`,
+                                            height: '100%',
+                                            background: progressColor,
+                                            transition: 'width 0.5s ease-in-out'
+                                        }} />
                                     </div>
                                 </div>
-
-                                {/* Progress Bar Container */}
-                                <div style={{ background: 'rgba(255,255,255,0.1)', height: '4px', width: '100%' }}>
-                                    <div style={{
-                                        width: `${progress}%`,
-                                        height: '100%',
-                                        background: progressColor,
-                                        transition: 'width 0.5s ease-in-out'
-                                    }} />
-                                </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
                 </div>
             )
             }
