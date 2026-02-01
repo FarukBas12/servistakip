@@ -86,7 +86,29 @@ const Suppliers = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
                 {suppliers.map(sup => (
                     <div key={sup.id} className="glass-panel" style={{ padding: '20px', position: 'relative' }}>
-                        <h3 style={{ margin: '0 0 10px 0', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px' }}>{sup.company_name}</h3>
+
+                        {/* HEADER: Company Name & Actions (Flex Row to prevent overlap) */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginBottom: '15px' }}>
+                            <h3 style={{
+                                margin: 0,
+                                fontSize: '1.1rem',
+                                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                                paddingBottom: '10px',
+                                wordBreak: 'break-word',
+                                flex: 1
+                            }}>
+                                {sup.company_name}
+                            </h3>
+
+                            <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                                <button onClick={() => openEdit(sup)} className="icon-btn" style={{ color: '#60a5fa' }} title="Düzenle">
+                                    <Edit2 size={18} />
+                                </button>
+                                <button onClick={() => handleDelete(sup.id)} className="icon-btn" style={{ color: '#ef4444' }} title="Sil">
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+                        </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem', color: '#ccc' }}>
                             {sup.contact_name && <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><User size={16} /> {sup.contact_name}</div>}
@@ -99,11 +121,6 @@ const Suppliers = () => {
                                     {sup.supply_items}
                                 </div>
                             )}
-                        </div>
-
-                        <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '10px' }}>
-                            <button onClick={() => openEdit(sup)} style={{ background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer' }} title="Düzenle"><Edit2 size={18} /></button>
-                            <button onClick={() => handleDelete(sup.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }} title="Sil"><Trash2 size={18} /></button>
                         </div>
                     </div>
                 ))}
