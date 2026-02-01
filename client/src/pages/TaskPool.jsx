@@ -252,8 +252,10 @@ const TaskPool = () => {
 
         // Region Filter
         if (selectedRegion === 'Hepsi') return true;
+
         const region = task.region || 'Diğer';
-        return region === selectedRegion;
+        // Case-insensitive comparison with Turkish locale support
+        return region.toLocaleLowerCase('tr-TR') === selectedRegion.toLocaleLowerCase('tr-TR');
     });
 
     return (
