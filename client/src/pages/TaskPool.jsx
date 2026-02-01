@@ -34,11 +34,12 @@ const TaskPool = () => {
     const [assignId, setAssignId] = useState('');
 
     const [selectedRegion, setSelectedRegion] = useState('Hepsi');
-    const regions = ['Hepsi', 'Kemalpaşa', 'Manisa', 'Güzelbahçe', 'Torbalı', 'Menemen', 'Diğer'];
+    // const regions = ... (Removed, fetched from API)
 
     useEffect(() => {
         fetchTasks();
         fetchUsers();
+        fetchRegions();
     }, []);
 
 
@@ -64,6 +65,50 @@ const TaskPool = () => {
             console.error(err);
         }
     };
+
+    // Region Management
+    const [regions, setRegions] = useState([]);
+    const [newRegion, setNewRegion] = useState('');
+
+    const fetchRegions = async () => {
+        try {
+            const res = await api.get('/api/regions');
+            setRegions(res.data.map(r => r.name)); // Simplify to strings for now to match structure
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleAddRegion = async () => {
+        if (!newRegion.trim()) return;
+        try {
+            await api.post('/api/regions', { name: newRegion });
+            setNewRegion('');
+            fetchRegions();
+        } catch (err) {
+            alert('Bölge eklenirken hata');
+        }
+    };
+
+    const handleDeleteRegion = async (regionName) => {
+        if (!window.confirm(`${regionName} bölgesini silmek istediğinize emin misiniz?`)) return;
+        try {
+            // Need ID to delete. Re-fetch full objects if needed, but for MVP:
+            // We need to store full objects in state, not just names.
+            // Let's refactor state to store objects.
+            // TEMPORARY FIX: We need to refactor fetchRegions first.
+            const res = await api.get('/api/regions');
+            const target = res.data.find(r => r.name === regionName);
+            if (target) {
+                await api.delete(`/api/regions/${target.id}`);
+                fetchRegions();
+            }
+        } catch (err) {
+            alert('Bölge silinemedi');
+        }
+    };
+
+
 
     const handleDelete = async (id) => {
         if (!window.confirm('Bu görevi silmek istediğinize emin misiniz?')) return;
@@ -147,7 +192,13 @@ const TaskPool = () => {
     const handleEditSubmit = async (e) => {
         e.preventDefault();
         try {
-            await api.put(`/tasks/${editingTask.id}`, editForm);
+            // Fix Date Timezone: Convert local input string to proper ISO UTC string
+            const payload = { ...editForm };
+            if (payload.due_date) {
+                payload.due_date = new Date(payload.due_date).toISOString();
+            }
+
+            await api.put(`/tasks/${editingTask.id}`, payload);
             // 2. Upload New Photos (Bulk)
             if (editFiles && editFiles.length > 0) {
                 const fileData = new FormData();
@@ -265,21 +316,59 @@ const TaskPool = () => {
             </div>
 
             {/* Region Tabs */}
-            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '20px' }}>
+            {/* Region Tabs */}
+            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '20px', alignItems: 'center' }}>
+                <button
+                    onClick={() => setSelectedRegion('Hepsi')}
+                    className="glass-btn"
+                    style={{
+                        background: selectedRegion === 'Hepsi' ? 'rgba(33, 150, 243, 0.5)' : 'rgba(255, 255, 255, 0.05)',
+                        border: selectedRegion === 'Hepsi' ? '1px solid #64b5f6' : '1px solid rgba(255,255,255,0.1)',
+                        minWidth: '80px'
+                    }}
+                >
+                    Hepsi
+                </button>
                 {regions.map(region => (
-                    <button
-                        key={region}
-                        onClick={() => setSelectedRegion(region)}
-                        className="glass-btn"
-                        style={{
-                            background: selectedRegion === region ? 'rgba(33, 150, 243, 0.5)' : 'rgba(255, 255, 255, 0.05)',
-                            border: selectedRegion === region ? '1px solid #64b5f6' : '1px solid rgba(255,255,255,0.1)',
-                            minWidth: '100px'
-                        }}
-                    >
-                        {region}
-                    </button>
+                    <div key={region} style={{ position: 'relative' }}>
+                        <button
+                            onClick={() => setSelectedRegion(region)}
+                            className="glass-btn"
+                            style={{
+                                background: selectedRegion === region ? 'rgba(33, 150, 243, 0.5)' : 'rgba(255, 255, 255, 0.05)',
+                                border: selectedRegion === region ? '1px solid #64b5f6' : '1px solid rgba(255,255,255,0.1)',
+                                minWidth: '100px',
+                                paddingRight: '25px' // Space for X
+                            }}
+                        >
+                            {region}
+                        </button>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteRegion(region); }}
+                            style={{
+                                position: 'absolute', top: 5, right: 5,
+                                background: 'transparent', border: 'none',
+                                color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
+                                fontSize: '0.8rem', fontWeight: 'bold'
+                            }}
+                            title="Sil"
+                        >
+                            &times;
+                        </button>
+                    </div>
                 ))}
+
+                {/* Add New Region */}
+                <div style={{ display: 'flex', gap: '5px' }}>
+                    <input
+                        className="glass-input"
+                        style={{ width: '100px', padding: '5px' }}
+                        placeholder="Yeni Bölge..."
+                        value={newRegion}
+                        onChange={(e) => setNewRegion(e.target.value)}
+                    />
+                    <button onClick={handleAddRegion} className="glass-btn" style={{ padding: '5px 10px' }}>+</button>
+                </div>
             </div>
 
             {loading ? <p>Yükleniyor...</p> : (
