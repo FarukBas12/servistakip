@@ -17,7 +17,7 @@ import DailyPlanReport from '../pages/DailyPlanReport';
 import ProjectDashboard from '../pages/ProjectDashboard';
 import ProjectDetail from '../pages/ProjectDetail';
 import StockPage from '../pages/StockPage'; // NEW
-import Settings from '../pages/Settings';
+
 import Suppliers from '../pages/Suppliers'; // NEW
 
 
@@ -39,7 +39,7 @@ const AdminLayout = () => {
                     <Route path="subs/:id/payment" element={<SubPaymentPage />} />
                     <Route path="subs/:id/ledger" element={<SubLedger />} />
                     <Route path="/reports" element={<Reports />} />
-                    <Route path="/settings" element={<Settings />} />
+
                     <Route path="/daily-report" element={<DailyPlanReport />} />
                     <Route path="/projects" element={<ProjectDashboard />} />
                     <Route path="/projects/:id" element={<ProjectDetail />} />

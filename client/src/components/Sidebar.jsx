@@ -20,7 +20,7 @@ const Sidebar = () => {
         // Hide Projects for Technicians
         ...(!isTech ? [{ path: '/admin/projects', icon: <FolderOpen size={24} />, label: 'Projeler' }] : []),
         { path: '/admin/stocks', icon: <Package size={24} />, label: 'Stok' },
-        { path: '/admin/settings', icon: <Shield size={24} />, label: 'Ayarlar' },
+
     ].filter(item => {
         if (user?.role === 'depocu') {
             // Warehouse Manager sees ONLY Stocks
