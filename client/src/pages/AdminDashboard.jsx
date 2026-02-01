@@ -284,11 +284,20 @@ const AdminDashboard = () => {
                                     </button>
 
                                     <button onClick={async () => {
-                                        if (!confirm('Mail kutusu şimdi kontrol edilecek. Devam edilsin mi?')) return;
+                                        if (!confirm('Mail kutusu şimdi kontrol edilecek. Lütfen mailin OKUNMAMIŞ olduğundan emin olun. Devam edilsin mi?')) return;
                                         try {
                                             alert('Kontrol ediliyor, lütfen bekleyin...');
-                                            await api.post('/subs/settings/test-email');
-                                            alert('✅ Başarılı! Kontrol tamamlandı. Yeni mail varsa havuza düşmüştür.');
+                                            const res = await api.post('/subs/settings/test-email');
+                                            const { processed, total, errors } = res.data.details || {};
+
+                                            let msg = `✅ Test Tamamlandı!\n\nBulunan Mail: ${total || 0}\nOluşturulan Görev: ${processed || 0}`;
+                                            if (errors && errors.length > 0) {
+                                                msg += `\n\nHatalar: ${errors.join(', ')}`;
+                                            } else if (total === 0) {
+                                                msg += `\n\n⚠️ Hiç mail bulunamadı. Lütfen mailin "Okunmamış" olduğundan ve spam'e düşmediğinden emin olun.`;
+                                            }
+
+                                            alert(msg);
                                         } catch (e) {
                                             alert('❌ Hata: ' + (e.response?.data?.message || e.message));
                                         }
