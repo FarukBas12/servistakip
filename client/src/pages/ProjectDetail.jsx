@@ -235,10 +235,56 @@ const ProjectDetail = () => {
         return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount || 0);
     };
 
-    const handleDownload = (url, filename) => {
+    const handleDownload = async (url, filename, fileType) => {
         if (!url) return;
-        // Simple and robust: Open in new tab. Browser handles download or view.
-        window.open(url, '_blank');
+
+        try {
+            // 1. Show user that download started
+            const btn = document.activeElement;
+            if (btn && btn.tagName === 'BUTTON') {
+                const originalText = btn.innerText;
+                btn.innerText = 'İndiriliyor...';
+                btn.disabled = true;
+
+                // Fetch blob
+                const response = await fetch(url);
+                const blob = await response.blob();
+
+                // Create object URL
+                const blobUrl = window.URL.createObjectURL(blob);
+
+                // Force download with correct name
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                // Ensure filename ends with .zip if it's supposed to be a zip
+                let saveName = filename || 'dosya';
+                if (!saveName.includes('.') && fileType?.includes('zip')) {
+                    saveName += '.zip';
+                } else if (!saveName.includes('.') && fileType) {
+                    // Try to infer extension from fileType if not in filename
+                    const ext = fileType.split('/').pop();
+                    if (ext) saveName += `.${ext}`;
+                }
+
+                link.download = saveName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Cleanup
+                window.URL.revokeObjectURL(blobUrl);
+                btn.innerText = originalText;
+                btn.disabled = false;
+            } else {
+                // Fallback if button not found
+                window.open(url, '_blank');
+            }
+        } catch (err) {
+            console.error('Download failed', err);
+            // Fallback to direct open if fetch fails (e.g. CORS)
+            window.open(url, '_blank');
+            alert('Otomatik indirme başarısız oldu, dosya yeni sekmede açıldı. Lütfen oradan kaydedin (Ctrl+S).');
+        }
     };
 
     if (loading) return <div style={{ padding: '20px', color: 'white' }}>Yükleniyor...</div>;
@@ -362,11 +408,53 @@ const ProjectDetail = () => {
                                     {new Date(file.uploaded_at).toLocaleDateString()}
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                                    <button
-                                        onClick={() => handleDownload(file.file_url, file.file_name, file.file_type)}
-                                        style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 10px', background: 'rgba(255,255,255,0.1)', borderRadius: '5px', color: 'white', border: 'none', cursor: 'pointer', fontSize: '0.8rem' }}>
-                                        <Download size={14} /> İndir
-                                    </button>
+    const handleDownload = async (url, filename) => {
+        if (!url) return;
+
+                                    try {
+            // 1. Show user that download started
+            const btn = document.activeElement;
+                                    if (btn && btn.tagName === 'BUTTON') {
+                const originalText = btn.innerText;
+                                    btn.innerText = 'İndiriliyor...';
+                                    btn.disabled = true;
+
+                                    // Fetch blob
+                                    const response = await fetch(url);
+                                    const blob = await response.blob();
+
+                                    // Create object URL
+                                    const blobUrl = window.URL.createObjectURL(blob);
+
+                                    // Force download with correct name
+                                    const link = document.createElement('a');
+                                    link.href = blobUrl;
+                                    // Ensure filename ends with .zip if it's supposed to be a zip
+                                    let saveName = filename || 'dosya.zip';
+                                    if (!saveName.toLowerCase().endsWith('.zip') && !saveName.includes('.')) {
+                                        saveName += '.zip';
+                }
+
+                                    link.download = saveName;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+
+                                    // Cleanup
+                                    window.URL.revokeObjectURL(blobUrl);
+                                    btn.innerText = originalText;
+                                    btn.disabled = false;
+            } else {
+                                        // Fallback if button not found
+                                        window.open(url, '_blank');
+            }
+        } catch (err) {
+                                        console.error('Download failed', err);
+                                    // Fallback to direct open if fetch fails (e.g. CORS)
+                                    window.open(url, '_blank');
+                                    alert('Otomatik indirme başarısız oldu, dosya yeni sekmede açıldı. Lütfen oradan kaydedin (Ctrl+S).');
+        }
+    };
                                     <button
                                         onClick={async () => {
                                             if (!window.confirm('Bu dosyayı silmek istediğinize emin misiniz?')) return;
@@ -469,53 +557,55 @@ const ProjectDetail = () => {
             {/* MODALS */}
 
             {/* FILE UPLOAD MODAL */}
-            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(8px)' }}>
-                <div className="glass-panel" style={{ padding: '30px', width: '450px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                        <h3 style={{ margin: 0, color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}><Upload size={20} color="#3b82f6" /> Dosya Yükle (ZIP)</h3>
-                        <button onClick={() => setShowFileModal(false)} style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer' }}><X size={20} /></button>
+            {showFileModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(8px)' }}>
+                    <div className="glass-panel" style={{ padding: '30px', width: '450px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h3 style={{ margin: 0, color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}><Upload size={20} color="#3b82f6" /> Dosya Yükle (ZIP)</h3>
+                            <button onClick={() => setShowFileModal(false)} style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer' }}><X size={20} /></button>
+                        </div>
+
+                        <form onSubmit={handleCleanUpload}>
+                            <div style={{ marginBottom: '15px' }}>
+                                <label style={{ display: 'block', color: '#aaa', fontSize: '0.85rem', marginBottom: '5px' }}>Dosya Adı</label>
+                                <input type="text" placeholder="Örn: Elektrik Projesi Revize" required value={fileForm.name} onChange={e => setFileForm({ ...fileForm, name: e.target.value })} className="glass-input" style={{ width: '100%' }} />
+                            </div>
+
+                            <div style={{ marginBottom: '20px', padding: '15px', border: '2px dashed #444', borderRadius: '10px', textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                                <input id="fileInput" type="file" required accept=".zip" onChange={e => setFileForm({ ...fileForm, file: e.target.files[0] })} style={{ display: 'none' }} />
+                                <label htmlFor="fileInput" style={{ cursor: 'pointer', display: 'block' }}>
+                                    {fileForm.file ? (
+                                        <div style={{ color: '#4ade80' }}>
+                                            <FileText size={30} style={{ marginBottom: '5px' }} />
+                                            <div>{fileForm.file.name}</div>
+                                            <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>{(fileForm.file.size / 1024 / 1024).toFixed(2)} MB</div>
+                                        </div>
+                                    ) : (
+                                        <div style={{ color: '#aaa' }}>
+                                            <Upload size={30} style={{ marginBottom: '5px' }} />
+                                            <div>Dosya Seçmek İçin Tıklayın</div>
+                                            <div style={{ fontSize: '0.8rem', opacity: 0.5, marginTop: '5px' }}>Sadece .ZIP (Maks 10MB)</div>
+                                        </div>
+                                    )}
+                                </label>
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                                <button type="button" onClick={() => setShowFileModal(false)} disabled={isUploading} className="glass-btn" style={{ background: '#333' }}>İptal</button>
+                                <button type="submit" disabled={isUploading} className="glass-btn" style={{ background: isUploading ? '#444' : '#2563eb', opacity: isUploading ? 0.7 : 1, cursor: isUploading ? 'not-allowed' : 'pointer', minWidth: '120px' }}>
+                                    {isUploading ? (
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                            <span className="loader"></span> Yükleniyor...
+                                        </span>
+                                    ) : (
+                                        'Yüklemeyi Başlat'
+                                    )}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-
-                    <form onSubmit={handleCleanUpload}>
-                        <div style={{ marginBottom: '15px' }}>
-                            <label style={{ display: 'block', color: '#aaa', fontSize: '0.85rem', marginBottom: '5px' }}>Dosya Adı</label>
-                            <input type="text" placeholder="Örn: Elektrik Projesi Revize" required value={fileForm.name} onChange={e => setFileForm({ ...fileForm, name: e.target.value })} className="glass-input" style={{ width: '100%' }} />
-                        </div>
-
-                        <div style={{ marginBottom: '20px', padding: '15px', border: '2px dashed #444', borderRadius: '10px', textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
-                            <input id="fileInput" type="file" required accept=".zip" onChange={e => setFileForm({ ...fileForm, file: e.target.files[0] })} style={{ display: 'none' }} />
-                            <label htmlFor="fileInput" style={{ cursor: 'pointer', display: 'block' }}>
-                                {fileForm.file ? (
-                                    <div style={{ color: '#4ade80' }}>
-                                        <FileText size={30} style={{ marginBottom: '5px' }} />
-                                        <div>{fileForm.file.name}</div>
-                                        <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>{(fileForm.file.size / 1024 / 1024).toFixed(2)} MB</div>
-                                    </div>
-                                ) : (
-                                    <div style={{ color: '#aaa' }}>
-                                        <Upload size={30} style={{ marginBottom: '5px' }} />
-                                        <div>Dosya Seçmek İçin Tıklayın</div>
-                                        <div style={{ fontSize: '0.8rem', opacity: 0.5, marginTop: '5px' }}>Sadece .ZIP (Maks 10MB)</div>
-                                    </div>
-                                )}
-                            </label>
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                            <button type="button" onClick={() => setShowFileModal(false)} disabled={isUploading} className="glass-btn" style={{ background: '#333' }}>İptal</button>
-                            <button type="submit" disabled={isUploading} className="glass-btn" style={{ background: isUploading ? '#444' : '#2563eb', opacity: isUploading ? 0.7 : 1, cursor: isUploading ? 'not-allowed' : 'pointer', minWidth: '120px' }}>
-                                {isUploading ? (
-                                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                        <span className="loader"></span> Yükleniyor...
-                                    </span>
-                                ) : (
-                                    'Yüklemeyi Başlat'
-                                )}
-                            </button>
-                        </div>
-                    </form>
                 </div>
-            </div>
+            )}
 
             {/* EXPENSE MODAL */}
             {showExpenseModal && (
