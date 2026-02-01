@@ -122,6 +122,18 @@ const TaskPool = () => {
         }
     };
 
+
+    const handleVerify = async (taskId) => {
+        if (!window.confirm('Bu görevi kontrol edildi olarak işaretlemek istiyor musunuz?')) return;
+        try {
+            await api.put(`/tasks/${taskId}/verify`);
+            fetchTasks(); // Refresh list
+        } catch (err) {
+            console.error(err);
+            alert('İşlem başarısız');
+        }
+    };
+
     const [existingPhotos, setExistingPhotos] = useState([]); // Photos from DB
 
     const openEditModal = async (task) => {
