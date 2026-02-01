@@ -112,6 +112,7 @@ app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/stock-tracking', require('./routes/stockTracking')); // Distinct from 'stores'
 app.use('/api/backup', require('./routes/backup')); // Backup Route
 app.use('/api/suppliers', require('./routes/suppliers')); // New Suppliers Route
+app.use('/api/regions', require('./routes/regions')); // Dynamic Regions Route
 // app.use('/api/subcontractors', ...); // REMOVED invalid route
 
 // Debug / Health Check Endpoint

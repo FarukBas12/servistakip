@@ -82,9 +82,7 @@ exports.checkEmails = async () => {
                     [
                         subject,
                         `${bodyText}\n\n[Otomatik oluşturuldu. Gönderen: ${from}]`,
-                        'pending', // Changed from 'pool' to 'pending' to fix constraint error
-                        'medium',
-                        'pending', // Changed from 'pool' to 'pending' to fix constraint error
+                        'pending',
                         'medium',
                         new Date(), // Due date today by default
                         'Adres belirtilmedi (Mailden geldi)',
