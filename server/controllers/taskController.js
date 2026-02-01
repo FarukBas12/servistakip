@@ -97,6 +97,8 @@ exports.updateTask = async (req, res) => {
         }
         if (title) { updates.push(`title = $${counter++}`); params.push(title); }
         if (description) { updates.push(`description = $${counter++}`); params.push(description); }
+        if (req.body.address) { updates.push(`address = $${counter++}`); params.push(req.body.address); }
+        if (req.body.maps_link) { updates.push(`maps_link = $${counter++}`); params.push(req.body.maps_link); }
         if (req.body.region) { updates.push(`region = $${counter++}`); params.push(req.body.region); }
         if (req.body.service_form_no) { updates.push(`service_form_no = $${counter++}`); params.push(req.body.service_form_no); }
         if (req.body.is_quoted !== undefined) { updates.push(`is_quoted = $${counter++}`); params.push(req.body.is_quoted); }
