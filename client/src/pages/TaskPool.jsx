@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
-import { Map, Activity, FolderArchive, Plus, FileBarChart } from 'lucide-react';
+import { Map, Activity, FolderArchive, Plus, FileBarChart, Calendar, Eye, UserPlus, Edit2 } from 'lucide-react';
 
 const TaskPool = () => {
     const [tasks, setTasks] = useState([]);
