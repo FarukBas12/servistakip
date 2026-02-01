@@ -72,7 +72,7 @@ const TaskPool = () => {
 
     const fetchRegions = async () => {
         try {
-            const res = await api.get('/api/regions');
+            const res = await api.get('/regions');
             setRegions(res.data.map(r => r.name)); // Simplify to strings for now to match structure
         } catch (err) {
             console.error(err);
@@ -82,7 +82,7 @@ const TaskPool = () => {
     const handleAddRegion = async () => {
         if (!newRegion.trim()) return;
         try {
-            await api.post('/api/regions', { name: newRegion });
+            await api.post('/regions', { name: newRegion });
             setNewRegion('');
             fetchRegions();
         } catch (err) {
@@ -97,10 +97,10 @@ const TaskPool = () => {
             // We need to store full objects in state, not just names.
             // Let's refactor state to store objects.
             // TEMPORARY FIX: We need to refactor fetchRegions first.
-            const res = await api.get('/api/regions');
+            const res = await api.get('/regions');
             const target = res.data.find(r => r.name === regionName);
             if (target) {
-                await api.delete(`/api/regions/${target.id}`);
+                await api.delete(`/regions/${target.id}`);
                 fetchRegions();
             }
         } catch (err) {
