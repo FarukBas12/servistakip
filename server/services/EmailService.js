@@ -70,7 +70,10 @@ exports.checkEmails = async () => {
 
                 const subject = mail.subject || '(Başlıksız Servis)';
                 const from = mail.from?.text || 'Bilinmeyen Gönderici';
-                const bodyText = mail.text || mail.html || '';
+                let bodyText = mail.text || mail.html || '';
+
+                // Clean Body
+                bodyText = cleanEmailBody(bodyText);
 
                 // Create Task in DB
                 // Status: pool, Priority: medium
@@ -128,3 +131,44 @@ exports.checkEmails = async () => {
         return { processed: 0, errors: [err.message] };
     }
 };
+
+/**
+ * Removes common email clutter like signatures, disclaimers, and quoted replies.
+ */
+function cleanEmailBody(text) {
+    if (!text) return '';
+
+    let clean = text;
+
+    // 1. Cut off at standard signature delimiters
+    const signatures = [
+        /^\s*--\s*$/m,               // "-- "
+        /^\s*Sent from my .*/mi,     // "Sent from my iPhone"
+        /^\s*Gönderen: .*/mi,        // "Gönderen: Yahoo Mail" etc.
+        /-+\s*Original Message\s*-+/i,
+        /-+\s*Forwarded Message\s*-+/i,
+        /^On .*, .* wrote:/mi,       // "On [Date], [User] wrote:"
+        /^\d{4}\/\d{1,2}\/\d{1,2} .* <.*@.*>:/mi // "2024/01/01 ... <user@...>:""
+    ];
+
+    for (const sig of signatures) {
+        const match = clean.match(sig);
+        if (match && match.index > 0) {
+            clean = clean.substring(0, match.index);
+        }
+    }
+
+    // 2. Remove common Disclaimer blocks (Turkish & English)
+    const disclaimers = [
+        /Yasal Uyarı:.*/si,
+        /Disclaimer:.*/si,
+        /Bu e-posta ve ekleri hukuken.*/si,
+        /This message and its attachments.*/si
+    ];
+
+    for (const disc of disclaimers) {
+        clean = clean.replace(disc, '');
+    }
+
+    return clean.trim();
+}
