@@ -91,13 +91,20 @@ const ProjectDetail = () => {
         }
     };
 
-    const handleFileUpload = async (e) => {
+    const handleCleanUpload = async (e) => {
         e.preventDefault();
         if (!fileForm.file) return;
 
-        // Check file type (Client-side validation)
+        // 1. Check File Type (Strict ZIP)
         if (!fileForm.file.name.toLowerCase().endsWith('.zip')) {
-            alert('Sadece ZIP dosyaları yüklenebilir!');
+            alert('❌ Sadece .zip uzantılı dosyalar yüklenebilir.');
+            return;
+        }
+
+        // 2. Check File Size (10MB Limit)
+        const MAX_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+        if (fileForm.file.size > MAX_SIZE) {
+            alert(`⚠️ Dosya boyutu çok yüksek! (Sizin dosyanız: ${(fileForm.file.size / 1024 / 1024).toFixed(2)} MB)\n\nÜcretsiz sunucu limiti: 10 MB.\nLütfen dosyayı küçültün veya parçalara bölün.`);
             return;
         }
 
@@ -113,8 +120,10 @@ const ProjectDetail = () => {
             setShowFileModal(false);
             setFileForm({ file: null, name: '' });
             fetchData();
+            alert('✅ Dosya başarıyla yüklendi.');
         } catch (err) {
-            alert('Dosya yüklenemedi: ' + (err.response?.data || err.message));
+            console.error(err);
+            alert('❌ Dosya yüklenemedi: ' + (err.response?.data || err.message));
         } finally {
             setIsUploading(false);
         }
@@ -460,23 +469,53 @@ const ProjectDetail = () => {
             {/* MODALS */}
 
             {/* FILE UPLOAD MODAL */}
-            {showFileModal && (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }}>
-                    <div style={{ background: '#1e1e1e', padding: '30px', borderRadius: '15px', width: '400px', border: '1px solid #333', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
-                        <h3>Dosya Yükle</h3>
-                        <form onSubmit={handleFileUpload}>
-                            <input type="text" placeholder="Dosya Görünür Adı" required value={fileForm.name} onChange={e => setFileForm({ ...fileForm, name: e.target.value })} className="glass-input" style={{ marginBottom: '10px' }} />
-                            <input type="file" required accept=".zip" onChange={e => setFileForm({ ...fileForm, file: e.target.files[0] })} style={{ marginBottom: '15px', color: 'white' }} />
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '15px' }}>
-                                <button type="button" onClick={() => setShowFileModal(false)} disabled={isUploading} style={{ marginRight: '10px', padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#444', color: 'white', opacity: isUploading ? 0.5 : 1 }}>İptal</button>
-                                <button type="submit" disabled={isUploading} style={{ padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#3b82f6', color: 'white', opacity: isUploading ? 0.5 : 1, cursor: isUploading ? 'not-allowed' : 'pointer' }}>
-                                    {isUploading ? 'Yükleniyor...' : 'Yükle'}
-                                </button>
-                            </div>
-                        </form>
+            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(8px)' }}>
+                <div className="glass-panel" style={{ padding: '30px', width: '450px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <h3 style={{ margin: 0, color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}><Upload size={20} color="#3b82f6" /> Dosya Yükle (ZIP)</h3>
+                        <button onClick={() => setShowFileModal(false)} style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer' }}><X size={20} /></button>
                     </div>
+
+                    <form onSubmit={handleCleanUpload}>
+                        <div style={{ marginBottom: '15px' }}>
+                            <label style={{ display: 'block', color: '#aaa', fontSize: '0.85rem', marginBottom: '5px' }}>Dosya Adı</label>
+                            <input type="text" placeholder="Örn: Elektrik Projesi Revize" required value={fileForm.name} onChange={e => setFileForm({ ...fileForm, name: e.target.value })} className="glass-input" style={{ width: '100%' }} />
+                        </div>
+
+                        <div style={{ marginBottom: '20px', padding: '15px', border: '2px dashed #444', borderRadius: '10px', textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                            <input id="fileInput" type="file" required accept=".zip" onChange={e => setFileForm({ ...fileForm, file: e.target.files[0] })} style={{ display: 'none' }} />
+                            <label htmlFor="fileInput" style={{ cursor: 'pointer', display: 'block' }}>
+                                {fileForm.file ? (
+                                    <div style={{ color: '#4ade80' }}>
+                                        <FileText size={30} style={{ marginBottom: '5px' }} />
+                                        <div>{fileForm.file.name}</div>
+                                        <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>{(fileForm.file.size / 1024 / 1024).toFixed(2)} MB</div>
+                                    </div>
+                                ) : (
+                                    <div style={{ color: '#aaa' }}>
+                                        <Upload size={30} style={{ marginBottom: '5px' }} />
+                                        <div>Dosya Seçmek İçin Tıklayın</div>
+                                        <div style={{ fontSize: '0.8rem', opacity: 0.5, marginTop: '5px' }}>Sadece .ZIP (Maks 10MB)</div>
+                                    </div>
+                                )}
+                            </label>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                            <button type="button" onClick={() => setShowFileModal(false)} disabled={isUploading} className="glass-btn" style={{ background: '#333' }}>İptal</button>
+                            <button type="submit" disabled={isUploading} className="glass-btn" style={{ background: isUploading ? '#444' : '#2563eb', opacity: isUploading ? 0.7 : 1, cursor: isUploading ? 'not-allowed' : 'pointer', minWidth: '120px' }}>
+                                {isUploading ? (
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                        <span className="loader"></span> Yükleniyor...
+                                    </span>
+                                ) : (
+                                    'Yüklemeyi Başlat'
+                                )}
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            )}
+            </div>
 
             {/* EXPENSE MODAL */}
             {showExpenseModal && (
