@@ -524,6 +524,14 @@ async function runMigrations() {
         `);
         // Ensure one row exists
         await db.query("INSERT INTO app_settings (id, delete_password) VALUES (1, '123456') ON CONFLICT (id) DO NOTHING");
+
+        // MIGRATION: Add email columns if they don't exist
+        await db.query("ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS email_host VARCHAR(255)");
+        await db.query("ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS email_port INTEGER");
+        await db.query("ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS email_user VARCHAR(255)");
+        await db.query("ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS email_pass VARCHAR(255)");
+        await db.query("ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS email_active BOOLEAN DEFAULT false");
+
         console.log(' - Checked app_settings table');
 
         // NEW: Notifications Table
