@@ -395,6 +395,26 @@ h3 {
     }
 }
 
+/* Icon Button (Fix for TaskPool) */
+.icon-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: var(--text-secondary);
+}
+
+.icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: scale(1.1);
+}
+
 /* --- MOBILE LAYOUT (PWA) --- */
 @media (max-width: 768px) {
 
