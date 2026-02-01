@@ -656,11 +656,11 @@ h3 {
 
     /* 6. Inputs Full Width - EXCLUDE .icon-btn */
     .glass-input,
-    select,
-    button:not(.icon-btn) {
+    select {
         width: 100% !important;
         max-width: 100% !important;
     }
+
 
     /* 7. Modal Fixes */
     div[style*="fixed"]>.glass-panel {
