@@ -83,8 +83,11 @@ exports.updateSettings = async (req, res) => {
 exports.testEmailConnection = async (req, res) => {
     try {
         console.log('Manual Email Check Triggered...');
-        await emailService.checkEmails();
-        res.json({ message: 'Test Tamamlandı. Lütfen Servis Havuzunu veya sunucu loglarını kontrol edin.' });
+        const result = await emailService.checkEmails();
+        res.json({
+            message: 'Test Tamamlandı.',
+            details: result || { processed: 0, total: 0 }
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Test Hatası: ' + err.message });

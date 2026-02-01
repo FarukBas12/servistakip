@@ -47,10 +47,12 @@ exports.checkEmails = async () => {
         if (messages.length === 0) {
             // console.log('Email Service: No new emails.');
             connection.end();
-            return;
+            return { processed: 0, errors: [] };
         }
 
         console.log(`Email Service: Found ${messages.length} new emails.`);
+        let processedCount = 0;
+        let errors = [];
 
         // 4. Process Each Message
         for (const message of messages) {
@@ -105,16 +107,20 @@ exports.checkEmails = async () => {
                 }
 
                 console.log(`Task created from email: ${subject} (ID: ${taskId})`);
+                processedCount++;
 
             } catch (err) {
                 console.error('Error processing message:', err);
+                errors.push(err.message);
             }
         }
 
         connection.end();
+        return { processed: processedCount, total: messages.length, errors };
 
     } catch (err) {
         console.error('Email Service Error:', err.message);
         if (connection) connection.end();
+        return { processed: 0, errors: [err.message] };
     }
 };
