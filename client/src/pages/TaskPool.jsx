@@ -492,7 +492,7 @@ const TaskPool = () => {
 
                                     <button
                                         className="icon-btn"
-                                        onClick={() => openDetailModal(task)}
+                                        onClick={() => openViewModal(task)}
                                         title="Görüntüle"
                                     >
                                         <Eye size={18} />
