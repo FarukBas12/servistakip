@@ -17,6 +17,7 @@ const ProjectDetail = () => {
     const [allUsers, setAllUsers] = useState([]); // For selection
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('files');
+    const [isUploading, setIsUploading] = useState(false);
 
     // Modals
     const [showFileModal, setShowFileModal] = useState(false);
@@ -92,6 +93,17 @@ const ProjectDetail = () => {
 
     const handleFileUpload = async (e) => {
         e.preventDefault();
+        if (!fileForm.file) return;
+
+        // Check file type (Client-side validation)
+        if (!fileForm.file.name.toLowerCase().endsWith('.zip')) {
+            alert('Sadece ZIP dosyaları yüklenebilir!');
+            return;
+        }
+
+        if (isUploading) return;
+        setIsUploading(true);
+
         const formData = new FormData();
         formData.append('file', fileForm.file);
         formData.append('file_name', fileForm.name);
@@ -103,6 +115,8 @@ const ProjectDetail = () => {
             fetchData();
         } catch (err) {
             alert('Dosya yüklenemedi: ' + (err.response?.data || err.message));
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -452,10 +466,12 @@ const ProjectDetail = () => {
                         <h3>Dosya Yükle</h3>
                         <form onSubmit={handleFileUpload}>
                             <input type="text" placeholder="Dosya Görünür Adı" required value={fileForm.name} onChange={e => setFileForm({ ...fileForm, name: e.target.value })} className="glass-input" style={{ marginBottom: '10px' }} />
-                            <input type="file" required onChange={e => setFileForm({ ...fileForm, file: e.target.files[0] })} style={{ marginBottom: '15px', color: 'white' }} />
+                            <input type="file" required accept=".zip" onChange={e => setFileForm({ ...fileForm, file: e.target.files[0] })} style={{ marginBottom: '15px', color: 'white' }} />
                             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '15px' }}>
-                                <button type="button" onClick={() => setShowFileModal(false)} style={{ marginRight: '10px', padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#444', color: 'white' }}>İptal</button>
-                                <button type="submit" style={{ padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#3b82f6', color: 'white' }}>Yükle</button>
+                                <button type="button" onClick={() => setShowFileModal(false)} disabled={isUploading} style={{ marginRight: '10px', padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#444', color: 'white', opacity: isUploading ? 0.5 : 1 }}>İptal</button>
+                                <button type="submit" disabled={isUploading} style={{ padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#3b82f6', color: 'white', opacity: isUploading ? 0.5 : 1, cursor: isUploading ? 'not-allowed' : 'pointer' }}>
+                                    {isUploading ? 'Yükleniyor...' : 'Yükle'}
+                                </button>
                             </div>
                         </form>
                     </div>
