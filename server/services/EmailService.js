@@ -26,7 +26,8 @@ exports.checkEmails = async () => {
                 host: settings.email_host || 'imap.gmail.com',
                 port: settings.email_port || 993,
                 tls: true,
-                authTimeout: 3000
+                tlsOptions: { rejectUnauthorized: false },
+                authTimeout: 15000 // Increased to 15s
             }
         };
 
