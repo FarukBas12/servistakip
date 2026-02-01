@@ -253,10 +253,6 @@ exports.cancelTask = async (req, res) => {
         console.error(err.message);
         res.status(500).json({ message: err.message });
     }
-} catch (err) {
-    console.error(err.message);
-    res.status(500).json({ message: err.message });
-}
 };
 
 exports.deletePhoto = async (req, res) => {
