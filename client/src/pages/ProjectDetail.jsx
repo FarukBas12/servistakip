@@ -408,53 +408,11 @@ const ProjectDetail = () => {
                                     {new Date(file.uploaded_at).toLocaleDateString()}
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-    const handleDownload = async (url, filename) => {
-        if (!url) return;
-
-                                    try {
-            // 1. Show user that download started
-            const btn = document.activeElement;
-                                    if (btn && btn.tagName === 'BUTTON') {
-                const originalText = btn.innerText;
-                                    btn.innerText = 'İndiriliyor...';
-                                    btn.disabled = true;
-
-                                    // Fetch blob
-                                    const response = await fetch(url);
-                                    const blob = await response.blob();
-
-                                    // Create object URL
-                                    const blobUrl = window.URL.createObjectURL(blob);
-
-                                    // Force download with correct name
-                                    const link = document.createElement('a');
-                                    link.href = blobUrl;
-                                    // Ensure filename ends with .zip if it's supposed to be a zip
-                                    let saveName = filename || 'dosya.zip';
-                                    if (!saveName.toLowerCase().endsWith('.zip') && !saveName.includes('.')) {
-                                        saveName += '.zip';
-                }
-
-                                    link.download = saveName;
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    document.body.removeChild(link);
-
-                                    // Cleanup
-                                    window.URL.revokeObjectURL(blobUrl);
-                                    btn.innerText = originalText;
-                                    btn.disabled = false;
-            } else {
-                                        // Fallback if button not found
-                                        window.open(url, '_blank');
-            }
-        } catch (err) {
-                                        console.error('Download failed', err);
-                                    // Fallback to direct open if fetch fails (e.g. CORS)
-                                    window.open(url, '_blank');
-                                    alert('Otomatik indirme başarısız oldu, dosya yeni sekmede açıldı. Lütfen oradan kaydedin (Ctrl+S).');
-        }
-    };
+                                    <button
+                                        onClick={() => handleDownload(file.file_url, file.file_name, file.file_type)}
+                                        style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 10px', background: 'rgba(255,255,255,0.1)', borderRadius: '5px', color: 'white', border: 'none', cursor: 'pointer', fontSize: '0.8rem' }}>
+                                        <Download size={14} /> İndir
+                                    </button>
                                     <button
                                         onClick={async () => {
                                             if (!window.confirm('Bu dosyayı silmek istediğinize emin misiniz?')) return;
