@@ -297,16 +297,14 @@ async function runMigrations() {
         // Create Photos Table
         await db.query(`
             CREATE TABLE IF NOT EXISTS photos (
-                id SERIAL PRIMARY KEY,
-                task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
-                url TEXT NOT NULL,
-                type VARCHAR(50),
-                gps_lat FLOAT,
-                gps_lng FLOAT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
         console.log(' - Checked photos table');
+
+        // MIGRATION: Add verified_by to tasks
+        await db.query(`ALTER TABLE tasks ADD COLUMN IF NOT EXISTS verified_by INTEGER REFERENCES users(id) ON DELETE SET NULL`);
+        console.log(' - Checked verified_by in tasks');
 
         // Create Regions Table (Dynamic)
         await db.query(`

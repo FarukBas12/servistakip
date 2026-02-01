@@ -3,7 +3,7 @@ const notificationController = require('./notificationController');
 
 exports.getTasks = async (req, res) => {
     try {
-        // Enlanced Query: Get Task + Assigned Users (Array) + Last Cancellation
+        // Enlanced Query: Get Task + Assigned Users + Last Cancellation + Verifier
         let query = `
             SELECT t.*, 
             COALESCE(
@@ -14,10 +14,12 @@ exports.getTasks = async (req, res) => {
                 '[]'
             ) as assigned_users,
             editor.username as last_editor,
+            verifier.username as verified_by_user,
             (SELECT description FROM task_logs tl WHERE tl.task_id = t.id AND tl.action = 'cancelled' ORDER BY tl.created_at DESC LIMIT 1) as last_cancel_reason,
             (SELECT COUNT(*) FROM task_logs tl WHERE tl.task_id = t.id AND tl.action = 'cancelled') as cancel_count
             FROM tasks t
             LEFT JOIN users editor ON t.updated_by = editor.id
+            LEFT JOIN users verifier ON t.verified_by = verifier.id
         `;
         const params = [];
 
@@ -279,3 +281,14 @@ exports.deletePhoto = async (req, res) => {
 };
 
 
+
+exports.verifyTask = async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.query('UPDATE tasks SET verified_by = $1 WHERE id = $2', [req.user.id, id]);
+        res.json({ message: 'Task verified' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Verification failed' });
+    }
+};

@@ -40,7 +40,9 @@ router.put('/:id', taskController.updateTask);
 router.delete('/:id', taskController.deleteTask);
 router.post('/:id/photos', upload, taskController.addPhoto);
 router.delete('/:id/photos/:photoId', taskController.deletePhoto); // NEW: Delete photo
-router.post('/:id/cancel', taskController.cancelTask); // NEW: Return task to pool
+router.post('/:id/cancel', taskController.cancelTask); // Return task to pool
+router.put('/:id/verify', taskController.verifyTask); // NEW: Verify task (Email check)
+
 
 
 module.exports = router;

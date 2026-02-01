@@ -403,20 +403,52 @@ const TaskPool = () => {
                                         {task.status === 'in_progress' ? 'SAHADA' : 'BEKLİYOR'}
                                     </span>
 
-                                    {/* EMAIL WARNING BADGE */}
+                                    {/* EMAIL WARNING BADGE & VERIFICATION */}
                                     {task.source === 'email' && (
-                                        <span className="blinking-badge" style={{
-                                            background: '#ff9800', // Solid orange for better visibility
-                                            color: 'black',
-                                            padding: '2px 8px',
-                                            borderRadius: '4px',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 'bold',
-                                            display: 'flex', alignItems: 'center', gap: '4px'
-                                        }}>
-                                            ⚠️ KONTROL BEKLİYOR
-                                        </span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            {!task.verified_by ? (
+                                                <>
+                                                    <span className="blinking-badge" style={{
+                                                        background: '#ff9800',
+                                                        color: 'black',
+                                                        padding: '4px 10px',
+                                                        borderRadius: '6px',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: 'bold',
+                                                        display: 'flex', alignItems: 'center', gap: '4px'
+                                                    }}>
+                                                        ⚠️ KONTROL BEKLİYOR
+                                                    </span>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleVerify(task.id); }}
+                                                        className="glass-btn"
+                                                        style={{
+                                                            padding: '4px 10px',
+                                                            fontSize: '0.75rem',
+                                                            background: 'rgba(76, 175, 80, 0.2)',
+                                                            color: '#81c784',
+                                                            border: '1px solid rgba(76, 175, 80, 0.4)',
+                                                            height: 'auto'
+                                                        }}
+                                                    >
+                                                        ✅ Kontrol Edildi
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <span style={{
+                                                    color: '#81c784',
+                                                    fontSize: '0.75rem',
+                                                    display: 'flex', alignItems: 'center', gap: '4px',
+                                                    border: '1px solid rgba(76, 175, 80, 0.2)',
+                                                    padding: '2px 8px',
+                                                    borderRadius: '4px'
+                                                }}>
+                                                    ✅ {task.verified_by_user} tarafından kontrol edildi
+                                                </span>
+                                            )}
+                                        </div>
                                     )}
+
                                     {task.cancel_count > 0 && (
                                         <span style={{ color: '#ff5252', fontSize: '0.8rem', fontWeight: 'bold' }}>
                                             ⚠️ {task.cancel_count} kez iade ({task.last_cancel_reason?.substring(0, 15)}...)
@@ -424,13 +456,22 @@ const TaskPool = () => {
                                     )}
                                 </div>
 
-                                <h3 style={{ margin: '0 0 5px 0', fontSize: '1.1rem' }}>{task.title}</h3>
-                                <p style={{ margin: 0, opacity: 0.7, fontSize: '0.9rem' }}>{task.address}</p>
-                                {/* RED AREA (Center): Description */}
+                                <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem', color: 'white' }}>{task.title}</h3>
+                                <p style={{ margin: 0, opacity: 0.8, fontSize: '0.95rem', color: '#ccc' }}>{task.address}</p>
+
+                                {/* RED AREA (Center): Description - ENHANCED */}
                                 <div style={{
-                                    fontSize: '0.85rem', color: '#e0e0e0', marginTop: '6px',
-                                    fontStyle: 'italic', borderLeft: '3px solid #f44336', paddingLeft: '8px',
-                                    maxWidth: '600px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                                    fontSize: '1.1rem', // Larger font
+                                    color: '#ffffff', // Bright white
+                                    marginTop: '8px',
+                                    fontWeight: '500',
+                                    backgroundColor: 'rgba(244, 67, 54, 0.1)', // Subtle red background
+                                    borderLeft: '4px solid #f44336',
+                                    padding: '8px 12px',
+                                    borderRadius: '0 8px 8px 0',
+                                    maxWidth: '650px',
+                                    lineHeight: '1.5',
+                                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
                                 }}>
                                     📝 {task.description || 'Açıklama yok'}
                                 </div>
