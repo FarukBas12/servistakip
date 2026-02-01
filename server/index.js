@@ -308,6 +308,23 @@ async function runMigrations() {
         `);
         console.log(' - Checked photos table');
 
+        // Create Regions Table (Dynamic)
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS regions (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(50) UNIQUE NOT NULL
+            );
+        `);
+        const regionCount = await db.query('SELECT COUNT(*) FROM regions');
+        if (parseInt(regionCount.rows[0].count) === 0) {
+            const defaultRegions = ['Kemalpaşa', 'Manisa', 'Güzelbahçe', 'Torbalı', 'Menemen', 'Diğer'];
+            for (const r of defaultRegions) {
+                await db.query('INSERT INTO regions (name) VALUES ($1)', [r]);
+            }
+            console.log(' - Seeded default regions');
+        }
+        console.log(' - Checked regions table');
+
         // NEW: Create Task Assignments Table (Multi-Assign)
         await db.query(`
             CREATE TABLE IF NOT EXISTS task_assignments (
