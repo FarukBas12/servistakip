@@ -212,51 +212,10 @@ const ProjectDetail = () => {
         return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount || 0);
     };
 
-    const handleDownload = (url, filename, fileType) => {
+    const handleDownload = (url, filename) => {
         if (!url) return;
-
-        let finalName = filename || 'download';
-
-        // Check if filename already has a valid extension (2-4 chars)
-        const hasExtension = /\.[a-z0-9]{2,5}$/i.test(finalName);
-
-        if (!hasExtension) {
-            // 1. Try to get extension from URL (ignore query params)
-            const urlPath = url.split('?')[0];
-            const extFromUrl = urlPath.split('.').pop();
-
-            if (extFromUrl && extFromUrl.length >= 2 && extFromUrl.length <= 4) {
-                finalName += `.${extFromUrl}`;
-            }
-            // 2. Fallback to fileType matching
-            else if (fileType) {
-                if (fileType.includes('sheet') || fileType.includes('excel')) finalName += '.xlsx';
-                else if (fileType.includes('pdf')) finalName += '.pdf';
-                else if (fileType.includes('word') || fileType.includes('document')) finalName += '.docx';
-                else if (fileType.includes('jpeg') || fileType.includes('jpg')) finalName += '.jpg';
-                else if (fileType.includes('png')) finalName += '.png';
-                else if (fileType.includes('dwg')) finalName += '.dwg';
-                else if (fileType.includes('dxf')) finalName += '.dxf';
-                else if (fileType.includes('zip')) finalName += '.zip';
-                else if (fileType.includes('rar')) finalName += '.rar';
-            }
-        }
-
-        // Cloudinary Logic
-        if (url.includes('cloudinary.com') && url.includes('/upload/')) {
-            const cleanName = encodeURIComponent(finalName);
-            const newUrl = url.replace('/upload/', `/upload/fl_attachment:${cleanName}/`);
-            window.open(newUrl, '_self');
-        } else {
-            // Fallback for non-cloudinary
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = finalName;
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+        // Simple and robust: Open in new tab. Browser handles download or view.
+        window.open(url, '_blank');
     };
 
     if (loading) return <div style={{ padding: '20px', color: 'white' }}>Yükleniyor...</div>;
