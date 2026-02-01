@@ -537,7 +537,7 @@ const TaskPool = () => {
                     }
                 </div>
             )}
-            )}
+
 
             {/* Modal Overlay */}
             {
