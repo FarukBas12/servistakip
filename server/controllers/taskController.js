@@ -13,9 +13,11 @@ exports.getTasks = async (req, res) => {
                  WHERE ta.task_id = t.id),
                 '[]'
             ) as assigned_users,
+            editor.username as last_editor,
             (SELECT description FROM task_logs tl WHERE tl.task_id = t.id AND tl.action = 'cancelled' ORDER BY tl.created_at DESC LIMIT 1) as last_cancel_reason,
             (SELECT COUNT(*) FROM task_logs tl WHERE tl.task_id = t.id AND tl.action = 'cancelled') as cancel_count
             FROM tasks t
+            LEFT JOIN users editor ON t.updated_by = editor.id
         `;
         const params = [];
 
@@ -102,6 +104,10 @@ exports.updateTask = async (req, res) => {
         if (req.body.region) { updates.push(`region = $${counter++}`); params.push(req.body.region); }
         if (req.body.service_form_no) { updates.push(`service_form_no = $${counter++}`); params.push(req.body.service_form_no); }
         if (req.body.is_quoted !== undefined) { updates.push(`is_quoted = $${counter++}`); params.push(req.body.is_quoted); }
+
+        // Track who updated
+        updates.push(`updated_by = $${counter++}`);
+        params.push(req.user.id);
 
         // Only run update if there are fields (excluding assigned_to which is handled separately)
         if (updates.length > 0) {
