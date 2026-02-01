@@ -472,19 +472,7 @@ const TaskPool = () => {
                                 <p style={{ margin: 0, opacity: 0.8, fontSize: '0.95rem', color: '#ccc' }}>{task.address}</p>
 
                                 {/* RED AREA (Center): Description - ENHANCED */}
-                                <div style={{
-                                    fontSize: '1.1rem', // Larger font
-                                    color: '#ffffff', // Bright white
-                                    marginTop: '8px',
-                                    fontWeight: '500',
-                                    backgroundColor: 'rgba(244, 67, 54, 0.1)', // Subtle red background
-                                    borderLeft: '4px solid #f44336',
-                                    padding: '8px 12px',
-                                    borderRadius: '0 8px 8px 0',
-                                    maxWidth: '650px',
-                                    lineHeight: '1.5',
-                                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-                                }}>
+                                <div className="task-description">
                                     📝 {task.description || 'Açıklama yok'}
                                 </div>
                             </div>
