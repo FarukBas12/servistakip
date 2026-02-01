@@ -56,6 +56,8 @@ exports.getSettings = async (req, res) => {
     } catch (err) { console.error(err); res.status(500).send('Server Error'); }
 };
 
+const emailService = require('../services/EmailService');
+
 exports.updateSettings = async (req, res) => {
     try {
         const { delete_password, email_host, email_port, email_user, email_pass, email_active } = req.body;
@@ -76,6 +78,17 @@ exports.updateSettings = async (req, res) => {
 
         res.json({ message: 'Settings Updated' });
     } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+};
+
+exports.testEmailConnection = async (req, res) => {
+    try {
+        console.log('Manual Email Check Triggered...');
+        await emailService.checkEmails();
+        res.json({ message: 'Test Tamamlandı. Lütfen Servis Havuzunu veya sunucu loglarını kontrol edin.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Test Hatası: ' + err.message });
+    }
 };
 
 // --- CASH TRANSACTIONS ---

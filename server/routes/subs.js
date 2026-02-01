@@ -24,6 +24,7 @@ router.get('/:id/ledger', controller.getLedger);
 // Settings
 router.get('/settings/all', controller.getSettings);
 router.put('/settings/all', controller.updateSettings);
+router.post('/settings/test-email', controller.testEmailConnection);
 router.delete('/transaction/:type/:id', controller.deleteTransaction);
 
 // Cash

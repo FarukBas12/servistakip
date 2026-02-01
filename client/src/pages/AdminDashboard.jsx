@@ -278,9 +278,24 @@ const AdminDashboard = () => {
                                     <span style={{ fontSize: '0.9rem', color: emailSettings.email_active ? '#4ade80' : '#aaa' }}>{emailSettings.email_active ? 'Otomatik Kontrol Aktif' : 'Devre Dışı'}</span>
                                 </div>
 
-                                <button onClick={handleSaveEmail} className="glass-btn" style={{ background: 'rgba(192, 132, 252, 0.3)', width: 'auto', padding: '10px 30px' }}>
-                                    <Save size={18} style={{ marginRight: '10px' }} /> Ayarları Kaydet
-                                </button>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button onClick={handleSaveEmail} className="glass-btn" style={{ background: 'rgba(192, 132, 252, 0.3)', width: 'auto', padding: '10px 30px' }}>
+                                        <Save size={18} style={{ marginRight: '10px' }} /> Ayarları Kaydet
+                                    </button>
+
+                                    <button onClick={async () => {
+                                        if (!confirm('Mail kutusu şimdi kontrol edilecek. Devam edilsin mi?')) return;
+                                        try {
+                                            alert('Kontrol ediliyor, lütfen bekleyin...');
+                                            await api.post('/subs/settings/test-email');
+                                            alert('✅ Başarılı! Kontrol tamamlandı. Yeni mail varsa havuza düşmüştür.');
+                                        } catch (e) {
+                                            alert('❌ Hata: ' + (e.response?.data?.message || e.message));
+                                        }
+                                    }} className="glass-btn" style={{ background: 'rgba(96, 165, 250, 0.2)', width: 'auto', padding: '10px 30px' }}>
+                                        <Database size={18} style={{ marginRight: '10px' }} /> Bağlantıyı Test Et
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
