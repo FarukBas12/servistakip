@@ -29,7 +29,7 @@ const TaskPool = () => {
     };
 
     // Form Data
-    const [editForm, setEditForm] = useState({ title: '', description: '', address: '', maps_link: '', due_date: '' });
+    const [editForm, setEditForm] = useState({ title: '', description: '', address: '', maps_link: '', region: 'Diğer', due_date: '' });
     const [editFiles, setEditFiles] = useState([]); // New state for edit files
     const [assignId, setAssignId] = useState('');
 
@@ -98,6 +98,7 @@ const TaskPool = () => {
                 description: fullTask.description || '',
                 address: fullTask.address,
                 maps_link: fullTask.maps_link || '',
+                region: fullTask.region || 'Diğer',
                 due_date: formattedDate
             });
             setExistingPhotos(fullTask.photos || []);
@@ -439,6 +440,19 @@ const TaskPool = () => {
                                             onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
                                             required
                                         />
+
+                                        <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Bölge</label>
+                                        <select
+                                            className="glass-input"
+                                            value={editForm.region}
+                                            onChange={(e) => setEditForm({ ...editForm, region: e.target.value })}
+                                            style={{ background: '#333', color: 'white' }}
+                                        >
+                                            {regions.filter(r => r !== 'Hepsi').map(r => (
+                                                <option key={r} value={r}>{r}</option>
+                                            ))}
+                                        </select>
+
                                         <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Tarih ve Saat</label>
                                         <input
                                             type="datetime-local"
