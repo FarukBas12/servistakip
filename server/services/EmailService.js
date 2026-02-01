@@ -78,14 +78,17 @@ exports.checkEmails = async () => {
                 // Create Task in DB
                 // Status: pool, Priority: medium
                 const taskResult = await db.query(
-                    'INSERT INTO tasks (title, description, status, priority, due_date, address) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+                    'INSERT INTO tasks (title, description, status, priority, due_date, address, source) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
                     [
                         subject,
                         `${bodyText}\n\n[Otomatik oluşturuldu. Gönderen: ${from}]`,
                         'pending', // Changed from 'pool' to 'pending' to fix constraint error
                         'medium',
+                        'pending', // Changed from 'pool' to 'pending' to fix constraint error
+                        'medium',
                         new Date(), // Due date today by default
-                        'Adres belirtilmedi (Mailden geldi)'
+                        'Adres belirtilmedi (Mailden geldi)',
+                        'email' // Source
                     ]
                 );
 

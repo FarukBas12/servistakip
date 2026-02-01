@@ -253,6 +253,25 @@ exports.cancelTask = async (req, res) => {
         console.error(err.message);
         res.status(500).json({ message: err.message });
     }
+} catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: err.message });
+}
+};
+
+exports.deletePhoto = async (req, res) => {
+    const { id, photoId } = req.params;
+    try {
+        const { rowCount } = await db.query('DELETE FROM photos WHERE id = $1 AND task_id = $2', [photoId, id]);
+
+        if (rowCount === 0) {
+            return res.status(404).json({ message: 'Photo not found' });
+        }
+        res.json({ message: 'Photo deleted' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: err.message });
+    }
 };
 
 

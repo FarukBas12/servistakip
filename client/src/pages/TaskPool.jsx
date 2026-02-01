@@ -29,7 +29,7 @@ const TaskPool = () => {
     };
 
     // Form Data
-    const [editForm, setEditForm] = useState({ title: '', description: '', address: '', due_date: '' });
+    const [editForm, setEditForm] = useState({ title: '', description: '', address: '', maps_link: '', due_date: '' });
     const [editFiles, setEditFiles] = useState([]); // New state for edit files
     const [assignId, setAssignId] = useState('');
 
@@ -75,25 +75,50 @@ const TaskPool = () => {
         }
     };
 
-    const openEditModal = (task) => {
+    const [existingPhotos, setExistingPhotos] = useState([]); // Photos from DB
+
+    const openEditModal = async (task) => {
+        // Set basic data first for immediate feedback
         setEditingTask(task);
 
-        let formattedDate = '';
-        if (task.due_date) {
-            const d = new Date(task.due_date);
-            // Adjust for timezone offset to keep local time in ISO string
-            const localDate = new Date(d.getTime() - (d.getTimezoneOffset() * 60000));
-            formattedDate = localDate.toISOString().slice(0, 16);
-        }
+        try {
+            // Fetch Full Details (for photos & latest data)
+            const res = await api.get(`/tasks/${task.id}`);
+            const fullTask = res.data;
 
-        setEditForm({
-            title: task.title,
-            description: task.description || '',
-            address: task.address,
-            due_date: formattedDate
-        });
-        setEditFiles([]); // Reset files
-        setModalMode('edit');
+            let formattedDate = '';
+            if (fullTask.due_date) {
+                const d = new Date(fullTask.due_date);
+                const localDate = new Date(d.getTime() - (d.getTimezoneOffset() * 60000));
+                formattedDate = localDate.toISOString().slice(0, 16);
+            }
+
+            setEditForm({
+                title: fullTask.title,
+                description: fullTask.description || '',
+                address: fullTask.address,
+                maps_link: fullTask.maps_link || '',
+                due_date: formattedDate
+            });
+            setExistingPhotos(fullTask.photos || []);
+            setEditFiles([]);
+            setModalMode('edit');
+
+        } catch (err) {
+            console.error(err);
+            alert('Detaylar yüklenirken hata oluştu');
+            setEditingTask(null);
+        }
+    };
+
+    const handleDeletePhoto = async (photoId) => {
+        if (!window.confirm('Fotoğrafı silmek istediğinize emin misiniz?')) return;
+        try {
+            await api.delete(`/tasks/${editingTask.id}/photos/${photoId}`);
+            setExistingPhotos(existingPhotos.filter(p => p.id !== photoId));
+        } catch (err) {
+            alert('Fotoğraf silinemedi');
+        }
     };
 
     // State for multiple assignment
@@ -283,6 +308,22 @@ const TaskPool = () => {
                                     }}>
                                         {task.status === 'in_progress' ? 'SAHADA' : 'BEKLİYOR'}
                                     </span>
+
+                                    {/* EMAIL WARNING BADGE */}
+                                    {task.source === 'email' && (
+                                        <span className="blink-badge" style={{
+                                            background: 'rgba(239, 68, 68, 0.2)',
+                                            color: '#f87171',
+                                            padding: '2px 8px',
+                                            borderRadius: '4px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 'bold',
+                                            border: '1px solid rgba(239, 68, 68, 0.5)',
+                                            display: 'flex', alignItems: 'center', gap: '4px'
+                                        }}>
+                                            ⚠️ KONTROL BEKLİYOR
+                                        </span>
+                                    )}
                                     {task.cancel_count > 0 && (
                                         <span style={{ color: '#ff5252', fontSize: '0.8rem', fontWeight: 'bold' }}>
                                             ⚠️ {task.cancel_count} kez iade ({task.last_cancel_reason?.substring(0, 15)}...)
@@ -405,6 +446,14 @@ const TaskPool = () => {
                                             value={editForm.due_date}
                                             onChange={(e) => setEditForm({ ...editForm, due_date: e.target.value })}
                                         />
+                                        <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Harita Konum Linki</label>
+                                        <input
+                                            className="glass-input"
+                                            placeholder="https://maps.google.com/..."
+                                            value={editForm.maps_link || ''}
+                                            onChange={(e) => setEditForm({ ...editForm, maps_link: e.target.value })}
+                                        />
+
                                         <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Açıklama</label>
                                         <textarea
                                             className="glass-input"
@@ -413,7 +462,30 @@ const TaskPool = () => {
                                             onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                                         />
 
-                                        <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Fotoğraf Ekle (Opsiyonel)</label>
+                                        <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Mevcut Fotoğraflar</label>
+                                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                                            {existingPhotos.map(p => (
+                                                <div key={p.id} style={{ position: 'relative', width: '80px', height: '80px' }}>
+                                                    <img src={p.url} alt="Task" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '5px', border: '1px solid #555' }} />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDeletePhoto(p.id)}
+                                                        style={{
+                                                            position: 'absolute', top: -5, right: -5,
+                                                            background: 'red', color: 'white',
+                                                            border: 'none', borderRadius: '50%',
+                                                            width: '20px', height: '20px',
+                                                            cursor: 'pointer', fontSize: '12px',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                        }}>
+                                                        &times;
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            {existingPhotos.length === 0 && <span style={{ opacity: 0.5, fontSize: '0.9rem' }}>Fotoğraf yok.</span>}
+                                        </div>
+
+                                        <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Yeni Fotoğraf Ekle</label>
                                         <input
                                             type="file"
                                             multiple
