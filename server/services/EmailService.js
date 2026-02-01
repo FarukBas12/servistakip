@@ -14,6 +14,9 @@ exports.checkEmails = async () => {
         const { rows } = await db.query('SELECT * FROM app_settings WHERE id = 1');
         const settings = rows[0];
 
+        // HOST FIX: Disable TLS Rejection for this process (Self-signed cert fix)
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
         if (!settings || !settings.email_user || !settings.email_pass || !settings.email_active) {
             console.log('Email Service: Not configured or inactive.');
             return;

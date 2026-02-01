@@ -289,7 +289,8 @@ async function runMigrations() {
 
         await db.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS service_form_no TEXT");
         await db.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS is_quoted BOOLEAN DEFAULT FALSE");
-        console.log(' - Checked service form columns');
+        await db.query("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS priority VARCHAR(20) DEFAULT 'medium'");
+        console.log(' - Checked service form & priority columns');
 
         // Create Photos Table
         await db.query(`
