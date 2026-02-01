@@ -51,15 +51,29 @@ exports.deleteSub = async (req, res) => {
 
 exports.getSettings = async (req, res) => {
     try {
-        const { rows } = await db.query('SELECT delete_password FROM app_settings WHERE id = 1');
+        const { rows } = await db.query('SELECT delete_password, email_host, email_port, email_user, email_pass, email_active FROM app_settings WHERE id = 1');
         res.json(rows[0] || { delete_password: '123456' });
     } catch (err) { console.error(err); res.status(500).send('Server Error'); }
 };
 
 exports.updateSettings = async (req, res) => {
     try {
-        const { delete_password } = req.body;
-        await db.query('UPDATE app_settings SET delete_password = $1 WHERE id = 1', [delete_password]);
+        const { delete_password, email_host, email_port, email_user, email_pass, email_active } = req.body;
+
+        // Dynamic update based on provided fields
+        if (delete_password) {
+            await db.query('UPDATE app_settings SET delete_password = $1 WHERE id = 1', [delete_password]);
+        }
+
+        if (email_host !== undefined) {
+            await db.query(
+                `UPDATE app_settings SET 
+                 email_host = $1, email_port = $2, email_user = $3, email_pass = $4, email_active = $5 
+                 WHERE id = 1`,
+                [email_host, email_port, email_user, email_pass, email_active]
+            );
+        }
+
         res.json({ message: 'Settings Updated' });
     } catch (err) { console.error(err); res.status(500).send('Server Error'); }
 };

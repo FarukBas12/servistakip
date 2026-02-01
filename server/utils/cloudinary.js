@@ -15,7 +15,25 @@ const storage = new CloudinaryStorage({
     },
 });
 
+const uploadStream = (buffer) => {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            { folder: 'field-service-app' },
+            (error, result) => {
+                if (result) {
+                    resolve(result);
+                } else {
+                    reject(error);
+                }
+            }
+        );
+        stream.write(buffer);
+        stream.end();
+    });
+};
+
 module.exports = {
     cloudinary,
-    storage
+    storage,
+    uploadStream
 };

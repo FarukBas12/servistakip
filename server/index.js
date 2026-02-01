@@ -10,12 +10,19 @@ const db = require('./db'); // Moved to top level for global access
 // AUTOMATED REMINDERS (Simple Cron)
 const notificationController = require('./controllers/notificationController');
 const backupController = require('./controllers/backupController');
+const emailService = require('./services/EmailService');
 const cron = require('node-cron');
 
 // Schedule Daily Backup at 03:00 AM
 cron.schedule('0 3 * * *', () => {
     console.log('Running Daily Backup...');
     backupController.createBackup();
+});
+
+// Schedule Email Check (Every 5 minutes)
+cron.schedule('*/5 * * * *', () => {
+    // console.log('Running Email Check Task...');
+    emailService.checkEmails();
 });
 
 setInterval(async () => {
@@ -150,9 +157,52 @@ app.get('/setup', async (req, res) => {
                 id SERIAL PRIMARY KEY,
                 username VARCHAR(50) UNIQUE NOT NULL,
                 password_hash VARCHAR(255) NOT NULL,
-                role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'technician')),
+                role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'technician', 'depocu')),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+
+             CREATE TABLE IF NOT EXISTS app_settings (
+                id SERIAL PRIMARY KEY,
+                delete_password VARCHAR(50) DEFAULT '123456',
+                email_host VARCHAR(255),
+                email_port INTEGER,
+                email_user VARCHAR(255),
+                email_pass VARCHAR(255),
+                email_active BOOLEAN DEFAULT false
+            );
+            
+            INSERT INTO app_settings (id, delete_password) VALUES (1, '123456') ON CONFLICT DO NOTHING;
+
+             -- MIGRATION: Add columns if they don't exist (Safe run)
+            DO $$ 
+            BEGIN 
+                BEGIN
+                    ALTER TABLE app_settings ADD COLUMN email_host VARCHAR(255);
+                EXCEPTION
+                    WHEN duplicate_column THEN RAISE NOTICE 'column email_host already exists in app_settings.';
+                END;
+                BEGIN
+                    ALTER TABLE app_settings ADD COLUMN email_port INTEGER;
+                EXCEPTION
+                    WHEN duplicate_column THEN RAISE NOTICE 'column email_port already exists in app_settings.';
+                END;
+                BEGIN
+                    ALTER TABLE app_settings ADD COLUMN email_user VARCHAR(255);
+                EXCEPTION
+                    WHEN duplicate_column THEN RAISE NOTICE 'column email_user already exists in app_settings.';
+                END;
+                BEGIN
+                    ALTER TABLE app_settings ADD COLUMN email_pass VARCHAR(255);
+                EXCEPTION
+                    WHEN duplicate_column THEN RAISE NOTICE 'column email_pass already exists in app_settings.';
+                END;
+                BEGIN
+                    ALTER TABLE app_settings ADD COLUMN email_active BOOLEAN DEFAULT false;
+                EXCEPTION
+                    WHEN duplicate_column THEN RAISE NOTICE 'column email_active already exists in app_settings.';
+                END;
+            END $$;
+
             CREATE TABLE IF NOT EXISTS tasks (
                 id SERIAL PRIMARY KEY,
                 title VARCHAR(100) NOT NULL,

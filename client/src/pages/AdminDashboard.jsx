@@ -13,10 +13,20 @@ const AdminDashboard = () => {
     const [totalValue, setTotalValue] = useState(0);
     const [categoryData, setCategoryData] = useState([]);
 
+
     // SETTINGS STATE
     const [password, setPassword] = useState('');
     const [users, setUsers] = useState([]);
     const [formData, setFormData] = useState({ username: '', password: '', role: 'technician' });
+
+    // EMAIL SETTINGS STATE
+    const [emailSettings, setEmailSettings] = useState({
+        email_host: 'imap.gmail.com',
+        email_port: 993,
+        email_user: '',
+        email_pass: '',
+        email_active: false
+    });
 
     useEffect(() => {
         fetchDashboardData();
@@ -55,6 +65,18 @@ const AdminDashboard = () => {
                 api.get('/auth/users')
             ]);
             setPassword(settingsRes.data.delete_password);
+
+            // Set Email Settings from DB
+            if (settingsRes.data) {
+                setEmailSettings({
+                    email_host: settingsRes.data.email_host || 'imap.gmail.com',
+                    email_port: settingsRes.data.email_port || 993,
+                    email_user: settingsRes.data.email_user || '',
+                    email_pass: settingsRes.data.email_pass || '',
+                    email_active: settingsRes.data.email_active || false
+                });
+            }
+
             setUsers(usersRes.data);
         } catch (err) { console.error(err); }
     };
@@ -86,6 +108,19 @@ const AdminDashboard = () => {
             await api.put('/subs/settings/all', { delete_password: password });
             alert('Ayarlar Kaydedildi');
         } catch (err) { alert('Hata'); }
+    };
+
+    // EMAIL HANDLERS
+    const handleEmailChange = (e) => {
+        const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+        setEmailSettings({ ...emailSettings, [e.target.name]: val });
+    };
+
+    const handleSaveEmail = async () => {
+        try {
+            await api.put('/subs/settings/all', emailSettings);
+            alert('E-posta Ayarları Kaydedildi! Sistem belirlenen aralıklarla mail kutusunu kontrol edecektir.');
+        } catch (err) { alert('Hata: Ayarlar kaydedilemedi.'); }
     };
 
     const handleBackup = async () => {
@@ -206,10 +241,54 @@ const AdminDashboard = () => {
                 {/* --- TAB CONTENT: SETTINGS --- */}
                 {activeTab === 'settings' && (
                     <div className="fade-in">
+                        {/* EMAIL INTEGRATION SECTION */}
+                        <div style={{ marginBottom: '40px' }}>
+                            <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#c084fc' }}>
+                                <Settings size={20} /> E-Posta Entegrasyonu
+                            </h3>
+                            <div className="glass-panel" style={{ padding: '20px', background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, rgba(168, 85, 247, 0.02) 100%)', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
+                                <p style={{ opacity: 0.7, marginBottom: '20px', fontSize: '0.9rem' }}>
+                                    Bu bölüme şirket mail bilgilerinizi (IMAP) girerek, gelen maillerin otomatik olarak servise/göreve dönüştürülmesini sağlayabilirsiniz.
+                                    (Gmail için Uygulama Şifresi kullanılması önerilir.)
+                                </p>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '20px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>IMAP Sunucusu</label>
+                                        <input type="text" className="glass-input" name="email_host" value={emailSettings.email_host} onChange={handleEmailChange} placeholder="imap.gmail.com" />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>Port</label>
+                                        <input type="number" className="glass-input" name="email_port" value={emailSettings.email_port} onChange={handleEmailChange} placeholder="993" />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>E-Posta Adresi</label>
+                                        <input type="email" className="glass-input" name="email_user" value={emailSettings.email_user} onChange={handleEmailChange} placeholder="info@ornek.com" />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>Şifre (Uygulama Şifresi)</label>
+                                        <input type="password" className="glass-input" name="email_pass" value={emailSettings.email_pass} onChange={handleEmailChange} placeholder="****" />
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                                    <label className="switch">
+                                        <input type="checkbox" name="email_active" checked={emailSettings.email_active} onChange={handleEmailChange} />
+                                        <span className="slider round"></span>
+                                    </label>
+                                    <span style={{ fontSize: '0.9rem', color: emailSettings.email_active ? '#4ade80' : '#aaa' }}>{emailSettings.email_active ? 'Otomatik Kontrol Aktif' : 'Devre Dışı'}</span>
+                                </div>
+
+                                <button onClick={handleSaveEmail} className="glass-btn" style={{ background: 'rgba(192, 132, 252, 0.3)', width: 'auto', padding: '10px 30px' }}>
+                                    <Save size={18} style={{ marginRight: '10px' }} /> Ayarları Kaydet
+                                </button>
+                            </div>
+                        </div>
+
                         {/* USER MANAGEMENT SECTION */}
                         <div style={{ marginBottom: '40px' }}>
                             <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#4ade80' }}>
                                 <Users size={20} /> Kullanıcı Yönetimi
+
                             </h3>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }}>
                                 {/* Create User */}
