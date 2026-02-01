@@ -86,7 +86,9 @@ const TaskPool = () => {
             setNewRegion('');
             fetchRegions();
         } catch (err) {
-            alert('Bölge eklenirken hata');
+            console.error(err);
+            const msg = err.response?.data?.message || err.message || 'Bölge eklenirken hata';
+            alert(`Hata: ${msg}`);
         }
     };
 

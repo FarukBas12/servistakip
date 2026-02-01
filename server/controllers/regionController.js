@@ -20,7 +20,10 @@ exports.addRegion = async (req, res) => {
         res.json(rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: 'Server error' });
+        if (err.code === '23505') { // Unique violation
+            return res.status(400).json({ message: 'Bu bölge zaten mevcut.' });
+        }
+        res.status(500).json({ message: 'Server error: ' + err.message });
     }
 };
 
