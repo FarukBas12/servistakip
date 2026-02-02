@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
-import { Map, Activity, FolderArchive, Plus, FileBarChart, Calendar, Eye, UserPlus, Edit2 } from 'lucide-react';
+import { Map, Activity, FolderArchive, Plus, FileBarChart, Calendar, Eye, UserPlus, Edit2, MessageCircle } from 'lucide-react';
 
 const TaskPool = () => {
     const [tasks, setTasks] = useState([]);
@@ -201,6 +201,19 @@ const TaskPool = () => {
         } else {
             setSelectedAssignees([...selectedAssignees, userId]);
         }
+    };
+
+    const handleWhatsAppShare = (task) => {
+        const text = `*YENİ GÖREV (Servis)*\n\n` +
+            `*Başlık:* ${task.title}\n` +
+            `*Adres:* ${task.address}\n` +
+            (task.region ? `*Bölge:* ${task.region}\n` : '') +
+            (task.due_date ? `*Tarih:* ${new Date(task.due_date).toLocaleString('tr-TR')}\n` : '') +
+            (task.description ? `*Açıklama:* ${task.description}\n` : '') +
+            (task.maps_link ? `\n*Konum:* ${task.maps_link}` : '');
+
+        const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+        window.open(url, '_blank');
     };
 
     const handleEditSubmit = async (e) => {
@@ -537,6 +550,15 @@ const TaskPool = () => {
                                         title="Görüntüle"
                                     >
                                         <Eye size={18} />
+                                    </button>
+
+                                    <button
+                                        className="icon-btn"
+                                        onClick={() => handleWhatsAppShare(task)}
+                                        style={{ color: '#25D366' }}
+                                        title="Whatsapp'ta Paylaş"
+                                    >
+                                        <MessageCircle size={18} />
                                     </button>
 
                                     <button
