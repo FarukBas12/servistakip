@@ -203,17 +203,33 @@ const TaskPool = () => {
         }
     };
 
-    const handleWhatsAppShare = (task) => {
-        const text = `*YENİ GÖREV (Servis)*\n\n` +
-            `*Başlık:* ${task.title}\n` +
-            `*Adres:* ${task.address}\n` +
-            (task.region ? `*Bölge:* ${task.region}\n` : '') +
-            (task.due_date ? `*Tarih:* ${new Date(task.due_date).toLocaleString('tr-TR')}\n` : '') +
-            (task.description ? `*Açıklama:* ${task.description}\n` : '') +
-            (task.maps_link ? `\n*Konum:* ${task.maps_link}` : '');
+    const handleWhatsAppShare = async (taskSummary) => {
+        try {
+            // Fetch full details to get photos
+            const res = await api.get(`/tasks/${taskSummary.id}`);
+            const task = res.data;
 
-        const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-        window.open(url, '_blank');
+            let text = `*YENİ GÖREV (Servis)*\n\n` +
+                `*Başlık:* ${task.title}\n` +
+                `*Adres:* ${task.address}\n` +
+                (task.region ? `*Bölge:* ${task.region}\n` : '') +
+                (task.due_date ? `*Tarih:* ${new Date(task.due_date).toLocaleString('tr-TR')}\n` : '') +
+                (task.description ? `*Açıklama:* ${task.description}\n` : '') +
+                (task.maps_link ? `\n*Konum:* ${task.maps_link}` : '');
+
+            if (task.photos && task.photos.length > 0) {
+                text += `\n\n*Fotoğraflar:*`;
+                task.photos.forEach((p, index) => {
+                    text += `\n${index + 1}. ${p.url}`;
+                });
+            }
+
+            const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+        } catch (err) {
+            console.error(err);
+            alert('Detaylar alınırken hata oluştu, lütfen tekrar deneyin.');
+        }
     };
 
     const handleEditSubmit = async (e) => {
