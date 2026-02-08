@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Search, Archive, AlertTriangle, History, ArrowRight, ArrowLeft, Upload, Printer, Edit2 } from 'lucide-react';
+import { Package, Plus, Search, Archive, AlertTriangle, History, ArrowRight, ArrowLeft, Upload, Printer, Edit2, TrendingUp, PieChart as PieChartIcon, X } from 'lucide-react';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import api from '../utils/api'; // Use centralized API wrapper
 
 const StockPage = () => {
@@ -14,6 +15,7 @@ const StockPage = () => {
     const [transactionModalOpen, setTransactionModalOpen] = useState(false);
     const [historyModalOpen, setHistoryModalOpen] = useState(false);
     const [importModalOpen, setImportModalOpen] = useState(false);
+    const [summaryModalOpen, setSummaryModalOpen] = useState(false);
 
     // Inline State
     const [editingId, setEditingId] = useState(null);
@@ -28,6 +30,29 @@ const StockPage = () => {
     // History Data
     const [stockHistory, setStockHistory] = useState([]);
     const [projects, setProjects] = useState([]);
+
+    // Summary Data
+    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7c43'];
+    const formatCurrency = (val) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(val);
+
+    const getTotalValue = () => {
+        return stocks.reduce((sum, item) => {
+            return sum + ((parseFloat(item.quantity) || 0) * (parseFloat(item.purchase_price) || 0));
+        }, 0);
+    };
+
+    const getCategoryData = () => {
+        const catMap = {};
+        stocks.forEach(item => {
+            const val = (parseFloat(item.quantity) || 0) * (parseFloat(item.purchase_price) || 0);
+            const cat = item.category || 'Diğer';
+            catMap[cat] = (catMap[cat] || 0) + val;
+        });
+        return Object.keys(catMap).map(key => ({
+            name: key,
+            value: catMap[key]
+        })).filter(i => i.value > 0);
+    };
 
     const fetchStocks = async () => {
         setLoading(true);
@@ -208,6 +233,13 @@ const StockPage = () => {
                     <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.8 (Inline History)</span>
                 </h2>
                 <div>
+                    <button
+                        onClick={() => setSummaryModalOpen(true)}
+                        className="glass-btn"
+                        style={{ marginRight: '10px', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(168, 85, 247, 0.3) 100%)' }}
+                    >
+                        <PieChartIcon size={18} /> Envanter Özeti
+                    </button>
                     <button
                         onClick={() => window.print()}
                         className="glass-btn glass-btn-secondary"
@@ -618,6 +650,85 @@ const StockPage = () => {
                                 <button type="submit" className="glass-btn glass-btn-primary">Yükle</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* SUMMARY MODAL */}
+            {summaryModalOpen && (
+                <div className="modal-overlay no-print">
+                    <div className="modal-content glass-panel" style={{ maxWidth: '700px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px', color: '#818cf8' }}>
+                                <TrendingUp size={24} /> Envanter Özeti
+                            </h3>
+                            <button onClick={() => setSummaryModalOpen(false)} style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Total Value Card */}
+                        <div style={{
+                            padding: '25px',
+                            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.05) 100%)',
+                            borderRadius: '12px',
+                            border: '1px solid rgba(99, 102, 241, 0.3)',
+                            marginBottom: '20px',
+                            textAlign: 'center'
+                        }}>
+                            <div style={{ fontSize: '0.9rem', color: '#818cf8', marginBottom: '8px' }}>Toplam Stok Değeri</div>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'white', textShadow: '0 0 20px rgba(99, 102, 241, 0.5)' }}>
+                                {formatCurrency(getTotalValue())}
+                            </div>
+                            <div style={{ fontSize: '0.85rem', color: '#aaa', marginTop: '8px' }}>
+                                {stocks.length} Kalem Ürün
+                            </div>
+                        </div>
+
+                        {/* Category Chart */}
+                        {getCategoryData().length > 0 && (
+                            <div style={{
+                                padding: '20px',
+                                background: 'rgba(255,255,255,0.02)',
+                                borderRadius: '12px',
+                                border: '1px solid rgba(255,255,255,0.1)'
+                            }}>
+                                <h4 style={{ margin: '0 0 15px 0', color: '#aaa', textAlign: 'center' }}>Kategori Bazlı Değer Dağılımı</h4>
+                                <div style={{ height: '280px' }}>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={getCategoryData()}
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius={60}
+                                                outerRadius={90}
+                                                fill="#8884d8"
+                                                paddingAngle={5}
+                                                dataKey="value"
+                                            >
+                                                {getCategoryData().map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip
+                                                formatter={(value) => formatCurrency(value)}
+                                                contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: 'white' }}
+                                            />
+                                            <Legend verticalAlign="bottom" height={36} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+                        )}
+
+                        <button
+                            onClick={() => setSummaryModalOpen(false)}
+                            className="glass-btn glass-btn-secondary"
+                            style={{ width: '100%', marginTop: '20px', justifyContent: 'center' }}
+                        >
+                            Kapat
+                        </button>
                     </div>
                 </div>
             )}

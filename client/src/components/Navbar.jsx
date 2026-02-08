@@ -17,7 +17,7 @@ const Navbar = () => {
     return (
         <nav className="glass-panel" style={{ margin: '1rem', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-                <img src="/logo.png" alt="Logo" style={{ height: '40px', marginRight: '15px' }} />
+                <img src="/logo.svg" alt="M-Tech Logo" style={{ height: '44px', marginRight: '15px', filter: 'drop-shadow(0 0 8px rgba(99,102,241,0.4))' }} />
                 <strong style={{ fontSize: '1.2rem', marginRight: '20px' }}>Servis Takip</strong>
                 <span style={{ marginLeft: '20px' }}>
                     {user.role === 'admin' ? (
