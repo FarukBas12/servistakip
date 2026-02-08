@@ -46,6 +46,7 @@ const AdminDashboard = () => {
         fetchUsers();
         fetchWeather();
         loadNotes();
+        syncLocalNotes(); // Auto-migrate old local notes
     }, []);
 
     useEffect(() => {
@@ -111,15 +112,17 @@ const AdminDashboard = () => {
     };
 
     // CALENDAR FUNCTIONS
-    const loadNotes = () => {
-        const saved = localStorage.getItem('dashboard_notes');
-        if (saved) setNotes(JSON.parse(saved));
+    // CALENDAR FUNCTIONS -- API INTEGRATED --
+    const loadNotes = async () => {
+        try {
+            const res = await api.get('/calendar');
+            setNotes(res.data);
+        } catch (err) {
+            console.error('Notes load error:', err);
+        }
     };
+    // saveNotes removed, using direct API calls
 
-    const saveNotes = (newNotes) => {
-        localStorage.setItem('dashboard_notes', JSON.stringify(newNotes));
-        setNotes(newNotes);
-    };
 
     const checkAlerts = () => {
         const today = new Date();
@@ -143,27 +146,43 @@ const AdminDashboard = () => {
         setAlerts(activeAlerts);
     };
 
-    const handleAddNote = () => {
+    const handleAddNote = async () => {
         if (!noteForm.title || !selectedDate) return;
-        const newNote = {
-            id: Date.now(),
-            date: selectedDate,
-            title: noteForm.title,
-            description: noteForm.description,
-            completed: false
-        };
-        saveNotes([...notes, newNote]);
-        setNoteForm({ title: '', description: '' });
-        setShowNoteModal(false);
+        try {
+            await api.post('/calendar', {
+                date: selectedDate,
+                title: noteForm.title,
+                description: noteForm.description,
+                completed: false
+            });
+            loadNotes();
+            setNoteForm({ title: '', description: '' });
+            setShowNoteModal(false);
+        } catch (err) {
+            alert('Not eklenirken hata: ' + err.message);
+        }
     };
 
-    const toggleNoteComplete = (id) => {
-        const updated = notes.map(n => n.id === id ? { ...n, completed: !n.completed } : n);
-        saveNotes(updated);
+    const toggleNoteComplete = async (id, currentStatus) => {
+        // Optimistic update or just wait for reload
+        // We need currentStatus. If not passed, we might need to find it.
+        // But UI calls this with id. 
+        // Let's find the note to flip status
+        const note = notes.find(n => n.id === id);
+        if (!note) return;
+
+        try {
+            await api.put(`/calendar/${id}`, { completed: !note.completed });
+            loadNotes();
+        } catch (err) { console.error(err); }
     };
 
-    const deleteNote = (id) => {
-        saveNotes(notes.filter(n => n.id !== id));
+    const deleteNote = async (id) => {
+        if (!confirm('Silmek istediğinize emin misiniz?')) return;
+        try {
+            await api.delete(`/calendar/${id}`);
+            loadNotes();
+        } catch (err) { alert('Silme hatası'); }
     };
 
     const getDaysInMonth = (date) => {

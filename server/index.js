@@ -77,7 +77,7 @@ app.get('/api/health-check', async (req, res) => {
         }
         res.json({
             status: 'online',
-            version: '1.4.1',
+            version: '1.4.3',
             dbConnected: true,
             tableExists: !!tableCheck.rows[0].table_exists,
             rowCount: rowCount,
@@ -113,6 +113,7 @@ app.use('/api/stock-tracking', require('./routes/stockTracking')); // Distinct f
 app.use('/api/backup', require('./routes/backup')); // Backup Route
 app.use('/api/suppliers', require('./routes/suppliers')); // New Suppliers Route
 app.use('/api/regions', require('./routes/regions')); // Dynamic Regions Route
+app.use('/api/calendar', require('./routes/calendar')); // NEW: Calendar Notes Route
 // app.use('/api/subcontractors', ...); // REMOVED invalid route
 
 // Debug / Health Check Endpoint
@@ -120,7 +121,7 @@ app.use('/api/regions', require('./routes/regions')); // Dynamic Regions Route
 
 // Version Endpoint for Auto-Update
 app.get('/api/version', (req, res) => {
-    res.json({ version: '1.4.1' });
+    res.json({ version: '1.4.3' });
 });
 
 // The "catchall" handler: for any request that doesn't
@@ -619,6 +620,44 @@ async function runMigrations() {
             await db.query(`CREATE INDEX IF NOT EXISTS idx_project_expenses_projectId ON project_expenses(project_id)`);
             console.log(' - Checked database indexes');
         } catch (e) { console.log(' - Note: Index creation failed or skipped (' + e.message + ')'); }
+
+        // --- NEW MIGRATIONS FOR BUG FIXES (v1.4.2) ---
+
+        // 1. Calendar Notes Table
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS calendar_notes (
+                id SERIAL PRIMARY KEY,
+                date VARCHAR(20) NOT NULL, -- Storing as YYYY-MM-DD string to match frontend
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log(' - Checked calendar_notes table');
+
+        // 2. Fix User Deletion Constraints (ON DELETE SET NULL)
+        const fixConstraint = async (tableName, columnName, constraintName) => {
+            try {
+                // Drop existing constraint
+                await db.query(`ALTER TABLE ${tableName} DROP CONSTRAINT IF EXISTS ${constraintName}`);
+                // Add new constraint with SET NULL
+                await db.query(`ALTER TABLE ${tableName} ADD CONSTRAINT ${constraintName} FOREIGN KEY (${columnName}) REFERENCES users(id) ON DELETE SET NULL`);
+                console.log(` - Updated constraint ${constraintName} on ${tableName}`);
+            } catch (e) {
+                console.log(` - Note: Could not update constraint ${constraintName} (might not exist or different name): ${e.message}`);
+                // Fallback: Try to drop by guessing name if standard name fails? 
+                // Postgres default usually: tablename_columnname_fkey
+            }
+        };
+
+        // We assume standard naming convention or recreate if possible. 
+        // Best effort to make these fields nullable upon user deletion.
+        await fixConstraint('tasks', 'assigned_to', 'tasks_assigned_to_fkey');
+        await fixConstraint('tasks', 'updated_by', 'tasks_updated_by_fkey');
+        await fixConstraint('tasks', 'verified_by', 'tasks_verified_by_fkey');
+        await fixConstraint('stock_transactions', 'user_id', 'stock_transactions_user_id_fkey');
+        await fixConstraint('task_logs', 'user_id', 'task_logs_user_id_fkey');
 
         console.log('✅ Database Schema Verified & Updated!');
     } catch (e) {
