@@ -238,11 +238,13 @@ const SubPaymentPage = () => {
 
                 {/* Totals */}
                 {/* Totals */}
-                <div style={{ marginTop: '30px', textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+                {/* Totals Section */}
+                <div style={{ marginTop: '30px', background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '10px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '15px' }}>
 
                     {/* Subtotal */}
-                    <div style={{ fontSize: '1rem', opacity: 0.7 }}>
-                        Ara Toplam: <span style={{ fontWeight: '600', color: 'white' }}>{prices.filter(p => !deletedItemIds.has(p.id)).reduce((acc, p) => {
+                    <div style={{ fontSize: '1.2rem', opacity: 0.8, display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        <span>Ara Toplam:</span>
+                        <span style={{ fontWeight: '600', color: 'white', minWidth: '150px', textAlign: 'right' }}>{prices.filter(p => !deletedItemIds.has(p.id)).reduce((acc, p) => {
                             const qty = parseFloat(quantities[p.id]) || 0;
                             const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);
                             return acc + (qty * unitPrice);
@@ -250,36 +252,54 @@ const SubPaymentPage = () => {
                     </div>
 
                     {/* KDV Input */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <label>KDV Oranı (%):</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', background: 'rgba(255,255,255,0.05)', padding: '10px 20px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <label style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#fbbf24' }}>KDV Oranı (%):</label>
                         <input
                             type="number"
                             className="glass-input"
-                            style={{ width: '60px', textAlign: 'center' }}
+                            style={{
+                                width: '100px',
+                                textAlign: 'center',
+                                fontSize: '1.5rem',
+                                fontWeight: 'bold',
+                                padding: '10px',
+                                background: 'rgba(0,0,0,0.5)',
+                                color: '#fbbf24',
+                                border: '1px solid #fbbf24'
+                            }}
                             value={header.kdv_rate || 20}
                             onChange={e => setHeader({ ...header, kdv_rate: e.target.value })}
                         />
                     </div>
 
                     {/* KDV Amount */}
-                    <div style={{ fontSize: '1rem', opacity: 0.7 }}>
-                        KDV Tutarı: <span style={{ fontWeight: '600', color: 'white' }}>{(prices.filter(p => !deletedItemIds.has(p.id)).reduce((acc, p) => {
+                    <div style={{ fontSize: '1.1rem', opacity: 0.8, display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        <span>KDV Tutarı:</span>
+                        <span style={{ fontWeight: '600', color: '#fbbf24', minWidth: '150px', textAlign: 'right' }}>{(prices.filter(p => !deletedItemIds.has(p.id)).reduce((acc, p) => {
                             const qty = parseFloat(quantities[p.id]) || 0;
                             const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);
                             return acc + (qty * unitPrice);
                         }, 0) * ((header.kdv_rate || 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</span>
                     </div>
 
-                    {/* Grand Total */}
-                    <h3 style={{ color: '#4caf50', fontSize: '1.5rem', margin: '10px 0' }}>
-                        GENEL TOPLAM: {(prices.filter(p => !deletedItemIds.has(p.id)).reduce((acc, p) => {
-                            const qty = parseFloat(quantities[p.id]) || 0;
-                            const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);
-                            return acc + (qty * unitPrice);
-                        }, 0) * (1 + ((header.kdv_rate || 20) / 100))).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
-                    </h3>
+                    {/* Divider */}
+                    <div style={{ width: '300px', height: '1px', background: 'rgba(255,255,255,0.2)', margin: '10px 0' }}></div>
 
-                    <button onClick={handleSave} className="glass-btn" style={{ background: '#4caf50', marginTop: '10px', padding: '10px 30px' }}>Kaydet</button>
+                    {/* Grand Total */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#4caf50' }}>GENEL TOPLAM:</span>
+                        <span style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4caf50', minWidth: '150px', textAlign: 'right' }}>
+                            {(prices.filter(p => !deletedItemIds.has(p.id)).reduce((acc, p) => {
+                                const qty = parseFloat(quantities[p.id]) || 0;
+                                const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);
+                                return acc + (qty * unitPrice);
+                            }, 0) * (1 + ((header.kdv_rate || 20) / 100))).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
+                        </span>
+                    </div>
+
+                    <button onClick={handleSave} className="glass-btn" style={{ background: '#4caf50', marginTop: '20px', padding: '15px 50px', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                        <Save size={24} style={{ marginRight: '10px' }} /> Hakedişi Kaydet
+                    </button>
                 </div>
             </div>
 
