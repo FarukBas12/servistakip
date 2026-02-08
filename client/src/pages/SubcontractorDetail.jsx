@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, PlusCircle, Upload, Save, Trash2, FileText, CheckCircle } from 'lucide-react';
+import { ArrowLeft, User, PlusCircle, Upload, Save, Trash2, FileText, CheckCircle, Phone } from 'lucide-react';
 
 const SubcontractorDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [sub, setSub] = useState(null);
     const [prices, setPrices] = useState([]); // The Contract Items
-    const [transactions, setTransactions] = useState([]); // Ledger
-
     // Hakediş Creation State (Tab 2)
     const [quantities, setQuantities] = useState({});
-    const [paymentHeader, setPaymentHeader] = useState({ title: '', date: new Date().toISOString().split('T')[0] });
+    const [paymentHeader, setPaymentHeader] = useState({
+        title: '',
+        date: new Date().toISOString().split('T')[0],
+        kdv_rate: 20
+    });
 
     // UI Tabs
     const [activeTab, setActiveTab] = useState('contract'); // contract | payment | ledger
@@ -29,8 +31,6 @@ const SubcontractorDetail = () => {
 
             const pricesRes = await api.get(`/definitions/prices?subId=${id}`);
             setPrices(pricesRes.data);
-
-            // ToDo: Fetch Transactions specifically if needed, or rely on global pool
         } catch (err) {
             console.error(err);
         }
@@ -70,12 +70,12 @@ const SubcontractorDetail = () => {
                 title: paymentHeader.title,
                 payment_date: paymentHeader.date,
                 subcontractor_id: id,
+                kdv_rate: paymentHeader.kdv_rate || 20,
                 items: itemsToSave
             });
             alert('Hakediş oluşturuldu!');
             setQuantities({});
-            setPaymentHeader({ title: '', date: new Date().toISOString().split('T')[0] });
-            // Optionally redirect or show success
+            setPaymentHeader({ title: '', date: new Date().toISOString().split('T')[0], kdv_rate: 20 });
         } catch (err) {
             alert('Hata');
         }
@@ -83,15 +83,33 @@ const SubcontractorDetail = () => {
 
     if (!sub) return <div className="dashboard">Yükleniyor...</div>;
 
+    const calculateTotal = () => {
+        return prices.reduce((acc, p) => acc + ((parseFloat(quantities[p.id]) || 0) * parseFloat(p.unit_price)), 0);
+    };
+
     return (
         <div className="dashboard">
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '20px' }}>
                 <button onClick={() => navigate('/admin/subs')} className="glass-btn" style={{ padding: '8px' }}>
                     <ArrowLeft size={20} />
                 </button>
+
+                {/* Profile Photo */}
+                <div style={{
+                    width: '80px', height: '80px', borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    overflow: 'hidden', border: '2px solid rgba(255,255,255,0.1)'
+                }}>
+                    <User size={48} />
+                </div>
+
                 <div>
                     <h2 style={{ margin: 0 }}>{sub.name}</h2>
-                    <p style={{ margin: 0, opacity: 0.7 }}>Bakiye: {parseFloat(sub.balance).toLocaleString('tr-TR')} ₺</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', opacity: 0.7 }}>
+                        {sub.phone && <Phone size={14} />}
+                        <span style={{ fontSize: '0.9rem' }}>{sub.phone || 'Telefon Yok'}</span>
+                    </div>
+                    <p style={{ margin: '4px 0 0 0', opacity: 0.5, fontSize: '0.85rem' }}>Bakiye: {parseFloat(sub.balance).toLocaleString('tr-TR')} ₺</p>
                 </div>
             </div>
 
@@ -210,9 +228,35 @@ const SubcontractorDetail = () => {
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colSpan="3" style={{ textAlign: 'right', padding: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>TOPLAM:</td>
-                                <td style={{ textAlign: 'right', padding: '20px', fontSize: '1.2rem', fontWeight: 'bold', color: '#4caf50' }}>
-                                    {prices.reduce((acc, p) => acc + ((parseFloat(quantities[p.id]) || 0) * parseFloat(p.unit_price)), 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
+                                <td colSpan="4" style={{ padding: '20px', textAlign: 'right' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+                                        {/* Subtotal */}
+                                        <div style={{ fontSize: '1rem', opacity: 0.7 }}>
+                                            Ara Toplam: <span style={{ fontWeight: '600' }}>{calculateTotal().toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</span>
+                                        </div>
+
+                                        {/* KDV Input */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <label>KDV Oranı (%):</label>
+                                            <input
+                                                type="number"
+                                                className="glass-input"
+                                                style={{ width: '60px', textAlign: 'center' }}
+                                                value={paymentHeader.kdv_rate || 20}
+                                                onChange={e => setPaymentHeader({ ...paymentHeader, kdv_rate: e.target.value })}
+                                            />
+                                        </div>
+
+                                        {/* KDV Amount */}
+                                        <div style={{ fontSize: '1rem', opacity: 0.7 }}>
+                                            KDV Tutarı: <span style={{ fontWeight: '600' }}>{(calculateTotal() * ((paymentHeader.kdv_rate || 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</span>
+                                        </div>
+
+                                        {/* Grand Total */}
+                                        <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#4caf50', marginTop: '10px' }}>
+                                            GENEL TOPLAM: {(calculateTotal() * (1 + ((paymentHeader.kdv_rate || 20) / 100))).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         </tfoot>

@@ -17,7 +17,7 @@ router.use(auth);
 // Subs
 router.get('/', controller.listSubs);
 router.post('/', controller.createSub);
-router.put('/:id', controller.updateSub);
+router.put('/:id', upload.single('photo'), controller.updateSub);
 router.post('/:id/delete', controller.deleteSub); // POST to send body with password
 router.get('/:id/ledger', controller.getLedger);
 

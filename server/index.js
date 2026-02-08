@@ -264,9 +264,13 @@ if (!fs.existsSync(uploadDir)) {
 
 
 // Error handling middleware
+// Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).send('Something broke!');
+    res.status(500).json({
+        message: err.message || 'Something broke!',
+        stack: process.env.NODE_ENV === 'production' ? '🥞' : err.stack
+    });
 });
 
 // AUTO MIGRATION FUNCTION

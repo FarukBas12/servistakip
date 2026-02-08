@@ -53,12 +53,21 @@ const SubcontractorDashboard = () => {
 
     const handleEditSub = async () => {
         if (!newSub.name) return alert('İsim Giriniz');
+
         try {
-            await api.put(`/subs/${selectedSub.id}`, newSub);
+            const payload = {
+                name: newSub.name,
+                phone: newSub.phone || ''
+            };
+
+            await api.put(`/subs/${selectedSub.id}`, payload);
             alert('Güncellendi');
             setShowEditModal(false);
             fetchSubs();
-        } catch (err) { alert('Hata'); }
+        } catch (err) {
+            console.error(err);
+            alert('Hata Oluştu');
+        }
     };
 
     const handleDeleteSub = async () => {
@@ -107,14 +116,23 @@ const SubcontractorDashboard = () => {
 
 
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
-                            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '15px', borderRadius: '50%' }}>
+                        <div
+                            onClick={() => navigate(`/admin/subs/${sub.id}`)}
+                            style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px', cursor: 'pointer' }}
+                        >
+                            <div style={{
+                                width: '64px', height: '64px', borderRadius: '50%',
+                                background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                overflow: 'hidden', border: '2px solid rgba(255,255,255,0.1)'
+                            }}>
                                 <User size={32} />
                             </div>
                             <div>
                                 <h3 style={{ margin: 0 }}>{sub.name}</h3>
-                                <p style={{ margin: 0, opacity: 0.6 }}>Bakiye</p>
-                                <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#ff9800' }}>
+                                <div style={{ fontSize: '0.9rem', opacity: 0.7, marginTop: '2px' }}>
+                                    {sub.phone || 'Telefon Yok'}
+                                </div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#ff9800', marginTop: '5px' }}>
                                     {parseFloat(sub.balance).toLocaleString('tr-TR')} ₺
                                 </div>
                             </div>
@@ -196,8 +214,12 @@ const SubcontractorDashboard = () => {
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
                     <div className="glass-panel" style={{ width: '350px', padding: '25px' }}>
                         <h3>Düzenle: {selectedSub?.name}</h3>
+                        <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Ad Soyad</label>
                         <input className="glass-input" value={newSub.name} onChange={e => setNewSub({ ...newSub, name: e.target.value })} />
-                        <input className="glass-input" value={newSub.phone} onChange={e => setNewSub({ ...newSub, phone: e.target.value })} style={{ marginTop: '10px' }} />
+
+                        <label style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '10px', display: 'block' }}>Telefon</label>
+                        <input className="glass-input" value={newSub.phone} onChange={e => setNewSub({ ...newSub, phone: e.target.value })} />
+
                         <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
                             <button onClick={handleEditSub} className="glass-btn" style={{ flex: 1, background: '#4caf50' }}>Güncelle</button>
                             <button onClick={() => setShowEditModal(false)} className="glass-btn" style={{ flex: 1, background: '#f44336' }}>İptal</button>

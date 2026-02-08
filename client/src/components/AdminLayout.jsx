@@ -9,6 +9,7 @@ import TaskPool from '../pages/TaskPool';
 import GlobalMap from '../pages/GlobalMap';
 import Reports from '../pages/Reports';
 import SubcontractorDashboard from '../pages/SubcontractorDashboard'; // NEW
+import SubcontractorDetail from '../pages/SubcontractorDetail'; // NEW
 import SubPaymentPage from '../pages/SubPaymentPage'; // NEW
 import SubLedger from '../pages/SubLedger'; // NEW
 import DailyTracking from '../pages/DailyTracking';
@@ -36,6 +37,7 @@ const AdminLayout = () => {
                     <Route path="/daily" element={<DailyTracking />} />
                     <Route path="/archive" element={<CompletedTasks />} />
                     <Route path="subs" element={<SubcontractorDashboard />} />
+                    <Route path="subs/:id" element={<SubcontractorDetail />} />
                     <Route path="subs/:id/payment" element={<SubPaymentPage />} />
                     <Route path="subs/:id/ledger" element={<SubLedger />} />
                     <Route path="/reports" element={<Reports />} />

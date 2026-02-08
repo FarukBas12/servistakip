@@ -1,5 +1,6 @@
 const db = require('../db');
 const XLSX = require('xlsx');
+const { cloudinary } = require('../utils/cloudinary');
 
 // --- SUBCONTRACTORS ---
 exports.listSubs = async (req, res) => {
@@ -25,10 +26,41 @@ exports.createSub = async (req, res) => {
 exports.updateSub = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, phone } = req.body;
-        await db.query('UPDATE subcontractors SET name = $1, phone = $2 WHERE id = $3', [name, phone, id]);
-        res.json({ message: 'Updated' });
-    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+        const { name, phone, photoBase64 } = req.body;
+
+        // Base64 Fallback (Priority)
+        let uploadDebug = 'Skipped';
+        let base64Len = 0;
+
+        if (photoBase64) {
+            base64Len = photoBase64.length;
+            console.log('Uploading Base64 Image. Length:', base64Len);
+            try {
+                const uploadRes = await cloudinary.uploader.upload(photoBase64, {
+                    folder: 'field-service-app'
+                });
+                photo = uploadRes.secure_url;
+                uploadDebug = 'Success: ' + photo;
+            } catch (upErr) {
+                console.error('Cloudinary Upload Failed:', upErr);
+                uploadDebug = 'Failed: ' + upErr.message;
+            }
+        } else {
+            console.log('No photoBase64 received.');
+        }
+
+        await db.query(`
+            UPDATE subcontractors 
+            SET name = $1, phone = $2, 
+                photo = COALESCE($3, photo) 
+            WHERE id = $4`,
+            [name, phone, photo, id]
+        );
+        res.json({ message: 'Updated', derivedPhoto: photo, debugLen: base64Len, debugUpload: uploadDebug });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: err.message, stack: err.stack });
+    }
 };
 
 exports.deleteSub = async (req, res) => {

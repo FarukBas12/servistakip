@@ -1,0 +1,246 @@
+/* M-Tech Enterprise Login - V12.0 (Rescue Polish) */
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@500;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+    --bg-dark: #020617;
+    --card-glass: rgba(15, 23, 42, 0.85);
+    /* Darker, less transparent for readability */
+    --input-bg: #0f172a;
+    /* Solid dark color to prevent weird transparency issues */
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --primary: #6366f1;
+    --primary-glow: rgba(99, 102, 241, 0.5);
+    --text-main: #ffffff;
+    --text-muted: #94a3b8;
+}
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    overflow: hidden;
+}
+
+/* --- BACKGROUND --- */
+.login-page-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Deep, high-quality gradient */
+    background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #020617 80%);
+}
+
+.login-page-container::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* --- CARD --- */
+.login-card {
+    width: 100%;
+    max-width: 380px;
+    /* Slightly narrower for elegance */
+    padding: 48px 40px;
+    background: var(--card-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 20px 40px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* --- HEADER --- */
+.login-header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.vector-logo-wrapper {
+    margin-bottom: 16px;
+    filter: drop-shadow(0 0 15px var(--primary-glow));
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.login-header h1 {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.05em;
+    margin: 0 0 8px 0;
+    background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.login-header p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+/* --- FORM --- */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-left: 4px;
+}
+
+/* INPUTS */
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--input-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 0 16px;
+    height: 50px;
+    transition: all 0.2s;
+}
+
+.input-wrapper:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-glow);
+    background: #1e293b;
+}
+
+.input-icon {
+    color: #64748b;
+    margin-right: 12px;
+}
+
+.premium-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    font-weight: 500;
+}
+
+.premium-input::placeholder {
+    color: #475569;
+}
+
+/* AUTOFILL FIX - CRITICAL */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #0f172a inset !important;
+    -webkit-text-fill-color: white !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* --- BUTTON --- */
+.submit-btn {
+    margin-top: 10px;
+    height: 50px;
+    background: linear-gradient(135deg, #4f46e5, #4338ca);
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    transition: all 0.2s;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+}
+
+/* --- EXTRAS --- */
+.form-extras {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.custom-checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+}
+
+.forgot-link {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+/* --- ERROR --- */
+.error-message {
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    color: #fca5a5;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+/* --- FOOTER --- */
+.copyright {
+    position: absolute;
+    bottom: 20px;
+    color: #475569;
+    font-size: 0.75rem;
+}

@@ -12,7 +12,8 @@ const PaymentCreate = () => {
     const [header, setHeader] = useState({
         title: '',
         payment_date: new Date().toISOString().split('T')[0],
-        subcontractor_id: searchParams.get('subId') || ''
+        subcontractor_id: searchParams.get('subId') || '',
+        kdv_rate: 20
     });
 
     // Items Data
@@ -197,10 +198,38 @@ const PaymentCreate = () => {
                             )}
                         </tbody>
                         <tfoot>
-                            <tr style={{ background: 'rgba(76, 175, 80, 0.2)', fontSize: '1.2rem' }}>
-                                <td colSpan="4" style={{ padding: '15px', textAlign: 'right', fontWeight: 'bold' }}>TOPLAM HAKEDİŞ:</td>
-                                <td style={{ padding: '15px', textAlign: 'right', fontWeight: 'bold', color: '#4caf50' }}>{calculateTotal().toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</td>
-                                <td></td>
+                            <tr>
+                                <td colSpan="6" style={{ padding: '20px', textAlign: 'right' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+
+                                        {/* Subtotal */}
+                                        <div style={{ fontSize: '1rem', opacity: 0.7 }}>
+                                            Ara Toplam: <span style={{ fontWeight: '600' }}>{calculateTotal().toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</span>
+                                        </div>
+
+                                        {/* KDV Input */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <label>KDV Oranı (%):</label>
+                                            <input
+                                                type="number"
+                                                className="glass-input"
+                                                style={{ width: '60px', textAlign: 'center' }}
+                                                value={header.kdv_rate || 20}
+                                                onChange={e => setHeader({ ...header, kdv_rate: e.target.value })}
+                                            />
+                                        </div>
+
+                                        {/* KDV Amount */}
+                                        <div style={{ fontSize: '1rem', opacity: 0.7 }}>
+                                            KDV Tutarı: <span style={{ fontWeight: '600' }}>{(calculateTotal() * ((header.kdv_rate || 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</span>
+                                        </div>
+
+                                        {/* Grand Total */}
+                                        <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#4caf50', marginTop: '10px' }}>
+                                            GENEL TOPLAM: {(calculateTotal() * (1 + ((header.kdv_rate || 20) / 100))).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
+                                        </div>
+                                    </div>
+                                </td>
                             </tr>
                         </tfoot>
                     </table>

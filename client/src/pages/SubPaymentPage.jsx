@@ -12,7 +12,8 @@ const SubPaymentPage = () => {
         store_name: '',
         title: '',
         date: new Date().toISOString().split('T')[0],
-        waybill_info: ''
+        waybill_info: '',
+        kdv_rate: 20
     });
 
     // File
@@ -91,6 +92,7 @@ const SubPaymentPage = () => {
         formData.append('store_name', header.store_name);
         formData.append('payment_date', header.date);
         formData.append('waybill_info', header.waybill_info);
+        formData.append('kdv_rate', header.kdv_rate || 20);
         if (waybillFile) formData.append('waybill', waybillFile);
         formData.append('items', JSON.stringify(items));
 
@@ -235,12 +237,48 @@ const SubPaymentPage = () => {
                 </table>
 
                 {/* Totals */}
-                <div style={{ marginTop: '30px', textAlign: 'right' }}>
-                    <h3 style={{ color: '#4caf50' }}>GENEL TOPLAM: {prices.filter(p => !deletedItemIds.has(p.id)).reduce((acc, p) => {
-                        const qty = parseFloat(quantities[p.id]) || 0;
-                        const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);
-                        return acc + (qty * unitPrice);
-                    }, 0).toLocaleString('tr-TR')} ₺</h3>
+                {/* Totals */}
+                <div style={{ marginTop: '30px', textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+
+                    {/* Subtotal */}
+                    <div style={{ fontSize: '1rem', opacity: 0.7 }}>
+                        Ara Toplam: <span style={{ fontWeight: '600', color: 'white' }}>{prices.filter(p => !deletedItemIds.has(p.id)).reduce((acc, p) => {
+                            const qty = parseFloat(quantities[p.id]) || 0;
+                            const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);
+                            return acc + (qty * unitPrice);
+                        }, 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</span>
+                    </div>
+
+                    {/* KDV Input */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <label>KDV Oranı (%):</label>
+                        <input
+                            type="number"
+                            className="glass-input"
+                            style={{ width: '60px', textAlign: 'center' }}
+                            value={header.kdv_rate || 20}
+                            onChange={e => setHeader({ ...header, kdv_rate: e.target.value })}
+                        />
+                    </div>
+
+                    {/* KDV Amount */}
+                    <div style={{ fontSize: '1rem', opacity: 0.7 }}>
+                        KDV Tutarı: <span style={{ fontWeight: '600', color: 'white' }}>{(prices.filter(p => !deletedItemIds.has(p.id)).reduce((acc, p) => {
+                            const qty = parseFloat(quantities[p.id]) || 0;
+                            const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);
+                            return acc + (qty * unitPrice);
+                        }, 0) * ((header.kdv_rate || 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</span>
+                    </div>
+
+                    {/* Grand Total */}
+                    <h3 style={{ color: '#4caf50', fontSize: '1.5rem', margin: '10px 0' }}>
+                        GENEL TOPLAM: {(prices.filter(p => !deletedItemIds.has(p.id)).reduce((acc, p) => {
+                            const qty = parseFloat(quantities[p.id]) || 0;
+                            const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);
+                            return acc + (qty * unitPrice);
+                        }, 0) * (1 + ((header.kdv_rate || 20) / 100))).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
+                    </h3>
+
                     <button onClick={handleSave} className="glass-btn" style={{ background: '#4caf50', marginTop: '10px', padding: '10px 30px' }}>Kaydet</button>
                 </div>
             </div>
