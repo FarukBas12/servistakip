@@ -513,83 +513,6 @@ const AdminDashboard = () => {
                         </div>
 
 
-                        {/* ACTION BUTTONS */}
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '40px' }}>
-                            <Link to="/admin/create-user" className="glass-btn" style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', width: '180px', height: '140px', justifyContent: 'center', background: 'rgba(33, 150, 243, 0.2)' }}>
-                                <Users size={32} />
-                                <span>Personel Ekle</span>
-                                <span style={{ fontSize: '0.75rem', opacity: 0.7, background: 'rgba(33, 150, 243, 0.3)', padding: '2px 10px', borderRadius: '10px' }}>
-                                    {users.length} Personel
-                                </span>
-                            </Link>
-                            <Link to="/admin/import-stores" className="glass-btn" style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', width: '180px', height: '140px', justifyContent: 'center', background: 'rgba(255, 193, 7, 0.2)' }}>
-                                <ShoppingBag size={32} />
-                                <span>Mağaza Yükle</span>
-                            </Link>
-                        </div>
-                    </div>
-                )}
-
-                {/* --- TAB CONTENT: SETTINGS --- */}
-                {activeTab === 'settings' && (
-                    <div className="fade-in">
-                        {/* EMAIL INTEGRATION SECTION */}
-                        <div style={{ marginBottom: '40px' }}>
-                            <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#c084fc' }}>
-                                <Settings size={20} /> E-Posta Entegrasyonu
-                            </h3>
-                            <div className="glass-panel" style={{ padding: '20px', background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, rgba(168, 85, 247, 0.02) 100%)', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
-                                <p style={{ opacity: 0.7, marginBottom: '20px', fontSize: '0.9rem' }}>
-                                    Bu bölüme şirket mail bilgilerinizi (IMAP) girerek, gelen maillerin otomatik olarak servise/göreve dönüştürülmesini sağlayabilirsiniz.
-                                </p>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '20px' }}>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>IMAP Sunucusu</label>
-                                        <input type="text" className="glass-input" name="email_host" value={emailSettings.email_host} onChange={handleEmailChange} placeholder="imap.gmail.com" />
-                                    </div>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>Port</label>
-                                        <input type="number" className="glass-input" name="email_port" value={emailSettings.email_port} onChange={handleEmailChange} placeholder="993" />
-                                    </div>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>E-Posta Adresi</label>
-                                        <input type="email" className="glass-input" name="email_user" value={emailSettings.email_user} onChange={handleEmailChange} placeholder="info@ornek.com" />
-                                    </div>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>Şifre (Uygulama Şifresi)</label>
-                                        <input type="password" className="glass-input" name="email_pass" value={emailSettings.email_pass} onChange={handleEmailChange} placeholder="****" />
-                                    </div>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                                    <label className="switch">
-                                        <input type="checkbox" name="email_active" checked={emailSettings.email_active} onChange={handleEmailChange} />
-                                        <span className="slider round"></span>
-                                    </label>
-                                    <span style={{ fontSize: '0.9rem', color: emailSettings.email_active ? '#4ade80' : '#aaa' }}>{emailSettings.email_active ? 'Otomatik Kontrol Aktif' : 'Devre Dışı'}</span>
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                    <button onClick={handleSaveEmail} className="glass-btn" style={{ background: 'rgba(192, 132, 252, 0.3)', width: 'auto', padding: '10px 30px' }}>
-                                        <Save size={18} style={{ marginRight: '10px' }} /> Ayarları Kaydet
-                                    </button>
-
-                                    <button onClick={async () => {
-                                        if (!confirm('Mail kutusu şimdi kontrol edilecek. Devam edilsin mi?')) return;
-                                        try {
-                                            alert('Kontrol ediliyor...');
-                                            const res = await api.post('/subs/settings/test-email');
-                                            alert(`✅ Test Tamamlandı! Bulunan: ${res.data.details?.total || 0}, Oluşturulan: ${res.data.details?.processed || 0}`);
-                                        } catch (e) {
-                                            alert('❌ Hata: ' + (e.response?.data?.message || e.message));
-                                        }
-                                    }} className="glass-btn" style={{ background: 'rgba(96, 165, 250, 0.2)', width: 'auto', padding: '10px 30px' }}>
-                                        <Database size={18} style={{ marginRight: '10px' }} /> Bağlantıyı Test Et
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
                         {/* USER MANAGEMENT SECTION */}
                         <div style={{ marginBottom: '40px' }}>
                             <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#4ade80' }}>
@@ -697,6 +620,79 @@ const AdminDashboard = () => {
                                 ))}
                             </div>
                         </div>
+
+
+                        {/* ACTION BUTTONS */}
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '40px' }}>
+                            <Link to="/admin/import-stores" className="glass-btn" style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', width: '180px', height: '140px', justifyContent: 'center', background: 'rgba(255, 193, 7, 0.2)' }}>
+                                <ShoppingBag size={32} />
+                                <span>Mağaza Yükle</span>
+                            </Link>
+                        </div>
+                    </div>
+                )}
+
+                {/* --- TAB CONTENT: SETTINGS --- */}
+                {activeTab === 'settings' && (
+                    <div className="fade-in">
+                        {/* EMAIL INTEGRATION SECTION */}
+                        <div style={{ marginBottom: '40px' }}>
+                            <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#c084fc' }}>
+                                <Settings size={20} /> E-Posta Entegrasyonu
+                            </h3>
+                            <div className="glass-panel" style={{ padding: '20px', background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, rgba(168, 85, 247, 0.02) 100%)', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
+                                <p style={{ opacity: 0.7, marginBottom: '20px', fontSize: '0.9rem' }}>
+                                    Bu bölüme şirket mail bilgilerinizi (IMAP) girerek, gelen maillerin otomatik olarak servise/göreve dönüştürülmesini sağlayabilirsiniz.
+                                </p>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '20px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>IMAP Sunucusu</label>
+                                        <input type="text" className="glass-input" name="email_host" value={emailSettings.email_host} onChange={handleEmailChange} placeholder="imap.gmail.com" />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>Port</label>
+                                        <input type="number" className="glass-input" name="email_port" value={emailSettings.email_port} onChange={handleEmailChange} placeholder="993" />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>E-Posta Adresi</label>
+                                        <input type="email" className="glass-input" name="email_user" value={emailSettings.email_user} onChange={handleEmailChange} placeholder="info@ornek.com" />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>Şifre (Uygulama Şifresi)</label>
+                                        <input type="password" className="glass-input" name="email_pass" value={emailSettings.email_pass} onChange={handleEmailChange} placeholder="****" />
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                                    <label className="switch">
+                                        <input type="checkbox" name="email_active" checked={emailSettings.email_active} onChange={handleEmailChange} />
+                                        <span className="slider round"></span>
+                                    </label>
+                                    <span style={{ fontSize: '0.9rem', color: emailSettings.email_active ? '#4ade80' : '#aaa' }}>{emailSettings.email_active ? 'Otomatik Kontrol Aktif' : 'Devre Dışı'}</span>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button onClick={handleSaveEmail} className="glass-btn" style={{ background: 'rgba(192, 132, 252, 0.3)', width: 'auto', padding: '10px 30px' }}>
+                                        <Save size={18} style={{ marginRight: '10px' }} /> Ayarları Kaydet
+                                    </button>
+
+                                    <button onClick={async () => {
+                                        if (!confirm('Mail kutusu şimdi kontrol edilecek. Devam edilsin mi?')) return;
+                                        try {
+                                            alert('Kontrol ediliyor...');
+                                            const res = await api.post('/subs/settings/test-email');
+                                            alert(`✅ Test Tamamlandı! Bulunan: ${res.data.details?.total || 0}, Oluşturulan: ${res.data.details?.processed || 0}`);
+                                        } catch (e) {
+                                            alert('❌ Hata: ' + (e.response?.data?.message || e.message));
+                                        }
+                                    }} className="glass-btn" style={{ background: 'rgba(96, 165, 250, 0.2)', width: 'auto', padding: '10px 30px' }}>
+                                        <Database size={18} style={{ marginRight: '10px' }} /> Bağlantıyı Test Et
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }}>
                             {/* SECURITY PASSWORD */}

@@ -1,7 +1,7 @@
 const db = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const cloudinary = require('../utils/cloudinary');
+const { cloudinary } = require('../utils/cloudinary');
 
 exports.login = async (req, res) => {
     let { username, password } = req.body;
