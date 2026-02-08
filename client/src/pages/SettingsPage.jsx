@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Users, PlusCircle, Settings, Save, Trash2, Lock, Database } from 'lucide-react';
+import { Settings, Save, Database, Lock, Mail, Shield, Server } from 'lucide-react';
 import api from '../utils/api';
 
 const SettingsPage = () => {
-    // SETTINGS STATE
+    const [activeTab, setActiveTab] = useState('general');
     const [password, setPassword] = useState('');
-    const [users, setUsers] = useState([]);
-    const [formData, setFormData] = useState({ username: '', password: '', role: 'technician' });
 
     // EMAIL SETTINGS STATE
     const [emailSettings, setEmailSettings] = useState({
@@ -23,13 +21,9 @@ const SettingsPage = () => {
 
     const fetchSettingsData = async () => {
         try {
-            const [settingsRes, usersRes] = await Promise.all([
-                api.get('/subs/settings/all'),
-                api.get('/auth/users')
-            ]);
+            const settingsRes = await api.get('/subs/settings/all');
             setPassword(settingsRes.data.delete_password);
 
-            // Set Email Settings from DB
             if (settingsRes.data) {
                 setEmailSettings({
                     email_host: settingsRes.data.email_host || 'imap.gmail.com',
@@ -39,31 +33,7 @@ const SettingsPage = () => {
                     email_active: settingsRes.data.email_active || false
                 });
             }
-
-            setUsers(usersRes.data);
         } catch (err) { console.error(err); }
-    };
-
-    // --- SETTINGS HANDLERS ---
-    const handleUserChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-
-    const handleCreateUser = async (e) => {
-        e.preventDefault();
-        try {
-            await api.post('/auth/register', formData);
-            alert('Kullanıcı oluşturuldu!');
-            setFormData({ username: '', password: '', role: 'technician' });
-            fetchSettingsData(); // Refresh users
-        } catch (err) { alert('Hata: Kullanıcı oluşturulamadı.'); }
-    };
-
-    const handleDeleteUser = async (id) => {
-        if (window.confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) {
-            try {
-                await api.delete(`/auth/${id}`);
-                fetchSettingsData();
-            } catch (err) { alert('Silme başarısız'); }
-        }
     };
 
     const handleSavePassword = async () => {
@@ -73,7 +43,6 @@ const SettingsPage = () => {
         } catch (err) { alert('Hata'); }
     };
 
-    // EMAIL HANDLERS
     const handleEmailChange = (e) => {
         const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
         setEmailSettings({ ...emailSettings, [e.target.name]: val });
@@ -82,7 +51,7 @@ const SettingsPage = () => {
     const handleSaveEmail = async () => {
         try {
             await api.put('/subs/settings/all', emailSettings);
-            alert('E-posta Ayarları Kaydedildi! Sistem belirlenen aralıklarla mail kutusunu kontrol edecektir.');
+            alert('E-posta Ayarları Kaydedildi!');
         } catch (err) { alert('Hata: Ayarlar kaydedilemedi.'); }
     };
 
@@ -98,157 +67,182 @@ const SettingsPage = () => {
     };
 
     return (
-        <div className="settings-page fade-in">
-            <div className="glass-panel" style={{ padding: '2rem' }}>
-                <h1 style={{ marginBottom: '30px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px' }}>
-                    Ayarlar & Yönetim
-                </h1>
+        <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }} className="fade-in">
+            <h1 style={{ marginBottom: '30px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Settings size={28} /> Ayarlar & Yönetim
+            </h1>
 
-                {/* EMAIL INTEGRATION SECTION */}
-                <div style={{ marginBottom: '40px' }}>
-                    <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#c084fc' }}>
-                        <Settings size={20} /> E-Posta Entegrasyonu
-                    </h3>
-                    <div className="glass-panel" style={{ padding: '20px', background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, rgba(168, 85, 247, 0.02) 100%)', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
-                        <p style={{ opacity: 0.7, marginBottom: '20px', fontSize: '0.9rem' }}>
-                            Bu bölüme şirket mail bilgilerinizi (IMAP) girerek, gelen maillerin otomatik olarak servise/göreve dönüştürülmesini sağlayabilirsiniz.
-                            (Gmail için Uygulama Şifresi kullanılması önerilir.)
-                        </p>
+            {/* TABS Navigation */}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '30px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px' }}>
+                <button
+                    onClick={() => setActiveTab('general')}
+                    style={{
+                        padding: '10px 20px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: activeTab === 'general' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+                        color: activeTab === 'general' ? '#60a5fa' : '#aaa',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontWeight: activeTab === 'general' ? 'bold' : 'normal',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    <Shield size={18} /> Genel & Güvenlik
+                </button>
+                <button
+                    onClick={() => setActiveTab('email')}
+                    style={{
+                        padding: '10px 20px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: activeTab === 'email' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
+                        color: activeTab === 'email' ? '#c084fc' : '#aaa',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontWeight: activeTab === 'email' ? 'bold' : 'normal',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    <Mail size={18} /> E-Posta Entegrasyonu
+                </button>
+            </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '20px' }}>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>IMAP Sunucusu</label>
-                                <input type="text" className="glass-input" name="email_host" value={emailSettings.email_host} onChange={handleEmailChange} placeholder="imap.gmail.com" />
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>Port</label>
-                                <input type="number" className="glass-input" name="email_port" value={emailSettings.email_port} onChange={handleEmailChange} placeholder="993" />
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>E-Posta Adresi</label>
-                                <input type="email" className="glass-input" name="email_user" value={emailSettings.email_user} onChange={handleEmailChange} placeholder="info@ornek.com" />
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px', opacity: 0.7 }}>Şifre (Uygulama Şifresi)</label>
-                                <input type="password" className="glass-input" name="email_pass" value={emailSettings.email_pass} onChange={handleEmailChange} placeholder="****" />
-                            </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                            <label className="switch">
-                                <input type="checkbox" name="email_active" checked={emailSettings.email_active} onChange={handleEmailChange} />
-                                <span className="slider round"></span>
-                            </label>
-                            <span style={{ fontSize: '0.9rem', color: emailSettings.email_active ? '#4ade80' : '#aaa' }}>{emailSettings.email_active ? 'Otomatik Kontrol Aktif' : 'Devre Dışı'}</span>
-                        </div>
+            <div className="glass-panel" style={{ padding: '2rem', minHeight: '400px' }}>
 
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button onClick={handleSaveEmail} className="glass-btn" style={{ background: 'rgba(192, 132, 252, 0.3)', width: 'auto', padding: '10px 30px' }}>
-                                <Save size={18} style={{ marginRight: '10px' }} /> Ayarları Kaydet
-                            </button>
-
-                            <button onClick={async () => {
-                                if (!confirm('Mail kutusu şimdi kontrol edilecek. Lütfen mailin OKUNMAMIŞ olduğundan emin olun. Devam edilsin mi?')) return;
-                                try {
-                                    alert('Kontrol ediliyor, lütfen bekleyin...');
-                                    const res = await api.post('/subs/settings/test-email');
-                                    const { processed, total, errors } = res.data.details || {};
-
-                                    let msg = `✅ Test Tamamlandı!\n\nBulunan Mail: ${total || 0}\nOluşturulan Görev: ${processed || 0}`;
-                                    if (errors && errors.length > 0) {
-                                        msg += `\n\nHatalar: ${errors.join(', ')}`;
-                                    } else if (total === 0) {
-                                        msg += `\n\n⚠️ Hiç mail bulunamadı. Lütfen mailin "Okunmamış" olduğundan ve spam'e düşmediğinden emin olun.`;
-                                    }
-
-                                    alert(msg);
-                                } catch (e) {
-                                    alert('❌ Hata: ' + (e.response?.data?.message || e.message));
-                                }
-                            }} className="glass-btn" style={{ background: 'rgba(96, 165, 250, 0.2)', width: 'auto', padding: '10px 30px' }}>
-                                <Database size={18} style={{ marginRight: '10px' }} /> Bağlantıyı Test Et
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* USER MANAGEMENT SECTION */}
-                <div style={{ marginBottom: '40px' }}>
-                    <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#4ade80' }}>
-                        <Users size={20} /> Kullanıcı Yönetimi
-
-                    </h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }}>
-                        {/* Create User */}
+                {/* --- TAB CONTENT: GENERAL & SECURITY --- */}
+                {activeTab === 'general' && (
+                    <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }}>
+                        {/* SECURITY PASSWORD */}
                         <div>
-                            <h4 style={{ marginBottom: '15px', color: '#aaa', fontSize: '0.9rem' }}>Yeni Kullanıcı</h4>
-                            <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <input className="glass-input" name="username" placeholder="Kullanıcı Adı" value={formData.username} onChange={handleUserChange} required />
-                                <input className="glass-input" name="password" type="password" placeholder="Şifre" value={formData.password} onChange={handleUserChange} required />
-                                <select className="glass-input" name="role" value={formData.role} onChange={handleUserChange} style={{ background: 'rgba(255,255,255,0.05)', color: 'white' }}>
-                                    <option value="technician" style={{ color: 'black' }}>Teknisyen</option>
-                                    <option value="depocu" style={{ color: 'black' }}>Depocu</option>
-                                    <option value="admin" style={{ color: 'black' }}>Admin</option>
-                                </select>
-                                <button type="submit" className="glass-btn" style={{ background: 'rgba(76, 175, 80, 0.3)', justifyContent: 'center' }}>
-                                    <PlusCircle size={18} style={{ marginRight: '5px' }} /> Kullanıcı Oluştur
+                            <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#f59e0b' }}>
+                                <Lock size={20} /> Silme Şifresi
+                            </h3>
+                            <div className="glass-panel" style={{ padding: '20px', background: 'rgba(255,255,255,0.02)' }}>
+                                <p style={{ opacity: 0.7, marginBottom: '15px', fontSize: '0.9rem' }}>Taşeron veya proje silerken sorulan güvenlik şifresi.</p>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <input type="text" className="glass-input" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Örn: 123456" style={{ flex: 1 }} />
+                                    <button onClick={handleSavePassword} className="glass-btn" style={{ background: '#f59e0b', color: 'black', width: 'auto' }}>
+                                        <Save size={18} /> Kaydet
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* BACKUP */}
+                        <div>
+                            <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#3b82f6' }}>
+                                <Database size={20} /> Sistem Yedekleme
+                            </h3>
+                            <div className="glass-panel" style={{ padding: '20px', background: 'rgba(255,255,255,0.02)' }}>
+                                <p style={{ opacity: 0.7, marginBottom: '15px', fontSize: '0.9rem' }}>Tüm veritabanını tek dosya olarak Cloudinary'e yedekle.</p>
+                                <button onClick={handleBackup} className="glass-btn" style={{ background: '#3b82f6', width: '100%', justifyContent: 'center' }}>
+                                    <Database size={18} style={{ marginRight: '10px' }} /> Şimdi Yedekle
                                 </button>
-                            </form>
+                            </div>
                         </div>
-                        {/* User List */}
+
+                        {/* DATABASE MIGRATION */}
                         <div>
-                            <h4 style={{ marginBottom: '15px', color: '#aaa', fontSize: '0.9rem' }}>Kayıtlı Kullanıcılar</h4>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
-                                {users.map(u => (
-                                    <div key={u.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '10px 15px', borderRadius: '8px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                                                {u.username.substring(0, 1).toUpperCase()}
-                                            </div>
-                                            <div>
-                                                <div style={{ fontWeight: 'bold' }}>{u.username}</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#aaa' }}>{u.role}</div>
-                                            </div>
-                                        </div>
-                                        {u.username !== 'admin' && (
-                                            <button onClick={() => handleDeleteUser(u.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', opacity: 0.7 }}>
-                                                <Trash2 size={18} />
-                                            </button>
-                                        )}
-                                    </div>
-                                ))}
+                            <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#10b981' }}>
+                                <Server size={20} /> Veritabanı Güncelleme
+                            </h3>
+                            <div className="glass-panel" style={{ padding: '20px', background: 'rgba(255,255,255,0.02)' }}>
+                                <p style={{ opacity: 0.7, marginBottom: '15px', fontSize: '0.9rem' }}>Personel tablosu değişikliklerini uygular. (Gerekirse)</p>
+                                <button onClick={async () => {
+                                    try {
+                                        await api.post('/auth/migrate');
+                                        alert('✅ Veritabanı güncellendi! Yeni personel alanları eklendi.');
+                                        fetchSettingsData();
+                                    } catch (err) {
+                                        alert('❌ Hata: ' + (err.response?.data || err.message));
+                                    }
+                                }} className="glass-btn" style={{ background: '#10b981', width: '100%', justifyContent: 'center' }}>
+                                    <Server size={18} style={{ marginRight: '10px' }} /> Migration Çalıştır
+                                </button>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }}>
-                    {/* SECURITY PASSWORD */}
-                    <div>
-                        <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#f59e0b' }}>
-                            <Lock size={20} /> Silme Şifresi
-                        </h3>
-                        <div className="glass-panel" style={{ padding: '20px', background: 'rgba(255,255,255,0.02)' }}>
-                            <p style={{ opacity: 0.7, marginBottom: '15px', fontSize: '0.9rem' }}>Taşeron veya proje silerken sorulan güvenlik şifresi.</p>
-                            <input type="text" className="glass-input" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Örn: 123456" style={{ width: '100%', marginBottom: '15px' }} />
-                            <button onClick={handleSavePassword} className="glass-btn" style={{ background: '#f59e0b', width: '100%', justifyContent: 'center', color: 'black' }}>
-                                <Save size={18} style={{ marginRight: '10px' }} /> Kaydet
-                            </button>
+                {/* --- TAB CONTENT: EMAIL INTEGRATION --- */}
+                {activeTab === 'email' && (
+                    <div className="fade-in">
+                        <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ padding: '10px', borderRadius: '50%', background: 'rgba(168, 85, 247, 0.2)' }}>
+                                <Mail size={24} color="#c084fc" />
+                            </div>
+                            <div>
+                                <h3 style={{ margin: 0, color: '#c084fc' }}>E-Posta Entegrasyonu</h3>
+                                <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.6 }}>Gelen mailleri otomatik olarak işleyin.</p>
+                            </div>
+                        </div>
+
+                        <div className="glass-panel" style={{ padding: '25px', background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, rgba(168, 85, 247, 0.02) 100%)', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
+                            <p style={{ opacity: 0.7, marginBottom: '25px', fontSize: '0.95rem', lineHeight: '1.5' }}>
+                                Bu özellik aktif edildiğinde, sistem belirlediğiniz e-posta kutusunu düzenli aralıklarla kontrol eder.
+                                Yeni gelen mailleri analiz ederek otomatik olarak servis kaydı veya görev oluşturur.
+                            </p>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '25px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '8px', opacity: 0.7 }}>IMAP Sunucusu</label>
+                                    <input type="text" className="glass-input" name="email_host" value={emailSettings.email_host} onChange={handleEmailChange} placeholder="imap.gmail.com" style={{ width: '100%', padding: '12px' }} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '8px', opacity: 0.7 }}>Port</label>
+                                    <input type="number" className="glass-input" name="email_port" value={emailSettings.email_port} onChange={handleEmailChange} placeholder="993" style={{ width: '100%', padding: '12px' }} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '8px', opacity: 0.7 }}>E-Posta Adresi</label>
+                                    <input type="email" className="glass-input" name="email_user" value={emailSettings.email_user} onChange={handleEmailChange} placeholder="info@ornek.com" style={{ width: '100%', padding: '12px' }} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '8px', opacity: 0.7 }}>Şifre (Uygulama Şifresi)</label>
+                                    <input type="password" className="glass-input" name="email_pass" value={emailSettings.email_pass} onChange={handleEmailChange} placeholder="****" style={{ width: '100%', padding: '12px' }} />
+                                </div>
+                            </div>
+
+                            <div style={{ padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', marginBottom: '25px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                    <label className="switch">
+                                        <input type="checkbox" name="email_active" checked={emailSettings.email_active} onChange={handleEmailChange} />
+                                        <span className="slider round"></span>
+                                    </label>
+                                    <div>
+                                        <span style={{ display: 'block', fontSize: '0.95rem', fontWeight: 'bold', color: emailSettings.email_active ? '#4ade80' : '#aaa' }}>
+                                            {emailSettings.email_active ? 'Otomatik Kontrol Aktif' : 'Devre Dışı'}
+                                        </span>
+                                        <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>Pasifken sadece manuel tetikleme ile çalışır.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                                <button onClick={handleSaveEmail} className="glass-btn" style={{ background: 'rgba(192, 132, 252, 0.3)', width: 'auto', padding: '12px 30px', flex: 1 }}>
+                                    <Save size={18} style={{ marginRight: '10px' }} /> Ayarları Kaydet
+                                </button>
+
+                                <button onClick={async () => {
+                                    if (!confirm('Mail kutusu şimdi kontrol edilecek. Devam edilsin mi?')) return;
+                                    try {
+                                        alert('Kontrol ediliyor...');
+                                        const res = await api.post('/subs/settings/test-email');
+                                        alert(`✅ Test Tamamlandı!\nBulunan: ${res.data.details?.total || 0}\nİşlenen: ${res.data.details?.processed || 0}`);
+                                    } catch (e) {
+                                        alert('❌ Hata: ' + (e.response?.data?.message || e.message));
+                                    }
+                                }} className="glass-btn" style={{ background: 'rgba(96, 165, 250, 0.2)', width: 'auto', padding: '12px 30px', flex: 1 }}>
+                                    <Database size={18} style={{ marginRight: '10px' }} /> Bağlantıyı Test Et
+                                </button>
+                            </div>
                         </div>
                     </div>
-
-                    {/* BACKUP */}
-                    <div>
-                        <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#3b82f6' }}>
-                            <Database size={20} /> Sistem Yedekleme
-                        </h3>
-                        <div className="glass-panel" style={{ padding: '20px', background: 'rgba(255,255,255,0.02)' }}>
-                            <p style={{ opacity: 0.7, marginBottom: '15px', fontSize: '0.9rem' }}>Tüm veritabanını tek dosya olarak Cloudinary'e yedekle.</p>
-                            <button onClick={handleBackup} className="glass-btn" style={{ background: '#3b82f6', width: '100%', justifyContent: 'center' }}>
-                                <Save size={18} style={{ marginRight: '10px' }} /> Şimdi Yedekle
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                )}
             </div>
         </div>
     );

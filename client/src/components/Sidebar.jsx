@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Inbox, Users, LogOut, FolderOpen, Package, Truck } from 'lucide-react';
+import { LayoutDashboard, Inbox, Users, LogOut, FolderOpen, Package, Truck, Settings } from 'lucide-react';
 
 const Sidebar = () => {
     const { user, logout } = useAuth();
@@ -43,6 +43,17 @@ const Sidebar = () => {
                     </NavLink>
                 ))}
             </nav>
+
+            {/* Settings */}
+            <NavLink
+                to="/admin/settings"
+                className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                title="Ayarlar"
+                style={{ marginTop: 'auto', marginBottom: '5px' }}
+            >
+                <span className="sidebar-icon"><Settings size={22} /></span>
+                <span className="sidebar-label">Ayarlar</span>
+            </NavLink>
 
             {/* Logout */}
             <button className="sidebar-logout" onClick={logout} title="Çıkış Yap">

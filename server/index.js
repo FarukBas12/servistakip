@@ -77,7 +77,7 @@ app.get('/api/health-check', async (req, res) => {
         }
         res.json({
             status: 'online',
-            version: '1.3.2',
+            version: '1.4.1',
             dbConnected: true,
             tableExists: !!tableCheck.rows[0].table_exists,
             rowCount: rowCount,
@@ -120,7 +120,7 @@ app.use('/api/regions', require('./routes/regions')); // Dynamic Regions Route
 
 // Version Endpoint for Auto-Update
 app.get('/api/version', (req, res) => {
-    res.json({ version: '1.3.9' });
+    res.json({ version: '1.4.1' });
 });
 
 // The "catchall" handler: for any request that doesn't

@@ -20,7 +20,7 @@ import ProjectDetail from '../pages/ProjectDetail';
 import StockPage from '../pages/StockPage'; // NEW
 
 import Suppliers from '../pages/Suppliers'; // NEW
-
+import SettingsPage from '../pages/SettingsPage';
 
 const AdminLayout = () => {
     return (
@@ -47,6 +47,7 @@ const AdminLayout = () => {
                     <Route path="/projects/:id" element={<ProjectDetail />} />
                     <Route path="/stocks" element={<StockPage />} />
                     <Route path="/suppliers" element={<Suppliers />} />
+                    <Route path="/settings" element={<SettingsPage />} />
                 </Routes>
             </div>
         </div>
