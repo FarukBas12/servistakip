@@ -112,6 +112,33 @@ const AdminDashboard = () => {
     };
 
     // CALENDAR FUNCTIONS
+    // SYNC LOCAL NOTES TO SERVER (MIGRATION)
+    const syncLocalNotes = async () => {
+        const local = localStorage.getItem('dashboard_notes');
+        if (local) {
+            try {
+                const parsed = JSON.parse(local);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    let count = 0;
+                    for (const n of parsed) {
+                        await api.post('/calendar', {
+                            date: n.date,
+                            title: n.title,
+                            description: n.description,
+                            completed: n.completed
+                        });
+                        count++;
+                    }
+                    if (count > 0) alert(`${count} adet eski notunuz veritabanına taşındı.`);
+                }
+                localStorage.removeItem('dashboard_notes'); // Clear after sync
+                loadNotes(); // Refresh from server
+            } catch (err) {
+                console.error('Local note sync failed', err);
+            }
+        }
+    };
+
     // CALENDAR FUNCTIONS -- API INTEGRATED --
     const loadNotes = async () => {
         try {
