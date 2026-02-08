@@ -115,7 +115,8 @@ const SubLedger = () => {
                 const data = res.data;
                 setEditPaymentData({
                     ...data,
-                    payment_date: data.payment_date.split('T')[0]
+                    payment_date: data.payment_date.split('T')[0],
+                    kdv_rate: data.kdv_rate || 0
                 });
                 setShowEditPaymentModal(true);
             } catch (e) { console.error(e); alert('Hakediş detayları alınamadı'); }
@@ -124,6 +125,11 @@ const SubLedger = () => {
 
     const handlePrint = () => {
         const printWindow = window.open('', '_blank');
+        const subTotal = detailData.items.reduce((acc, item) => acc + (parseFloat(item.total_price) || 0), 0);
+        const kdvRate = detailData.kdv_rate || 0;
+        const kdvAmount = subTotal * kdvRate / 100;
+        const grandTotal = parseFloat(detailData.total_amount);
+
         printWindow.document.write(`
             <html>
                 <head>
@@ -133,7 +139,9 @@ const SubLedger = () => {
                         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
                         th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
                         .header { margin-bottom: 20px; display: flex; justify-content: space-between; }
-                        .total { text-align: right; font-size: 1.2rem; font-weight: bold; margin-top: 20px; }
+                        .summary { margin-top: 20px; text-align: right; }
+                        .summary div { margin-bottom: 5px; }
+                        .total { font-size: 1.2rem; font-weight: bold; }
                         img { max-width: 300px; margin-top: 10px; border: 1px solid #ddd; }
                         @media print {
                             .no-print { display: none; }
@@ -176,7 +184,11 @@ const SubLedger = () => {
                         </tbody>
                     </table>
 
-                    <div class="total">GENEL TOPLAM: ${parseFloat(detailData.total_amount).toLocaleString('tr-TR')} ₺</div>
+                    <div class="summary">
+                        <div>Ara Toplam: ${subTotal.toLocaleString('tr-TR')} ₺</div>
+                        <div>KDV (%${kdvRate}): ${kdvAmount.toLocaleString('tr-TR')} ₺</div>
+                        <div class="total">GENEL TOPLAM: ${grandTotal.toLocaleString('tr-TR')} ₺</div>
+                    </div>
 
                     <script>
                         window.onload = function() { window.print(); }
@@ -332,8 +344,14 @@ const SubLedger = () => {
                             </tbody>
                         </table>
 
-                        <div style={{ textAlign: 'right', marginTop: '20px', fontSize: '1.2rem', fontWeight: 'bold', color: '#4caf50' }}>
-                            TOPLAM: {parseFloat(detailData.total_amount).toLocaleString('tr-TR')} ₺
+                        <div style={{ textAlign: 'right', marginTop: '20px', fontSize: '1rem', color: '#ccc' }}>
+                            <div style={{ marginBottom: '5px' }}>
+                                Ara Toplam: {detailData.items.reduce((acc, i) => acc + parseFloat(i.total_price), 0).toLocaleString('tr-TR')} ₺
+                            </div>
+                            <div style={{ marginBottom: '5px' }}>
+                                KDV (%{detailData.kdv_rate || 0}): {(parseFloat(detailData.total_amount) - detailData.items.reduce((acc, i) => acc + parseFloat(i.total_price), 0)).toLocaleString('tr-TR')} ₺
+                            </div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#4caf50' }}>GENEL TOPLAM: {parseFloat(detailData.total_amount).toLocaleString('tr-TR')} ₺</div>
                         </div>
                     </div>
                 </div>
@@ -394,8 +412,11 @@ const SubLedger = () => {
                                     <input type="text" className="glass-input" value={editPaymentData.title} onChange={e => setEditPaymentData({ ...editPaymentData, title: e.target.value })} />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7 }}>Tarih</label>
                                     <input type="date" className="glass-input" value={editPaymentData.payment_date} onChange={e => setEditPaymentData({ ...editPaymentData, payment_date: e.target.value })} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7 }}>KDV Oranı (%)</label>
+                                    <input type="number" className="glass-input" value={editPaymentData.kdv_rate || 0} onChange={e => setEditPaymentData({ ...editPaymentData, kdv_rate: e.target.value })} />
                                 </div>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -478,6 +499,7 @@ const SubLedger = () => {
                                         formData.append('store_name', editPaymentData.store_name);
                                         formData.append('waybill_info', editPaymentData.waybill_info);
                                         formData.append('payment_date', editPaymentData.payment_date);
+                                        formData.append('kdv_rate', editPaymentData.kdv_rate);
                                         formData.append('items', JSON.stringify(editPaymentData.items));
                                         if (editPaymentData.new_waybill) {
                                             formData.append('waybill', editPaymentData.new_waybill);

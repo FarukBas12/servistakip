@@ -77,7 +77,7 @@ app.get('/api/health-check', async (req, res) => {
         }
         res.json({
             status: 'online',
-            version: '1.4.4',
+            version: '1.4.5',
             dbConnected: true,
             tableExists: !!tableCheck.rows[0].table_exists,
             rowCount: rowCount,
@@ -121,7 +121,7 @@ app.use('/api/calendar', require('./routes/calendar')); // NEW: Calendar Notes R
 
 // Version Endpoint for Auto-Update
 app.get('/api/version', (req, res) => {
-    res.json({ version: '1.4.4' });
+    res.json({ version: '1.4.5' });
 });
 
 // The "catchall" handler: for any request that doesn't
@@ -429,6 +429,7 @@ async function runMigrations() {
         await db.query("ALTER TABLE payments ADD COLUMN IF NOT EXISTS store_name VARCHAR(150)");
         await db.query("ALTER TABLE payments ADD COLUMN IF NOT EXISTS waybill_info TEXT");
         await db.query("ALTER TABLE payments ADD COLUMN IF NOT EXISTS waybill_image TEXT"); // New Column for Photo URL
+        await db.query("ALTER TABLE payments ADD COLUMN IF NOT EXISTS kdv_rate INTEGER DEFAULT 0"); // v1.4.5: VAT Rate
 
         // Create Payment Items Table (Hakediş Rows)
         await db.query(`

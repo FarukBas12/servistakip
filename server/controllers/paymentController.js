@@ -35,18 +35,18 @@ exports.getPaymentById = async (req, res) => {
 exports.createPayment = async (req, res) => {
     const client = await db.pool.connect();
     try {
-        const { title, payment_date, items } = req.body;
+        const { title, payment_date, items, kdv_rate } = req.body;
         // Items: [{ work_item, detail, quantity, unit_price }]
 
         await client.query('BEGIN');
 
         // 1. Create Header
         const paymentRes = await client.query(
-            'INSERT INTO payments (title, payment_date, total_amount, status) VALUES ($1, $2, $3, $4) RETURNING *',
-            [title, payment_date, 0, 'pending']
+            'INSERT INTO payments (title, payment_date, total_amount, status, kdv_rate) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [title, payment_date, 0, 'pending', kdv_rate || 0]
         );
         const paymentId = paymentRes.rows[0].id;
-        let grandTotal = 0;
+        let subTotal = 0;
 
         // 2. Insert Items
         if (items && Array.isArray(items)) {
@@ -54,7 +54,7 @@ exports.createPayment = async (req, res) => {
                 const qty = parseFloat(item.quantity) || 0;
                 const price = parseFloat(item.unit_price) || 0;
                 const total = qty * price;
-                grandTotal += total;
+                subTotal += total;
 
                 await client.query(
                     'INSERT INTO payment_items (payment_id, work_item, detail, quantity, unit_price, total_price) VALUES ($1, $2, $3, $4, $5, $6)',
@@ -63,7 +63,10 @@ exports.createPayment = async (req, res) => {
             }
         }
 
-        // 3. Update Grand Total
+        // 3. Update Grand Total (Subtotal + VAT)
+        const vatRate = parseFloat(kdv_rate) || 0;
+        const grandTotal = subTotal + (subTotal * vatRate / 100);
+
         await client.query('UPDATE payments SET total_amount = $1 WHERE id = $2', [grandTotal, paymentId]);
 
         await client.query('COMMIT');

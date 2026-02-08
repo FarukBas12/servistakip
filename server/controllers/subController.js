@@ -207,7 +207,7 @@ exports.createPayment = async (req, res) => {
     try {
         await client.query('BEGIN');
         // Parse items if sent as string (Multipart/form-data)
-        let { subcontractor_id, title, store_name, waybill_info, payment_date, items } = req.body;
+        let { subcontractor_id, title, store_name, waybill_info, payment_date, items, kdv_rate } = req.body;
         if (typeof items === 'string') items = JSON.parse(items);
 
         let waybill_image = null;
@@ -216,12 +216,14 @@ exports.createPayment = async (req, res) => {
         }
 
         // Calculate total
-        const total = items.reduce((acc, item) => acc + (parseFloat(item.quantity) * parseFloat(item.unit_price)), 0);
+        const subTotal = items.reduce((acc, item) => acc + (parseFloat(item.quantity) * parseFloat(item.unit_price)), 0);
+        const vatRate = parseFloat(kdv_rate) || 0;
+        const total = subTotal + (subTotal * vatRate / 100);
 
         const resHeader = await client.query(`
-            INSERT INTO payments (subcontractor_id, title, store_name, waybill_info, waybill_image, payment_date, total_amount, status)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending') RETURNING id`,
-            [subcontractor_id, title, store_name, waybill_info, waybill_image, payment_date, total]
+            INSERT INTO payments (subcontractor_id, title, store_name, waybill_info, waybill_image, payment_date, total_amount, status, kdv_rate)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', $8) RETURNING id`,
+            [subcontractor_id, title, store_name, waybill_info, waybill_image, payment_date, total, vatRate]
         );
         const paymentId = resHeader.rows[0].id;
 
@@ -313,7 +315,7 @@ exports.updatePayment = async (req, res) => {
     try {
         await client.query('BEGIN');
         const { id } = req.params;
-        let { title, store_name, waybill_info, payment_date, items } = req.body;
+        let { title, store_name, waybill_info, payment_date, items, kdv_rate } = req.body;
 
         if (typeof items === 'string') items = JSON.parse(items);
 
@@ -323,22 +325,24 @@ exports.updatePayment = async (req, res) => {
         }
 
         // Calculate total
-        const total = items.reduce((acc, item) => acc + (parseFloat(item.quantity) * parseFloat(item.unit_price)), 0);
+        const subTotal = items.reduce((acc, item) => acc + (parseFloat(item.quantity) * parseFloat(item.unit_price)), 0);
+        const vatRate = parseFloat(kdv_rate) || 0;
+        const total = subTotal + (subTotal * vatRate / 100);
 
         // Update header
         if (waybill_image) {
             await client.query(`
                 UPDATE payments 
-                SET title = $1, store_name = $2, waybill_info = $3, waybill_image = $4, payment_date = $5, total_amount = $6
-                WHERE id = $7`,
-                [title, store_name, waybill_info, waybill_image, payment_date, total, id]
+                SET title = $1, store_name = $2, waybill_info = $3, waybill_image = $4, payment_date = $5, total_amount = $6, kdv_rate = $7
+                WHERE id = $8`,
+                [title, store_name, waybill_info, waybill_image, payment_date, total, vatRate, id]
             );
         } else {
             await client.query(`
                 UPDATE payments 
-                SET title = $1, store_name = $2, waybill_info = $3, payment_date = $4, total_amount = $5
-                WHERE id = $6`,
-                [title, store_name, waybill_info, payment_date, total, id]
+                SET title = $1, store_name = $2, waybill_info = $3, payment_date = $4, total_amount = $5, kdv_rate = $6
+                WHERE id = $7`,
+                [title, store_name, waybill_info, payment_date, total, vatRate, id]
             );
         }
 
