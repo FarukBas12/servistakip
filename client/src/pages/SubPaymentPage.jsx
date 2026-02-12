@@ -3,6 +3,34 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { ArrowLeft, Upload, Plus, Save, FileText, Paperclip, PlusCircle, Camera, Trash2 } from 'lucide-react';
 
+// Safe Preview Component to prevent crashes
+const SafePreview = ({ file }) => {
+    const [preview, setPreview] = React.useState(null);
+
+    React.useEffect(() => {
+        if (!file) return;
+
+        let objectUrl;
+        try {
+            objectUrl = URL.createObjectURL(file);
+            setPreview(objectUrl);
+        } catch (err) {
+            console.error("Preview generation failed:", err);
+            setPreview(null); // Fallback
+        }
+
+        return () => {
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+        };
+    }, [file]);
+
+    if (!preview) {
+        return <div style={{ width: '100%', height: '100%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#888' }}>Resim Yok</div>;
+    }
+
+    return <img src={preview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />;
+};
+
 const SubPaymentPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -169,16 +197,41 @@ const SubPaymentPage = () => {
                                     accept="image/*"
                                     onChange={e => {
                                         try {
-                                            if (e.target.files && e.target.files.length > 0) {
-                                                const newFiles = Array.from(e.target.files);
-                                                setFiles(prev => [...prev, ...newFiles]);
-                                                e.target.value = '';
+                                            // 1. Check if files exist
+                                            if (!e.target.files || e.target.files.length === 0) return;
+
+                                            // 2. Convert to Array safely
+                                            const newFiles = Array.from(e.target.files);
+
+                                            // 3. Filter only valid images (extra safety)
+                                            const validFiles = newFiles.filter(f => f.type.startsWith('image/'));
+
+                                            if (validFiles.length === 0) {
+                                                alert("Lütfen geçerli resim dosyaları seçiniz.");
+                                                return;
                                             }
+
+                                            // 4. Update state
+                                            setFiles(prev => [...prev, ...validFiles]);
+
+                                            // 5. Reset input
+                                            e.target.value = '';
                                         } catch (err) {
-                                            alert("Dosya yükleme hatası: " + err.message);
+                                            console.error("File selection error:", err);
+                                            alert("Hata: " + err.message);
                                         }
                                     }}
-                                    style={{ position: 'absolute', opacity: 0, width: 1, height: 1, overflow: 'hidden', zIndex: -1 }}
+                                    style={{
+                                        position: 'absolute',
+                                        width: '1px',
+                                        height: '1px',
+                                        padding: '0',
+                                        margin: '-1px',
+                                        overflow: 'hidden',
+                                        clip: 'rect(0, 0, 0, 0)',
+                                        whiteSpace: 'nowrap',
+                                        border: '0'
+                                    }}
                                 />
                                 <label
                                     htmlFor="file-upload-input"
@@ -193,13 +246,18 @@ const SubPaymentPage = () => {
                         {files.length > 0 && (
                             <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '5px' }}>
                                 {files.map((f, i) => (
-                                    <div key={i} style={{ position: 'relative', width: '50px', height: '50px', border: '1px solid #444', borderRadius: '4px', overflow: 'hidden' }}>
-                                        <img src={URL.createObjectURL(f)} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <div key={i} style={{ position: 'relative', width: '60px', height: '60px', border: '1px solid #444', borderRadius: '4px', overflow: 'hidden', background: '#000' }}>
+                                        {/* Safe Preview Image */}
+                                        <SafePreview file={f} />
                                         <button
-                                            onClick={() => setFiles(files.filter((_, idx) => idx !== i))}
-                                            style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(0,0,0,0.7)', color: 'white', border: 'none', cursor: 'pointer', padding: '2px' }}
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setFiles(files.filter((_, idx) => idx !== i));
+                                            }}
+                                            style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(255,0,0,0.7)', color: 'white', border: 'none', cursor: 'pointer', padding: '2px', zIndex: 10 }}
                                         >
-                                            <X size={12} />
+                                            <X size={14} />
                                         </button>
                                     </div>
                                 ))}

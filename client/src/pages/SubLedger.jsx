@@ -1,7 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { ArrowLeft, Download, Trash2, CheckSquare, Square, Eye, X, Edit2, Plus, Trash } from 'lucide-react';
+import { ArrowLeft, Download, Trash2, CheckSquare, Square, Eye, X, Edit2, Plus, Trash, Save, Image as ImageIcon, FileText, Camera } from 'lucide-react';
+
+// Safe Preview Component to prevent crashes
+const SafePreview = ({ file }) => {
+    const [preview, setPreview] = React.useState(null);
+
+    React.useEffect(() => {
+        if (!file) return;
+
+        let objectUrl;
+        try {
+            objectUrl = URL.createObjectURL(file);
+            setPreview(objectUrl);
+        } catch (err) {
+            console.error("Preview generation failed:", err);
+            setPreview(null); // Fallback
+        }
+
+        return () => {
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+        };
+    }, [file]);
+
+    if (!preview) {
+        return <div style={{ width: '100%', height: '100%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#888' }}>Resim Yok</div>;
+    }
+
+    return <img src={preview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />;
+};
 
 const SubLedger = () => {
     const { id } = useParams();
@@ -464,19 +492,44 @@ const SubLedger = () => {
                                             accept="image/*"
                                             onChange={e => {
                                                 try {
-                                                    if (e.target.files && e.target.files.length > 0) {
-                                                        const newFiles = Array.from(e.target.files);
-                                                        setEditPaymentData(prev => ({
-                                                            ...prev,
-                                                            new_photos: [...(prev.new_photos || []), ...newFiles]
-                                                        }));
-                                                        e.target.value = ''; // Reset
+                                                    // 1. Check if files exist
+                                                    if (!e.target.files || e.target.files.length === 0) return;
+
+                                                    // 2. Convert to Array safely
+                                                    const newFiles = Array.from(e.target.files);
+
+                                                    // 3. Filter only valid images (extra safety)
+                                                    const validFiles = newFiles.filter(f => f.type.startsWith('image/'));
+
+                                                    if (validFiles.length === 0) {
+                                                        alert("Lütfen geçerli resim dosyaları seçiniz.");
+                                                        return;
                                                     }
+
+                                                    // 4. Update state
+                                                    setEditPaymentData(prev => ({
+                                                        ...prev,
+                                                        new_photos: [...(prev.new_photos || []), ...validFiles]
+                                                    }));
+
+                                                    // 5. Reset input
+                                                    e.target.value = '';
                                                 } catch (err) {
-                                                    alert("Dosya yükleme hatası: " + err.message);
+                                                    console.error("File selection error:", err);
+                                                    alert("Hata: " + err.message);
                                                 }
                                             }}
-                                            style={{ position: 'absolute', opacity: 0, width: 1, height: 1, overflow: 'hidden', zIndex: -1 }}
+                                            style={{
+                                                position: 'absolute',
+                                                width: '1px',
+                                                height: '1px',
+                                                padding: '0',
+                                                margin: '-1px',
+                                                overflow: 'hidden',
+                                                clip: 'rect(0, 0, 0, 0)',
+                                                whiteSpace: 'nowrap',
+                                                border: '0'
+                                            }}
                                         />
                                         <label
                                             htmlFor="edit-file-input"
@@ -489,14 +542,10 @@ const SubLedger = () => {
 
                                     {/* New Photos Preview */}
                                     {editPaymentData.new_photos && editPaymentData.new_photos.length > 0 && (
-                                        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '5px' }}>
+                                        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '10px' }}>
                                             {editPaymentData.new_photos.map((file, i) => (
-                                                <div key={i} style={{ position: 'relative' }}>
-                                                    <img
-                                                        src={URL.createObjectURL(file)}
-                                                        alt="Preview"
-                                                        style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
-                                                    />
+                                                <div key={i} style={{ position: 'relative', width: '40px', height: '40px', border: '1px solid #444', borderRadius: '4px', overflow: 'hidden' }}>
+                                                    <SafePreview file={file} />
                                                     <button
                                                         type="button"
                                                         onClick={(e) => {
@@ -504,14 +553,10 @@ const SubLedger = () => {
                                                             const newFiles = editPaymentData.new_photos.filter((_, idx) => idx !== i);
                                                             setEditPaymentData({ ...editPaymentData, new_photos: newFiles });
                                                         }}
-                                                        style={{
-                                                            position: 'absolute', top: -5, right: -5,
-                                                            width: '16px', height: '16px', borderRadius: '50%',
-                                                            background: 'red', color: 'white', border: 'none',
-                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                            cursor: 'pointer', fontSize: '10px'
-                                                        }}
-                                                    >X</button>
+                                                        style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(255,0,0,0.7)', color: 'white', border: 'none', cursor: 'pointer', padding: '0', width: '12px', height: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                    >
+                                                        <X size={8} />
+                                                    </button>
                                                 </div>
                                             ))}
                                         </div>
