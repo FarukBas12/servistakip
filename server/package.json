@@ -1,6 +1,6 @@
 {
   "name": "field-service-server",
-  "version": "1.4.11",
+  "version": "1.4.12",
   "description": "Backend for Field Service App",
   "main": "index.js",
   "scripts": {

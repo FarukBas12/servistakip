@@ -291,6 +291,14 @@ const StockPage = () => {
                     * {
                         opacity: 1 !important;
                         filter: none !important;
+                        color: #000000 !important;
+                        -webkit-text-fill-color: #000000 !important; /* Critical for some browsers */
+                    }
+
+                    .glass-panel h3 {
+                        color: #000000 !important;
+                        font-weight: 900 !important; /* Extra bold */
+                        -webkit-text-stroke: 0.5px black; /* Artificially thicken text */
                     }
 
                     h2, h3, h4, p, span, div, b, strong, i, em, li, ul { 
