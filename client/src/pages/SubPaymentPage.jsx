@@ -163,27 +163,25 @@ const SubPaymentPage = () => {
                             />
                             <div>
                                 <input
+                                    id="file-upload-input"
                                     type="file"
                                     multiple
                                     accept="image/*"
-                                    ref={fileInputRef}
                                     onChange={e => {
                                         if (e.target.files && e.target.files.length > 0) {
                                             setFiles(prev => [...prev, ...Array.from(e.target.files)]);
-                                            // Reset input so same file can be selected again if needed
                                             e.target.value = '';
                                         }
                                     }}
                                     style={{ display: 'none' }}
                                 />
-                                <button
-                                    type="button"
+                                <label
+                                    htmlFor="file-upload-input"
                                     className="glass-btn glass-btn-primary"
-                                    style={{ height: '100%' }}
-                                    onClick={(e) => { e.preventDefault(); fileInputRef.current?.click(); }}
+                                    style={{ height: '100%', display: 'flex', alignItems: 'center', cursor: 'pointer' }}
                                 >
                                     <Camera size={18} /> Fotoğraflar ({files.length})
-                                </button>
+                                </label>
                             </div>
                         </div>
                         {/* Photo Previews */}

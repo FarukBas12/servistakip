@@ -458,10 +458,10 @@ const SubLedger = () => {
                                     {/* New Photos Input */}
                                     <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                                         <input
+                                            id="edit-file-input"
                                             type="file"
                                             multiple
                                             accept="image/*"
-                                            ref={editFileInputRef}
                                             onChange={e => {
                                                 if (e.target.files && e.target.files.length > 0) {
                                                     setEditPaymentData(prev => ({
@@ -473,14 +473,13 @@ const SubLedger = () => {
                                             }}
                                             style={{ display: 'none' }}
                                         />
-                                        <button
-                                            type="button"
+                                        <label
+                                            htmlFor="edit-file-input"
                                             className="glass-btn"
-                                            onClick={(e) => { e.preventDefault(); editFileInputRef.current?.click(); }}
-                                            style={{ fontSize: '0.8rem' }}
+                                            style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', cursor: 'pointer' }}
                                         >
                                             <Camera size={14} style={{ marginRight: '5px' }} /> Fotoğraf Ekle ({editPaymentData.new_photos?.length || 0})
-                                        </button>
+                                        </label>
                                     </div>
 
                                     {/* New Photos Preview */}
