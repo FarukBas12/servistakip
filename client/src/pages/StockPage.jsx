@@ -10,6 +10,9 @@ const StockPage = () => {
     const [debugError, setDebugError] = useState(null);
     const [serverVersion, setServerVersion] = useState('Checking...');
 
+    // Sorting State
+    const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
+
     // Modal States
     const [modalOpen, setModalOpen] = useState(false);
     const [transactionModalOpen, setTransactionModalOpen] = useState(false);
@@ -182,6 +185,33 @@ const StockPage = () => {
         s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         s.category.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    // Sorting Logic
+    const sortedStocks = [...filteredStocks].sort((a, b) => {
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
+
+        // Numeric handling for quantity and price
+        if (sortConfig.key === 'quantity' || sortConfig.key === 'purchase_price') {
+            aValue = parseFloat(aValue) || 0;
+            bValue = parseFloat(bValue) || 0;
+        } else {
+            // String handling
+            aValue = aValue ? aValue.toString().toLowerCase() : '';
+            bValue = bValue ? bValue.toString().toLowerCase() : '';
+        }
+
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    const handleSort = (key) => {
+        setSortConfig(current => ({
+            key,
+            direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+        }));
+    };
 
     return (
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -426,17 +456,48 @@ const StockPage = () => {
                         style={{ paddingLeft: '40px' }}
                     />
                 </div>
+                {/* Sorting Controls */}
+                <div style={{ display: 'flex', gap: '10px', marginTop: '10px', overflowX: 'auto', paddingBottom: '5px' }}>
+                    <button
+                        onClick={() => handleSort('name')}
+                        className={`glass-btn ${sortConfig.key === 'name' ? 'glass-btn-primary' : 'glass-btn-secondary'}`}
+                        style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+                    >
+                        İsim {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                    </button>
+                    <button
+                        onClick={() => handleSort('quantity')}
+                        className={`glass-btn ${sortConfig.key === 'quantity' ? 'glass-btn-primary' : 'glass-btn-secondary'}`}
+                        style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+                    >
+                        Adet {sortConfig.key === 'quantity' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                    </button>
+                    <button
+                        onClick={() => handleSort('category')}
+                        className={`glass-btn ${sortConfig.key === 'category' ? 'glass-btn-primary' : 'glass-btn-secondary'}`}
+                        style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+                    >
+                        Kategori {sortConfig.key === 'category' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                    </button>
+                    <button
+                        onClick={() => handleSort('critical_level')}
+                        className={`glass-btn ${sortConfig.key === 'critical_level' ? 'glass-btn-primary' : 'glass-btn-secondary'}`}
+                        style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+                    >
+                        Kritik {sortConfig.key === 'critical_level' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                    </button>
+                </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {filteredStocks.length === 0 && (
+                {sortedStocks.length === 0 && (
                     <div style={{ textAlign: 'center', padding: '40px', color: '#aaa', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
                         <Package size={48} style={{ opacity: 0.5, marginBottom: '10px' }} />
                         <p>Henüz görüntülenecek stok yok veya arama sonucu boş.</p>
                         <p style={{ fontSize: '0.8rem' }}>Yeni stok eklemek için sağ üstteki düğmeyi kullanın.</p>
                     </div>
                 )}
-                {filteredStocks.map(stock => {
+                {sortedStocks.map(stock => {
                     const isCritical = parseFloat(stock.quantity) <= parseFloat(stock.critical_level);
                     return (
                         <div key={stock.id} className="glass-panel" style={{
