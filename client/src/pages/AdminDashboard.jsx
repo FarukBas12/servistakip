@@ -427,6 +427,86 @@ const AdminDashboard = () => {
             )}
 
             <div className="glass-panel" style={{ padding: '2rem' }}>
+                <style>{`
+                    /* Weather Animations */
+                    .weather-icon {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        height: 40px;
+                        width: 40px;
+                    }
+                    
+                    /* Sun Spin */
+                    @keyframes spin-slow {
+                        from { transform: rotate(0deg); }
+                        to { transform: rotate(360deg); }
+                    }
+                    .sun-animation svg {
+                        animation: spin-slow 12s linear infinite;
+                    }
+
+                    /* Cloud Float */
+                    @keyframes float {
+                        0%, 100% { transform: translateY(0); }
+                        50% { transform: translateY(-3px); }
+                    }
+                    .cloud-animation svg {
+                        animation: float 3s ease-in-out infinite;
+                    }
+
+                    /* Rain Drop */
+                    @keyframes rain-fall {
+                        0% { transform: translateY(-5px); opacity: 0; }
+                        50% { opacity: 1; }
+                        100% { transform: translateY(5px); opacity: 0; }
+                    }
+                    .rain-animation .rain-drop {
+                        position: absolute;
+                        width: 2px;
+                        height: 6px;
+                        background: #60a5fa;
+                        bottom: 0;
+                        border-radius: 2px;
+                        opacity: 0;
+                    }
+                    .rain-animation .rain-drop.one { left: 15px; animation: rain-fall 1s infinite 0.2s; }
+                    .rain-animation .rain-drop.two { left: 25px; animation: rain-fall 1s infinite 0.7s; }
+
+                    /* Snow Flake */
+                    @keyframes snow-fall {
+                        0% { transform: translateY(-5px) rotate(0deg); opacity: 0; }
+                        50% { opacity: 1; }
+                        100% { transform: translateY(5px) rotate(180deg); opacity: 0; }
+                    }
+                    .snow-animation .snow-flake {
+                        position: absolute;
+                        font-size: 10px;
+                        color: white;
+                        bottom: 0;
+                        opacity: 0;
+                    }
+                    .snow-animation .snow-flake.one { left: 12px; animation: snow-fall 2s infinite 0s; }
+                    .snow-animation .snow-flake.two { left: 24px; animation: snow-fall 2.5s infinite 1s; }
+
+                    /* Wind/Fog Breeze */
+                    @keyframes breeze {
+                        0%, 100% { transform: translateX(0); }
+                        50% { transform: translateX(3px); }
+                    }
+                    .wind-animation svg {
+                        animation: breeze 2s ease-in-out infinite;
+                    }
+                    
+                    /* Storm Flash */
+                    @keyframes flash {
+                        0%, 90%, 100% { filter: brightness(1); }
+                        92%, 96% { filter: brightness(1.5) drop-shadow(0 0 10px yellow); }
+                    }
+                    .storm-animation svg {
+                        animation: float 3s ease-in-out infinite, flash 5s infinite;
+                    }
+                `}</style>
                 <div className="fade-in">
                     <h1 style={{ marginBottom: '10px', textAlign: 'center' }}>Yönetici Paneli & Varlık Raporu</h1>
                     <p style={{ opacity: 0.7, marginBottom: '40px', textAlign: 'center' }}>Şirket envanter durumu ve yönetim kısayolları.</p>
