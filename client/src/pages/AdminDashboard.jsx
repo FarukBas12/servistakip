@@ -6,48 +6,25 @@ import api from '../utils/api';
 // Weather code mapping
 // Weather code mapping with Animations
 const getWeatherIcon = (code) => {
-    // 0: Clear sky (Brighter Sun)
-    if (code === 0) return (
-        <div className="weather-icon sun-animation">
-            <Sun size={32} color="#fbbf24" fill="#fbbf24" style={{ filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))' }} />
-        </div>
-    );
-    // 1-3: Partly cloudy (Static, no animation)
-    if (code >= 1 && code <= 3) return (
-        <div className="weather-icon">
-            <Cloud size={28} color="#94a3b8" fill="#e2e8f0" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
-        </div>
-    );
-    // 45, 48: Fog (Wind as placeholder)
-    if (code === 45 || code === 48) return (
-        <div className="weather-icon wind-animation">
-            <Wind size={28} color="#94a3b8" />
-        </div>
-    );
-    // 51-67: Drizzle / Rain
-    if (code >= 51 && code <= 67) return (
-        <div className="weather-icon rain-animation" style={{ position: 'relative' }}>
-            <CloudRain size={28} color="#60a5fa" />
-            <div className="rain-drop one"></div>
-            <div className="rain-drop two"></div>
-        </div>
-    );
-    // 71-77: Snow
-    if (code >= 71 && code <= 77) return (
-        <div className="weather-icon snow-animation" style={{ position: 'relative' }}>
-            <CloudSnow size={28} color="#e2e8f0" />
-            <div className="snow-flake one">❄</div>
-            <div className="snow-flake two">❄</div>
-        </div>
-    );
-    // 80-99: Showers / Thunderstorm
-    if (code >= 80 && code <= 99) return (
-        <div className="weather-icon storm-animation">
-            <CloudRain size={28} color="#3b82f6" strokeWidth={2.5} />
-        </div>
-    );
+    // 0: Clear sky
+    if (code === 0) return <Sun size={24} color="#fbbf24" />;
 
-    return <Wind size={28} color="#94a3b8" />;
+    // 1-3: Partly cloudy
+    if (code >= 1 && code <= 3) return <Cloud size={24} color="#94a3b8" />;
+
+    // 45, 48: Fog
+    if (code === 45 || code === 48) return <Wind size={24} color="#94a3b8" />;
+
+    // 51-67: Rain
+    if (code >= 51 && code <= 67) return <CloudRain size={24} color="#60a5fa" />;
+
+    // 71-77: Snow
+    if (code >= 71 && code <= 77) return <CloudSnow size={24} color="#e2e8f0" />;
+
+    // 80-99: Storm
+    if (code >= 80 && code <= 99) return <CloudRain size={24} color="#3b82f6" />;
+
+    return <Wind size={24} color="#94a3b8" />;
 };
 
 const AdminDashboard = () => {
@@ -427,83 +404,6 @@ const AdminDashboard = () => {
             )}
 
             <div className="glass-panel" style={{ padding: '2rem' }}>
-                <style>{`
-                    /* Weather Animations */
-                    .weather-icon {
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        height: 40px;
-                        width: 40px;
-                    }
-                    
-                    /* Sun Spin & Glow */
-                    @keyframes sun-glow {
-                        0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.6)); }
-                        50% { transform: scale(1.1); filter: drop-shadow(0 0 15px rgba(251, 191, 36, 1)); }
-                        100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.6)); }
-                    }
-                    .sun-animation svg {
-                        animation: sun-glow 3s ease-in-out infinite;
-                    }
-
-                    /* Cloud Float Removed */
-                    .cloud-animation svg {
-                        /* Animation removed as per request */
-                    }
-
-                    /* Rain Drop */
-                    @keyframes rain-fall {
-                        0% { transform: translateY(-5px); opacity: 0; }
-                        50% { opacity: 1; }
-                        100% { transform: translateY(5px); opacity: 0; }
-                    }
-                    .rain-animation .rain-drop {
-                        position: absolute;
-                        width: 2px;
-                        height: 6px;
-                        background: #60a5fa;
-                        bottom: 0;
-                        border-radius: 2px;
-                        opacity: 0;
-                    }
-                    .rain-animation .rain-drop.one { left: 15px; animation: rain-fall 1s infinite 0.2s; }
-                    .rain-animation .rain-drop.two { left: 25px; animation: rain-fall 1s infinite 0.7s; }
-
-                    /* Snow Flake */
-                    @keyframes snow-fall {
-                        0% { transform: translateY(-5px) rotate(0deg); opacity: 0; }
-                        50% { opacity: 1; }
-                        100% { transform: translateY(5px) rotate(180deg); opacity: 0; }
-                    }
-                    .snow-animation .snow-flake {
-                        position: absolute;
-                        font-size: 10px;
-                        color: white;
-                        bottom: 0;
-                        opacity: 0;
-                    }
-                    .snow-animation .snow-flake.one { left: 12px; animation: snow-fall 2s infinite 0s; }
-                    .snow-animation .snow-flake.two { left: 24px; animation: snow-fall 2.5s infinite 1s; }
-
-                    /* Wind/Fog Breeze */
-                    @keyframes breeze {
-                        0%, 100% { transform: translateX(0); }
-                        50% { transform: translateX(3px); }
-                    }
-                    .wind-animation svg {
-                        animation: breeze 2s ease-in-out infinite;
-                    }
-                    
-                    /* Storm Flash */
-                    @keyframes flash {
-                        0%, 90%, 100% { filter: brightness(1); }
-                        92%, 96% { filter: brightness(1.5) drop-shadow(0 0 10px yellow); }
-                    }
-                    .storm-animation svg {
-                        animation: float 3s ease-in-out infinite, flash 5s infinite;
-                    }
-                `}</style>
                 <div className="fade-in">
                     <h1 style={{ marginBottom: '10px', textAlign: 'center' }}>Yönetici Paneli & Varlık Raporu</h1>
                     <p style={{ opacity: 0.7, marginBottom: '40px', textAlign: 'center' }}>Şirket envanter durumu ve yönetim kısayolları.</p>
