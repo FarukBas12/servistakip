@@ -18,6 +18,7 @@ const SubPaymentPage = () => {
 
     // Files
     const [files, setFiles] = useState([]);
+    const fileInputRef = React.useRef(null);
 
     // Data
     const [prices, setPrices] = useState([]); // Available items
@@ -165,10 +166,12 @@ const SubPaymentPage = () => {
                                     type="file"
                                     multiple
                                     accept="image/*"
-                                    id="photo-upload-input"
+                                    ref={fileInputRef}
                                     onChange={e => {
-                                        if (e.target.files) {
+                                        if (e.target.files && e.target.files.length > 0) {
                                             setFiles(prev => [...prev, ...Array.from(e.target.files)]);
+                                            // Reset input so same file can be selected again if needed
+                                            e.target.value = '';
                                         }
                                     }}
                                     style={{ display: 'none' }}
@@ -176,7 +179,7 @@ const SubPaymentPage = () => {
                                 <button
                                     className="glass-btn glass-btn-primary"
                                     style={{ height: '100%' }}
-                                    onClick={() => document.getElementById('photo-upload-input').click()}
+                                    onClick={() => fileInputRef.current?.click()}
                                 >
                                     <Camera size={18} /> Fotoğraflar ({files.length})
                                 </button>
