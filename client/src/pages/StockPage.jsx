@@ -187,20 +187,78 @@ const StockPage = () => {
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <style>{`
                 @media print {
+                    @page { margin: 1cm; size: A4; }
                     .no-print { display: none !important; }
                     .sidebar { display: none !important; }
-                    body { background: white !important; color: black !important; }
-                    .glass-panel { 
+                    body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; }
+                    
+                    /* Reset Container */
+                    .dashboard, .glass-panel { 
                         background: none !important; 
                         box-shadow: none !important; 
-                        border: 1px solid #ddd !important;
-                        color: black !important;
-                        break-inside: avoid;
-                        margin-bottom: 10px;
+                        border: none !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        width: 100% !important;
+                        max-width: none !important;
                     }
-                    .glass-btn { display: none !important; }
+
+                    /* Header */
+                    .print-header { 
+                        display: flex !important; 
+                        justify-content: space-between; 
+                        align-items: center;
+                        border-bottom: 2px solid black; 
+                        padding-bottom: 10px; 
+                        margin-bottom: 20px; 
+                    }
+                    .print-header h2 { margin: 0; font-size: 1.5rem; }
+
+                    /* Stock List Container */
+                    div[style*="flex-direction: column"] { gap: 0 !important; }
+
+                    /* Individual Stock Item (Card -> Row) */
+                    .glass-panel {
+                        display: flex !important;
+                        flex-direction: row !important;
+                        align-items: center !important;
+                        justify-content: space-between !important;
+                        border-bottom: 1px solid #ddd !important;
+                        padding: 5px 0 !important;
+                        break-inside: avoid;
+                    }
+
+                    /* Remove left status border colors in print to save ink/confusion, use text instead if needed */
+                    .glass-panel[style*="border-left"] { border-left: none !important; }
+
+                    /* Product Name */
+                    .glass-panel h3 { 
+                        font-size: 0.9rem !important; 
+                        margin: 0 !important; 
+                        color: black !important; 
+                        font-weight: bold !important;
+                    }
+                    
+                    /* Category */
+                    .glass-panel span[style*="background"] {
+                        background: none !important;
+                        color: #666 !important;
+                        padding: 0 !important;
+                        font-size: 0.8rem !important;
+                        margin-left: 10px;
+                    }
+
+                    /* Quantity */
+                    .glass-panel div[style*="text-align: right"] {
+                        text-align: right !important;
+                    }
+                    .glass-panel div[style*="font-size: 1.2rem"] {
+                        font-size: 0.9rem !important;
+                        color: black !important;
+                        font-weight: bold !important;
+                    }
+
                     h2, h3, h4, p, span, div, b, strong, i, em { color: black !important; text-shadow: none !important; }
-                    .print-header { display: block !important; margin-bottom: 20px; text-align: center; }
                 }
                 .print-header { display: none; }
                 .inline-section {
