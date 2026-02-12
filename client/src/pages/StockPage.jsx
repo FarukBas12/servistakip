@@ -190,7 +190,7 @@ const StockPage = () => {
                     @page { margin: 1cm; size: A4; }
                     .no-print { display: none !important; }
                     .sidebar { display: none !important; }
-                    body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; }
+                    body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; font-size: 10pt; }
                     
                     /* Reset Container */
                     .dashboard, .glass-panel { 
@@ -201,6 +201,7 @@ const StockPage = () => {
                         padding: 0 !important;
                         width: 100% !important;
                         max-width: none !important;
+                        border-radius: 0 !important;
                     }
 
                     /* Header */
@@ -209,53 +210,87 @@ const StockPage = () => {
                         justify-content: space-between; 
                         align-items: center;
                         border-bottom: 2px solid black; 
-                        padding-bottom: 10px; 
-                        margin-bottom: 20px; 
+                        padding-bottom: 5px; 
+                        margin-bottom: 10px; 
                     }
-                    .print-header h2 { margin: 0; font-size: 1.5rem; }
+                    .print-header h2 { margin: 0; font-size: 1.2rem; }
 
                     /* Stock List Container */
-                    div[style*="flex-direction: column"] { gap: 0 !important; }
+                    div[style*="flex-direction: column"] { gap: 0 !important; display: block !important; }
 
-                    /* Individual Stock Item (Card -> Row) */
+                    /* Individual Stock Item Wrapper */
                     .glass-panel {
                         display: flex !important;
                         flex-direction: row !important;
                         align-items: center !important;
                         justify-content: space-between !important;
-                        border-bottom: 1px solid #ddd !important;
-                        padding: 5px 0 !important;
+                        border-bottom: 1px solid #ccc !important;
+                        padding: 4px 0 !important; /* Very small padding */
                         break-inside: avoid;
+                        height: auto !important;
+                        min-height: 0 !important;
+                        border-left: none !important; /* Override inline styles */
                     }
 
-                    /* Remove left status border colors in print to save ink/confusion, use text instead if needed */
-                    .glass-panel[style*="border-left"] { border-left: none !important; }
+                    /* Inner Flex Container Override */
+                    .glass-panel > div {
+                        display: flex !important;
+                        flex-direction: row !important;
+                        flex-wrap: nowrap !important;
+                        align-items: center !important;
+                        width: 100% !important;
+                        margin: 0 !important;
+                        gap: 10px !important;
+                    }
 
-                    /* Product Name */
+                    /* Product Name Section */
+                    .glass-panel > div > div:first-child {
+                        flex: 1 !important;
+                        margin: 0 !important;
+                    }
+
+                    /* Product Name Text */
                     .glass-panel h3 { 
                         font-size: 0.9rem !important; 
                         margin: 0 !important; 
                         color: black !important; 
                         font-weight: bold !important;
+                        display: inline-block !important;
                     }
                     
-                    /* Category */
+                    /* Category Pill -> Text */
                     .glass-panel span[style*="background"] {
                         background: none !important;
                         color: #666 !important;
                         padding: 0 !important;
                         font-size: 0.8rem !important;
-                        margin-left: 10px;
+                        margin-left: 5px;
+                        display: inline-block !important;
+                    }
+                    /* Add parenthesis or dash before category for cleaner look */
+                    .glass-panel span[style*="background"]::before {
+                        content: "- ";
                     }
 
-                    /* Quantity */
-                    .glass-panel div[style*="text-align: right"] {
+                    /* Critical Badge */
+                    .glass-panel span[style*="color: #ef4444"] {
+                        display: none !important; /* Hide 'Critical' text to save space */
+                    }
+
+                    /* Quantity Section */
+                    .glass-panel > div > div:nth-child(2) {
                         text-align: right !important;
+                        min-width: auto !important;
                     }
                     .glass-panel div[style*="font-size: 1.2rem"] {
                         font-size: 0.9rem !important;
                         color: black !important;
                         font-weight: bold !important;
+                    }
+
+                    /* Hide Actions Column completely */
+                    .glass-panel > div > div:last-child {
+                        display: none !important;
                     }
 
                     h2, h3, h4, p, span, div, b, strong, i, em { color: black !important; text-shadow: none !important; }
