@@ -4,13 +4,50 @@ import { Users, ShoppingBag, Cloud, Sun, CloudRain, CloudSnow, Wind, Calendar, P
 import api from '../utils/api';
 
 // Weather code mapping
+// Weather code mapping with Animations
 const getWeatherIcon = (code) => {
-    if (code === 0) return <Sun size={24} color="#fbbf24" />;
-    if (code >= 1 && code <= 3) return <Cloud size={24} color="#94a3b8" />;
-    if (code >= 51 && code <= 67) return <CloudRain size={24} color="#60a5fa" />;
-    if (code >= 71 && code <= 77) return <CloudSnow size={24} color="#e2e8f0" />;
-    if (code >= 80 && code <= 99) return <CloudRain size={24} color="#3b82f6" />;
-    return <Wind size={24} color="#94a3b8" />;
+    // 0: Clear sky
+    if (code === 0) return (
+        <div className="weather-icon sun-animation">
+            <Sun size={28} color="#fbbf24" style={{ filter: 'drop-shadow(0 0 5px rgba(251, 191, 36, 0.5))' }} />
+        </div>
+    );
+    // 1-3: Partly cloudy
+    if (code >= 1 && code <= 3) return (
+        <div className="weather-icon cloud-animation">
+            <Cloud size={28} color="#94a3b8" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
+        </div>
+    );
+    // 45, 48: Fog (Wind as placeholder)
+    if (code === 45 || code === 48) return (
+        <div className="weather-icon wind-animation">
+            <Wind size={28} color="#94a3b8" />
+        </div>
+    );
+    // 51-67: Drizzle / Rain
+    if (code >= 51 && code <= 67) return (
+        <div className="weather-icon rain-animation" style={{ position: 'relative' }}>
+            <CloudRain size={28} color="#60a5fa" />
+            <div className="rain-drop one"></div>
+            <div className="rain-drop two"></div>
+        </div>
+    );
+    // 71-77: Snow
+    if (code >= 71 && code <= 77) return (
+        <div className="weather-icon snow-animation" style={{ position: 'relative' }}>
+            <CloudSnow size={28} color="#e2e8f0" />
+            <div className="snow-flake one">❄</div>
+            <div className="snow-flake two">❄</div>
+        </div>
+    );
+    // 80-99: Showers / Thunderstorm
+    if (code >= 80 && code <= 99) return (
+        <div className="weather-icon storm-animation">
+            <CloudRain size={28} color="#3b82f6" strokeWidth={2.5} />
+        </div>
+    );
+
+    return <Wind size={28} color="#94a3b8" />;
 };
 
 const AdminDashboard = () => {
