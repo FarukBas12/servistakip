@@ -277,19 +277,8 @@ const StockPage = () => {
                         display: none !important; /* Hide 'Critical' text to save space */
                     }
 
-                    /* Quantity Section */
+                    /* Quantity Section - HIDDEN as per user request */
                     .glass-panel > div > div:nth-child(2) {
-                        text-align: right !important;
-                        min-width: auto !important;
-                    }
-                    .glass-panel div[style*="font-size: 1.2rem"] {
-                        font-size: 0.9rem !important;
-                        color: black !important;
-                        font-weight: bold !important;
-                    }
-
-                    /* Hide Unit Text (Adet, Kg, etc.) */
-                    .glass-panel div[style*="font-size: 1.2rem"] span {
                         display: none !important;
                     }
 
@@ -298,7 +287,17 @@ const StockPage = () => {
                         display: none !important;
                     }
 
-                    h2, h3, h4, p, span, div, b, strong, i, em { color: black !important; text-shadow: none !important; }
+                    /* Force ALL text to be high contrast black and opaque */
+                    * {
+                        opacity: 1 !important;
+                        filter: none !important;
+                    }
+
+                    h2, h3, h4, p, span, div, b, strong, i, em, li, ul { 
+                        color: #000000 !important; 
+                        text-shadow: none !important; 
+                        fill: #000000 !important;
+                    }
                 }
                 .print-header { display: none; }
                 .inline-section {
