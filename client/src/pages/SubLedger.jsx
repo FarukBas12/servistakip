@@ -439,169 +439,168 @@ const SubLedger = () => {
                                     <input type="text" className="glass-input" value={editPaymentData.waybill_info || ''} onChange={e => setEditPaymentData({ ...editPaymentData, waybill_info: e.target.value })} />
                                 </div>
                                 <div>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7 }}>Fotoğraflar</label>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7 }}>Fotoğraflar</label>
 
-                                        {/* Existing Photos */}
-                                        {editPaymentData.existing_photos && editPaymentData.existing_photos.length > 0 && (
-                                            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '10px' }}>
-                                                {editPaymentData.existing_photos.map((photo, i) => (
-                                                    <div key={i} style={{ width: '50px', height: '50px', position: 'relative' }}>
-                                                        <img
-                                                            src={photo.startsWith('http') ? photo : api.defaults.baseURL.replace('/api', '') + photo}
-                                                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }}
-                                                        />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        {/* New Photos Input */}
-                                        <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
-                                            <input
-                                                type="file"
-                                                multiple
-                                                accept="image/*"
-                                                ref={editFileInputRef}
-                                                onChange={e => {
-                                                    if (e.target.files && e.target.files.length > 0) {
-                                                        setEditPaymentData(prev => ({
-                                                            ...prev,
-                                                            new_photos: [...(prev.new_photos || []), ...Array.from(e.target.files)]
-                                                        }));
-                                                        e.target.value = ''; // Reset
-                                                    }
-                                                }}
-                                                style={{ display: 'none' }}
-                                            />
-                                            <button
-                                                className="glass-btn"
-                                                onClick={() => editFileInputRef.current?.click()}
-                                                style={{ fontSize: '0.8rem' }}
-                                            >
-                                                <Camera size={14} style={{ marginRight: '5px' }} /> Fotoğraf Ekle ({editPaymentData.new_photos?.length || 0})
-                                            </button>
+                                    {/* Existing Photos */}
+                                    {editPaymentData.existing_photos && editPaymentData.existing_photos.length > 0 && (
+                                        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                                            {editPaymentData.existing_photos.map((photo, i) => (
+                                                <div key={i} style={{ width: '50px', height: '50px', position: 'relative' }}>
+                                                    <img
+                                                        src={photo.startsWith('http') ? photo : api.defaults.baseURL.replace('/api', '') + photo}
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }}
+                                                    />
+                                                </div>
+                                            ))}
                                         </div>
+                                    )}
 
-                                        {/* New Photos Preview */}
-                                        {editPaymentData.new_photos && editPaymentData.new_photos.length > 0 && (
-                                            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '5px' }}>
-                                                {editPaymentData.new_photos.map((file, i) => (
-                                                    <div key={i} style={{ position: 'relative' }}>
-                                                        <img
-                                                            src={URL.createObjectURL(file)}
-                                                            alt="Preview"
-                                                            style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
-                                                        />
-                                                        <button
-                                                            onClick={() => {
-                                                                const newFiles = editPaymentData.new_photos.filter((_, idx) => idx !== i);
-                                                                setEditPaymentData({ ...editPaymentData, new_photos: newFiles });
-                                                            }}
-                                                            style={{
-                                                                position: 'absolute', top: -5, right: -5,
-                                                                width: '16px', height: '16px', borderRadius: '50%',
-                                                                background: 'red', color: 'white', border: 'none',
-                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                cursor: 'pointer', fontSize: '10px'
-                                                            }}
-                                                        >X</button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
+                                    {/* New Photos Input */}
+                                    <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                                        <input
+                                            type="file"
+                                            multiple
+                                            accept="image/*"
+                                            ref={editFileInputRef}
+                                            onChange={e => {
+                                                if (e.target.files && e.target.files.length > 0) {
+                                                    setEditPaymentData(prev => ({
+                                                        ...prev,
+                                                        new_photos: [...(prev.new_photos || []), ...Array.from(e.target.files)]
+                                                    }));
+                                                    e.target.value = ''; // Reset
+                                                }
+                                            }}
+                                            style={{ display: 'none' }}
+                                        />
+                                        <button
+                                            className="glass-btn"
+                                            onClick={() => editFileInputRef.current?.click()}
+                                            style={{ fontSize: '0.8rem' }}
+                                        >
+                                            <Camera size={14} style={{ marginRight: '5px' }} /> Fotoğraf Ekle ({editPaymentData.new_photos?.length || 0})
+                                        </button>
                                     </div>
+
+                                    {/* New Photos Preview */}
+                                    {editPaymentData.new_photos && editPaymentData.new_photos.length > 0 && (
+                                        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '5px' }}>
+                                            {editPaymentData.new_photos.map((file, i) => (
+                                                <div key={i} style={{ position: 'relative' }}>
+                                                    <img
+                                                        src={URL.createObjectURL(file)}
+                                                        alt="Preview"
+                                                        style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
+                                                    />
+                                                    <button
+                                                        onClick={() => {
+                                                            const newFiles = editPaymentData.new_photos.filter((_, idx) => idx !== i);
+                                                            setEditPaymentData({ ...editPaymentData, new_photos: newFiles });
+                                                        }}
+                                                        style={{
+                                                            position: 'absolute', top: -5, right: -5,
+                                                            width: '16px', height: '16px', borderRadius: '50%',
+                                                            background: 'red', color: 'white', border: 'none',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                            cursor: 'pointer', fontSize: '10px'
+                                                        }}
+                                                    >X</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
+                        </div>
 
-                            <h3>Kalemler</h3>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
-                                <thead>
-                                    <tr style={{ borderBottom: '1px solid #333', textAlign: 'left', color: '#888' }}>
-                                        <th style={{ padding: '8px' }}>İş Kalemi</th>
-                                        <th style={{ padding: '8px', width: '120px' }}>Birim Fiyat</th>
-                                        <th style={{ padding: '8px', width: '100px' }}>Metraj</th>
-                                        <th style={{ padding: '8px', width: '50px' }}></th>
+                        <h3>Kalemler</h3>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid #333', textAlign: 'left', color: '#888' }}>
+                                    <th style={{ padding: '8px' }}>İş Kalemi</th>
+                                    <th style={{ padding: '8px', width: '120px' }}>Birim Fiyat</th>
+                                    <th style={{ padding: '8px', width: '100px' }}>Metraj</th>
+                                    <th style={{ padding: '8px', width: '50px' }}></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {editPaymentData.items?.map((item, idx) => (
+                                    <tr key={idx} style={{ borderBottom: '1px solid #222' }}>
+                                        <td style={{ padding: '5px' }}>
+                                            <input type="text" className="glass-input" style={{ width: '100%', background: 'transparent' }} value={item.work_item}
+                                                onChange={e => {
+                                                    const newItems = [...editPaymentData.items];
+                                                    newItems[idx].work_item = e.target.value;
+                                                    setEditPaymentData({ ...editPaymentData, items: newItems });
+                                                }} />
+                                        </td>
+                                        <td style={{ padding: '5px' }}>
+                                            <input type="number" className="glass-input" style={{ width: '100%', background: 'transparent' }} value={item.unit_price}
+                                                onChange={e => {
+                                                    const newItems = [...editPaymentData.items];
+                                                    newItems[idx].unit_price = e.target.value;
+                                                    setEditPaymentData({ ...editPaymentData, items: newItems });
+                                                }} />
+                                        </td>
+                                        <td style={{ padding: '5px' }}>
+                                            <input type="number" className="glass-input" style={{ width: '100%', background: 'transparent' }} value={item.quantity}
+                                                onChange={e => {
+                                                    const newItems = [...editPaymentData.items];
+                                                    newItems[idx].quantity = e.target.value;
+                                                    setEditPaymentData({ ...editPaymentData, items: newItems });
+                                                }} />
+                                        </td>
+                                        <td style={{ padding: '5px' }}>
+                                            <button className="glass-btn" style={{ padding: '5px', color: '#f44336' }}
+                                                onClick={() => {
+                                                    const newItems = editPaymentData.items.filter((_, i) => i !== idx);
+                                                    setEditPaymentData({ ...editPaymentData, items: newItems });
+                                                }}>
+                                                <Trash size={16} />
+                                            </button>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {editPaymentData.items?.map((item, idx) => (
-                                        <tr key={idx} style={{ borderBottom: '1px solid #222' }}>
-                                            <td style={{ padding: '5px' }}>
-                                                <input type="text" className="glass-input" style={{ width: '100%', background: 'transparent' }} value={item.work_item}
-                                                    onChange={e => {
-                                                        const newItems = [...editPaymentData.items];
-                                                        newItems[idx].work_item = e.target.value;
-                                                        setEditPaymentData({ ...editPaymentData, items: newItems });
-                                                    }} />
-                                            </td>
-                                            <td style={{ padding: '5px' }}>
-                                                <input type="number" className="glass-input" style={{ width: '100%', background: 'transparent' }} value={item.unit_price}
-                                                    onChange={e => {
-                                                        const newItems = [...editPaymentData.items];
-                                                        newItems[idx].unit_price = e.target.value;
-                                                        setEditPaymentData({ ...editPaymentData, items: newItems });
-                                                    }} />
-                                            </td>
-                                            <td style={{ padding: '5px' }}>
-                                                <input type="number" className="glass-input" style={{ width: '100%', background: 'transparent' }} value={item.quantity}
-                                                    onChange={e => {
-                                                        const newItems = [...editPaymentData.items];
-                                                        newItems[idx].quantity = e.target.value;
-                                                        setEditPaymentData({ ...editPaymentData, items: newItems });
-                                                    }} />
-                                            </td>
-                                            <td style={{ padding: '5px' }}>
-                                                <button className="glass-btn" style={{ padding: '5px', color: '#f44336' }}
-                                                    onClick={() => {
-                                                        const newItems = editPaymentData.items.filter((_, i) => i !== idx);
-                                                        setEditPaymentData({ ...editPaymentData, items: newItems });
-                                                    }}>
-                                                    <Trash size={16} />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                            <button className="glass-btn" style={{ marginTop: '10px', fontSize: '0.8rem' }}
-                                onClick={() => {
-                                    const newItems = [...(editPaymentData.items || []), { work_item: '', unit_price: 0, quantity: 0 }];
-                                    setEditPaymentData({ ...editPaymentData, items: newItems });
-                                }}>
-                                <Plus size={16} style={{ marginRight: '5px' }} /> Yeni Kalem Ekle
-                            </button>
+                                ))}
+                            </tbody>
+                        </table>
+                        <button className="glass-btn" style={{ marginTop: '10px', fontSize: '0.8rem' }}
+                            onClick={() => {
+                                const newItems = [...(editPaymentData.items || []), { work_item: '', unit_price: 0, quantity: 0 }];
+                                setEditPaymentData({ ...editPaymentData, items: newItems });
+                            }}>
+                            <Plus size={16} style={{ marginRight: '5px' }} /> Yeni Kalem Ekle
+                        </button>
 
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', marginTop: '30px' }}>
-                                <button onClick={() => setShowEditPaymentModal(false)} className="glass-btn">İptal</button>
-                                <button
-                                    onClick={async () => {
-                                        try {
-                                            const formData = new FormData();
-                                            formData.append('title', editPaymentData.title);
-                                            formData.append('store_name', editPaymentData.store_name);
-                                            formData.append('waybill_info', editPaymentData.waybill_info);
-                                            formData.append('payment_date', editPaymentData.payment_date);
-                                            formData.append('kdv_rate', editPaymentData.kdv_rate);
-                                            formData.append('items', JSON.stringify(editPaymentData.items));
-                                            if (editPaymentData.new_photos && editPaymentData.new_photos.length > 0) {
-                                                editPaymentData.new_photos.forEach(file => {
-                                                    formData.append('photos', file);
-                                                });
-                                            }
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', marginTop: '30px' }}>
+                            <button onClick={() => setShowEditPaymentModal(false)} className="glass-btn">İptal</button>
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        const formData = new FormData();
+                                        formData.append('title', editPaymentData.title);
+                                        formData.append('store_name', editPaymentData.store_name);
+                                        formData.append('waybill_info', editPaymentData.waybill_info);
+                                        formData.append('payment_date', editPaymentData.payment_date);
+                                        formData.append('kdv_rate', editPaymentData.kdv_rate);
+                                        formData.append('items', JSON.stringify(editPaymentData.items));
+                                        if (editPaymentData.new_photos && editPaymentData.new_photos.length > 0) {
+                                            editPaymentData.new_photos.forEach(file => {
+                                                formData.append('photos', file);
+                                            });
+                                        }
 
-                                            await api.put(`/subs/payment/${editPaymentData.id}`, formData);
-                                            setShowEditPaymentModal(false);
-                                            fetchData();
-                                        } catch (e) { alert('Hata oluştu'); }
-                                    }}
-                                    className="glass-btn" style={{ background: '#4caf50' }}>Güncellemeleri Kaydet</button>
-                            </div>
+                                        await api.put(`/subs/payment/${editPaymentData.id}`, formData);
+                                        setShowEditPaymentModal(false);
+                                        fetchData();
+                                    } catch (e) { alert('Hata oluştu'); }
+                                }}
+                                className="glass-btn" style={{ background: '#4caf50' }}>Güncellemeleri Kaydet</button>
                         </div>
                     </div>
-            )}
                 </div>
-            );
+            )}
+        </div>
+    );
 };
 
-            export default SubLedger;
+export default SubLedger;
