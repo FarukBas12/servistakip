@@ -261,7 +261,7 @@ const StockPage = () => {
                     /* Category Pill -> Text */
                     .glass-panel span[style*="background"] {
                         background: none !important;
-                        color: #666 !important;
+                        color: black !important;
                         padding: 0 !important;
                         font-size: 0.8rem !important;
                         margin-left: 5px;
@@ -286,6 +286,11 @@ const StockPage = () => {
                         font-size: 0.9rem !important;
                         color: black !important;
                         font-weight: bold !important;
+                    }
+
+                    /* Hide Unit Text (Adet, Kg, etc.) */
+                    .glass-panel div[style*="font-size: 1.2rem"] span {
+                        display: none !important;
                     }
 
                     /* Hide Actions Column completely */
