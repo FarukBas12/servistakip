@@ -187,13 +187,27 @@ const StockPage = () => {
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <style>{`
                 @media print {
+                @media print {
                     @page { margin: 1cm; size: A4; }
                     .no-print { display: none !important; }
                     .sidebar { display: none !important; }
-                    body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; font-size: 10pt; }
                     
+                    /* Global Reset for Pagination */
+                    html, body, #root, .App, .dashboard, .main-content {
+                        background: white !important;
+                        color: black !important;
+                        height: auto !important;
+                        min-height: 0 !important;
+                        overflow: visible !important;
+                        position: static !important;
+                        width: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        display: block !important;
+                    }
+
                     /* Reset Container */
-                    .dashboard, .glass-panel { 
+                    .glass-panel { 
                         background: none !important; 
                         box-shadow: none !important; 
                         border: none !important;
@@ -202,6 +216,7 @@ const StockPage = () => {
                         width: 100% !important;
                         max-width: none !important;
                         border-radius: 0 !important;
+                        page-break-inside: avoid;
                     }
 
                     /* Header */
