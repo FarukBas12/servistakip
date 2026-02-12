@@ -199,7 +199,7 @@ const StockPage = () => {
                         margin-bottom: 10px;
                     }
                     .glass-btn { display: none !important; }
-                    h2, h3 { color: black !important; }
+                    h2, h3, h4, p, span, div, b, strong, i, em { color: black !important; text-shadow: none !important; }
                     .print-header { display: block !important; margin-bottom: 20px; text-align: center; }
                 }
                 .print-header { display: none; }
