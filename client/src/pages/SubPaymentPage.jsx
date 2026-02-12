@@ -177,9 +177,10 @@ const SubPaymentPage = () => {
                                     style={{ display: 'none' }}
                                 />
                                 <button
+                                    type="button"
                                     className="glass-btn glass-btn-primary"
                                     style={{ height: '100%' }}
-                                    onClick={() => fileInputRef.current?.click()}
+                                    onClick={(e) => { e.preventDefault(); fileInputRef.current?.click(); }}
                                 >
                                     <Camera size={18} /> Fotoğraflar ({files.length})
                                 </button>

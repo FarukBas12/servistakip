@@ -474,8 +474,9 @@ const SubLedger = () => {
                                             style={{ display: 'none' }}
                                         />
                                         <button
+                                            type="button"
                                             className="glass-btn"
-                                            onClick={() => editFileInputRef.current?.click()}
+                                            onClick={(e) => { e.preventDefault(); editFileInputRef.current?.click(); }}
                                             style={{ fontSize: '0.8rem' }}
                                         >
                                             <Camera size={14} style={{ marginRight: '5px' }} /> Fotoğraf Ekle ({editPaymentData.new_photos?.length || 0})
@@ -493,7 +494,9 @@ const SubLedger = () => {
                                                         style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
                                                     />
                                                     <button
-                                                        onClick={() => {
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
                                                             const newFiles = editPaymentData.new_photos.filter((_, idx) => idx !== i);
                                                             setEditPaymentData({ ...editPaymentData, new_photos: newFiles });
                                                         }}
