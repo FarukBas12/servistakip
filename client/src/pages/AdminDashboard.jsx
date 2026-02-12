@@ -6,16 +6,16 @@ import api from '../utils/api';
 // Weather code mapping
 // Weather code mapping with Animations
 const getWeatherIcon = (code) => {
-    // 0: Clear sky
+    // 0: Clear sky (Brighter Sun)
     if (code === 0) return (
         <div className="weather-icon sun-animation">
-            <Sun size={28} color="#fbbf24" style={{ filter: 'drop-shadow(0 0 5px rgba(251, 191, 36, 0.5))' }} />
+            <Sun size={32} color="#fbbf24" fill="#fbbf24" style={{ filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))' }} />
         </div>
     );
-    // 1-3: Partly cloudy
+    // 1-3: Partly cloudy (Static, no animation)
     if (code >= 1 && code <= 3) return (
-        <div className="weather-icon cloud-animation">
-            <Cloud size={28} color="#94a3b8" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
+        <div className="weather-icon">
+            <Cloud size={28} color="#94a3b8" fill="#e2e8f0" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
         </div>
     );
     // 45, 48: Fog (Wind as placeholder)
@@ -437,22 +437,19 @@ const AdminDashboard = () => {
                         width: 40px;
                     }
                     
-                    /* Sun Spin */
-                    @keyframes spin-slow {
-                        from { transform: rotate(0deg); }
-                        to { transform: rotate(360deg); }
+                    /* Sun Spin & Glow */
+                    @keyframes sun-glow {
+                        0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.6)); }
+                        50% { transform: scale(1.1); filter: drop-shadow(0 0 15px rgba(251, 191, 36, 1)); }
+                        100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.6)); }
                     }
                     .sun-animation svg {
-                        animation: spin-slow 12s linear infinite;
+                        animation: sun-glow 3s ease-in-out infinite;
                     }
 
-                    /* Cloud Float */
-                    @keyframes float {
-                        0%, 100% { transform: translateY(0); }
-                        50% { transform: translateY(-3px); }
-                    }
+                    /* Cloud Float Removed */
                     .cloud-animation svg {
-                        animation: float 3s ease-in-out infinite;
+                        /* Animation removed as per request */
                     }
 
                     /* Rain Drop */
