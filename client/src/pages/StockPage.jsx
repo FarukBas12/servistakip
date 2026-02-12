@@ -317,15 +317,15 @@ const StockPage = () => {
                         color: transparent !important;
                     }
 
-                    /* The Write-in Box */
+                    /* The Write-in Box - Enlarged */
                     .glass-panel > div > div:nth-child(2)::after {
                         content: "" !important;
                         display: block !important;
-                        width: 80px !important;
-                        height: 25px !important;
+                        width: 120px !important; /* Wider */
+                        height: 35px !important; /* Taller */
                         border: 2px solid #000 !important;
                         visibility: visible !important;
-                        background: white !important; /* Ensure white box on grey row */
+                        background: white !important;
                     }
 
                     /* Hide Actions Column completely */
