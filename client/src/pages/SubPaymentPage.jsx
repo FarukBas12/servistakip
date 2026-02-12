@@ -160,19 +160,24 @@ const SubPaymentPage = () => {
                                 value={header.waybill_info}
                                 onChange={e => setHeader({ ...header, waybill_info: e.target.value })}
                             />
-                            <div style={{ position: 'relative' }}>
+                            <div>
                                 <input
                                     type="file"
                                     multiple
                                     accept="image/*"
+                                    id="photo-upload-input"
                                     onChange={e => {
                                         if (e.target.files) {
                                             setFiles(prev => [...prev, ...Array.from(e.target.files)]);
                                         }
                                     }}
-                                    style={{ position: 'absolute', opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
+                                    style={{ display: 'none' }}
                                 />
-                                <button className="glass-btn glass-btn-primary" style={{ height: '100%' }}>
+                                <button
+                                    className="glass-btn glass-btn-primary"
+                                    style={{ height: '100%' }}
+                                    onClick={() => document.getElementById('photo-upload-input').click()}
+                                >
                                     <Camera size={18} /> Fotoğraflar ({files.length})
                                 </button>
                             </div>
