@@ -37,8 +37,8 @@ router.delete('/prices/:id', controller.deletePrice);
 router.post('/prices/import', uploadMemory.single('file'), controller.importPrices);
 
 // Payments
-router.post('/payments', upload.single('waybill'), controller.createPayment);
-router.put('/payment/:id', upload.single('waybill'), controller.updatePayment);
+router.post('/payments', upload.array('photos', 10), controller.createPayment);
+router.put('/payment/:id', upload.array('photos', 10), controller.updatePayment);
 router.get('/payment/:id', controller.getPaymentDetails);
 
 // Cash Update

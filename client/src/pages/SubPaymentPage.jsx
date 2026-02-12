@@ -16,8 +16,8 @@ const SubPaymentPage = () => {
         kdv_rate: 20
     });
 
-    // File
-    const [waybillFile, setWaybillFile] = useState(null);
+    // Files
+    const [files, setFiles] = useState([]);
 
     // Data
     const [prices, setPrices] = useState([]); // Available items
@@ -93,7 +93,14 @@ const SubPaymentPage = () => {
         formData.append('payment_date', header.date);
         formData.append('waybill_info', header.waybill_info);
         formData.append('kdv_rate', header.kdv_rate || 20);
-        if (waybillFile) formData.append('waybill', waybillFile);
+        formData.append('waybill_info', header.waybill_info);
+        formData.append('kdv_rate', header.kdv_rate || 20);
+
+        // Append all photos
+        files.forEach(file => {
+            formData.append('photos', file);
+        });
+
         formData.append('items', JSON.stringify(items));
 
         try {
@@ -144,22 +151,48 @@ const SubPaymentPage = () => {
 
                 {/* Actions Row */}
                 <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                    {/* Waybill Section */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    {/* Waybill / Photos Section */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', flex: 1 }}>
                         <div style={{ display: 'flex', gap: '5px' }}>
                             <input
+                                placeholder="İrsaliye No / Açıklama"
                                 className="glass-input"
-                                placeholder="İrsaliye No/Bilgi"
                                 value={header.waybill_info}
                                 onChange={e => setHeader({ ...header, waybill_info: e.target.value })}
-                                style={{ width: '150px' }}
                             />
-                            <label className="glass-btn" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 10px' }}>
-                                <Camera size={18} />
-                                <input type="file" onChange={e => setWaybillFile(e.target.files[0])} hidden />
-                            </label>
+                            <div style={{ position: 'relative' }}>
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={e => {
+                                        if (e.target.files) {
+                                            setFiles(prev => [...prev, ...Array.from(e.target.files)]);
+                                        }
+                                    }}
+                                    style={{ position: 'absolute', opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
+                                />
+                                <button className="glass-btn glass-btn-primary" style={{ height: '100%' }}>
+                                    <Camera size={18} /> Fotoğraflar ({files.length})
+                                </button>
+                            </div>
                         </div>
-                        {waybillFile && <span style={{ fontSize: '0.8rem', color: '#4caf50' }}>Fotoğraf Seçildi: {waybillFile.name}</span>}
+                        {/* Photo Previews */}
+                        {files.length > 0 && (
+                            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '5px' }}>
+                                {files.map((f, i) => (
+                                    <div key={i} style={{ position: 'relative', width: '50px', height: '50px', border: '1px solid #444', borderRadius: '4px', overflow: 'hidden' }}>
+                                        <img src={URL.createObjectURL(f)} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <button
+                                            onClick={() => setFiles(files.filter((_, idx) => idx !== i))}
+                                            style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(0,0,0,0.7)', color: 'white', border: 'none', cursor: 'pointer', padding: '2px' }}
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <button className="glass-btn" style={{ display: 'flex', gap: '5px', alignItems: 'center' }} onClick={() => setShowItemModal(true)}>

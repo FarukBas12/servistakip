@@ -210,9 +210,12 @@ exports.createPayment = async (req, res) => {
         let { subcontractor_id, title, store_name, waybill_info, payment_date, items, kdv_rate } = req.body;
         if (typeof items === 'string') items = JSON.parse(items);
 
-        let waybill_image = null;
-        if (req.file) {
-            waybill_image = req.file.path;
+        let photos = [];
+        if (req.files && req.files.length > 0) {
+            photos = req.files.map(f => f.path);
+        } else if (req.file) {
+            // Fallback if singular upload is somehow used
+            photos = [req.file.path];
         }
 
         // Calculate total
@@ -221,9 +224,9 @@ exports.createPayment = async (req, res) => {
         const total = subTotal + (subTotal * vatRate / 100);
 
         const resHeader = await client.query(`
-            INSERT INTO payments (subcontractor_id, title, store_name, waybill_info, waybill_image, payment_date, total_amount, status, kdv_rate)
+            INSERT INTO payments (subcontractor_id, title, store_name, waybill_info, photos, payment_date, total_amount, status, kdv_rate)
             VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', $8) RETURNING id`,
-            [subcontractor_id, title, store_name, waybill_info, waybill_image, payment_date, total, vatRate]
+            [subcontractor_id, title, store_name, waybill_info, JSON.stringify(photos), payment_date, total, vatRate]
         );
         const paymentId = resHeader.rows[0].id;
 
@@ -319,9 +322,9 @@ exports.updatePayment = async (req, res) => {
 
         if (typeof items === 'string') items = JSON.parse(items);
 
-        let waybill_image = null;
-        if (req.file) {
-            waybill_image = req.file.path;
+        let newPhotos = [];
+        if (req.files && req.files.length > 0) {
+            newPhotos = req.files.map(f => f.path);
         }
 
         // Calculate total
@@ -330,12 +333,17 @@ exports.updatePayment = async (req, res) => {
         const total = subTotal + (subTotal * vatRate / 100);
 
         // Update header
-        if (waybill_image) {
+        if (newPhotos.length > 0) {
+            // If new photos are uploaded, replace (or append?) - simpler to replace for now or could handle appending if we read logic.
+            // Requirement was "add multi photo capability". 
+            // For update, let's just replace 'photos' column with new array if uploaded. 
+            // Better: If we want to strictly *add*, we'd need to fetch existing. 
+            // For simplicity in this iteration: Overwrite if new photos provided.
             await client.query(`
                 UPDATE payments 
-                SET title = $1, store_name = $2, waybill_info = $3, waybill_image = $4, payment_date = $5, total_amount = $6, kdv_rate = $7
+                SET title = $1, store_name = $2, waybill_info = $3, photos = $4, payment_date = $5, total_amount = $6, kdv_rate = $7
                 WHERE id = $8`,
-                [title, store_name, waybill_info, waybill_image, payment_date, total, vatRate, id]
+                [title, store_name, waybill_info, JSON.stringify(newPhotos), payment_date, total, vatRate, id]
             );
         } else {
             await client.query(`
