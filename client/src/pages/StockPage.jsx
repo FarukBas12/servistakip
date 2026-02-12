@@ -292,9 +292,40 @@ const StockPage = () => {
                         display: none !important; /* Hide 'Critical' text to save space */
                     }
 
-                    /* Quantity Section - HIDDEN as per user request */
+                    /* Zebra Striping for easier reading/writing */
+                    .glass-panel:nth-of-type(even) {
+                        background-color: #f3f3f3 !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+
+                    /* Quantity Section - Transformed into Counting Box */
                     .glass-panel > div > div:nth-child(2) {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: flex-end !important;
+                        min-width: 100px !important;
+                        visibility: visible !important; /* Ensure container is visible */
+                    }
+
+                    /* Hide the System Quantity Number (Blind Count) */
+                    .glass-panel > div > div:nth-child(2) * {
                         display: none !important;
+                    }
+                    .glass-panel > div > div:nth-child(2) {
+                        font-size: 0 !important; /* Hide direct text nodes */
+                        color: transparent !important;
+                    }
+
+                    /* The Write-in Box */
+                    .glass-panel > div > div:nth-child(2)::after {
+                        content: "" !important;
+                        display: block !important;
+                        width: 80px !important;
+                        height: 25px !important;
+                        border: 2px solid #000 !important;
+                        visibility: visible !important;
+                        background: white !important; /* Ensure white box on grey row */
                     }
 
                     /* Hide Actions Column completely */
