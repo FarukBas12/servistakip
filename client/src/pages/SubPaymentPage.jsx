@@ -168,12 +168,17 @@ const SubPaymentPage = () => {
                                     multiple
                                     accept="image/*"
                                     onChange={e => {
-                                        if (e.target.files && e.target.files.length > 0) {
-                                            setFiles(prev => [...prev, ...Array.from(e.target.files)]);
-                                            e.target.value = '';
+                                        try {
+                                            if (e.target.files && e.target.files.length > 0) {
+                                                const newFiles = Array.from(e.target.files);
+                                                setFiles(prev => [...prev, ...newFiles]);
+                                                e.target.value = '';
+                                            }
+                                        } catch (err) {
+                                            alert("Dosya yükleme hatası: " + err.message);
                                         }
                                     }}
-                                    style={{ display: 'none' }}
+                                    style={{ position: 'absolute', opacity: 0, width: 1, height: 1, overflow: 'hidden', zIndex: -1 }}
                                 />
                                 <label
                                     htmlFor="file-upload-input"

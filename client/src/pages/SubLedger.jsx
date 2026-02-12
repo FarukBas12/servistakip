@@ -463,15 +463,20 @@ const SubLedger = () => {
                                             multiple
                                             accept="image/*"
                                             onChange={e => {
-                                                if (e.target.files && e.target.files.length > 0) {
-                                                    setEditPaymentData(prev => ({
-                                                        ...prev,
-                                                        new_photos: [...(prev.new_photos || []), ...Array.from(e.target.files)]
-                                                    }));
-                                                    e.target.value = ''; // Reset
+                                                try {
+                                                    if (e.target.files && e.target.files.length > 0) {
+                                                        const newFiles = Array.from(e.target.files);
+                                                        setEditPaymentData(prev => ({
+                                                            ...prev,
+                                                            new_photos: [...(prev.new_photos || []), ...newFiles]
+                                                        }));
+                                                        e.target.value = ''; // Reset
+                                                    }
+                                                } catch (err) {
+                                                    alert("Dosya yükleme hatası: " + err.message);
                                                 }
                                             }}
-                                            style={{ display: 'none' }}
+                                            style={{ position: 'absolute', opacity: 0, width: 1, height: 1, overflow: 'hidden', zIndex: -1 }}
                                         />
                                         <label
                                             htmlFor="edit-file-input"
