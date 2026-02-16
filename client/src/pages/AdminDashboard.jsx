@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, ShoppingBag, Cloud, Sun, CloudRain, CloudSnow, Wind, Calendar, Check, Bell, Activity, ClipboardList, Wrench, Wallet, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, ShoppingBag, Cloud, Sun, CloudRain, CloudSnow, Wind, Calendar, Check, Bell, Activity, ClipboardList, Wrench, Wallet, ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import api from '../utils/api';
 
 const AdminDashboard = () => {
@@ -19,6 +19,9 @@ const AdminDashboard = () => {
 
     // Calendar State
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState(null); // For modal
+    const [showNoteModal, setShowNoteModal] = useState(false);
+    const [newNote, setNewNote] = useState({ title: '', description: '' });
 
     useEffect(() => {
         fetchDashboardData();
@@ -70,6 +73,49 @@ const AdminDashboard = () => {
         try { const res = await api.get('/calendar'); setNotes(res.data.filter(n => !n.completed)); } catch (e) { }
     };
 
+    const handleDayClick = (day) => {
+        const dateStr = new Date(currentDate.getFullYear(), currentDate.getMonth(), day).toISOString().split('T')[0];
+        setSelectedDate(dateStr);
+        setNewNote({ title: '', description: '' });
+        setShowNoteModal(true);
+    };
+
+    const handleAddNote = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/calendar', {
+                ...newNote,
+                date: selectedDate,
+                type: 'note'
+            });
+            setShowNoteModal(false);
+            loadNotes();
+        } catch (err) { alert('Hata'); }
+    };
+
+    const handleDeleteNote = async (id) => {
+        if (!confirm('Silinsin mi?')) return;
+        try {
+            await api.delete(`/calendar/${id}`);
+            loadNotes();
+        } catch (err) { alert('Hata'); }
+    };
+
+    // Sorting & Coloring Logic
+    const sortedNotes = [...notes].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const getNoteColor = (dateStr) => {
+        const today = new Date();
+        const target = new Date(dateStr);
+        const diffTime = target - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) return '#666'; // Past
+        if (diffDays <= 3) return '#ef5350'; // Red (Urgent)
+        if (diffDays <= 7) return '#ffa726'; // Orange (Soon)
+        return '#66bb6a'; // Green (Safe)
+    };
+
     const getWeatherIcon = (code) => {
         if (code === 0) return <Sun size={24} color="#fbbf24" />;
         if (code >= 1 && code <= 3) return <Cloud size={24} color="#94a3b8" />;
@@ -98,14 +144,18 @@ const AdminDashboard = () => {
             const isToday = new Date().toISOString().split('T')[0] === dateStr;
 
             days.push(
-                <div key={i} style={{
+                <div key={i} onClick={() => handleDayClick(i)} style={{
                     height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     borderRadius: '8px', cursor: 'pointer', position: 'relative',
                     background: isToday ? 'rgba(33, 150, 243, 0.3)' : 'transparent',
                     border: isToday ? '1px solid rgba(33, 150, 243, 0.5)' : 'none',
                     color: isToday ? '#2196f3' : 'white',
-                    fontWeight: isToday ? 'bold' : 'normal'
-                }}>
+                    fontWeight: isToday ? 'bold' : 'normal',
+                    transition: 'background 0.2s'
+                }}
+                    onMouseEnter={e => !isToday && (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                    onMouseLeave={e => !isToday && (e.currentTarget.style.background = 'transparent')}
+                >
                     {i}
                     {hasNote && <div style={{ position: 'absolute', bottom: '5px', width: '4px', height: '4px', borderRadius: '50%', background: '#ffa726' }}></div>}
                 </div>
@@ -178,30 +228,35 @@ const AdminDashboard = () => {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '5px' }}>
                         {renderCalendar()}
                     </div>
+                    <p style={{ textAlign: 'center', fontSize: '0.8rem', color: '#666', marginTop: '15px' }}>Not eklemek için bir güne tıklayın.</p>
                 </div>
 
-                {/* NOTES WIDGET */}
+                {/* NOTES WIDGET - SORTED & COLORED */}
                 <div className="glass-panel" style={{ padding: '25px', borderRadius: '16px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                        <h3 style={{ margin: 0 }}>📌 Notlar</h3>
-                        <Link to="/admin/daily-report" className="glass-btn" style={{ fontSize: '0.8rem', padding: '5px 10px' }}>Düzenle</Link>
+                        <h3 style={{ margin: 0 }}>📌 Yaklaşan Notlar</h3>
+                        <Link to="/admin/daily-report" className="glass-btn" style={{ fontSize: '0.8rem', padding: '5px 10px' }}>Tümünü Gör</Link>
                     </div>
-                    {notes.length === 0 ? (
+                    {sortedNotes.length === 0 ? (
                         <p style={{ color: '#666', fontStyle: 'italic' }}>Hiç not bulunmuyor.</p>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
-                            {notes.slice(0, 5).map(n => (
-                                <div key={n.id} style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                    <div style={{ background: '#333', padding: '5px 10px', borderRadius: '6px', textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.7rem', color: '#888' }}>{new Date(n.date).toLocaleString('tr-TR', { month: 'short' })}</div>
-                                        <div style={{ fontWeight: 'bold', fontSize: '1rem' }}>{new Date(n.date).getDate()}</div>
+                            {sortedNotes.slice(0, 5).map(n => {
+                                const color = getNoteColor(n.date);
+                                return (
+                                    <div key={n.id} style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', display: 'flex', gap: '10px', alignItems: 'center', borderLeft: `3px solid ${color}` }}>
+                                        <div style={{ background: '#333', padding: '5px 10px', borderRadius: '6px', textAlign: 'center' }}>
+                                            <div style={{ fontSize: '0.7rem', color: '#888' }}>{new Date(n.date).toLocaleString('tr-TR', { month: 'short' })}</div>
+                                            <div style={{ fontWeight: 'bold', fontSize: '1rem', color }}>{new Date(n.date).getDate()}</div>
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ fontWeight: 500 }}>{n.title}</div>
+                                            {n.description && <div style={{ fontSize: '0.8rem', color: '#666', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>{n.description}</div>}
+                                        </div>
+                                        <button onClick={() => handleDeleteNote(n.id)} className="icon-btn" style={{ color: '#ef5350', opacity: 0.5 }}><Trash2 size={14} /></button>
                                     </div>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ fontWeight: 500 }}>{n.title}</div>
-                                        {n.description && <div style={{ fontSize: '0.8rem', color: '#666', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>{n.description}</div>}
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>
@@ -224,6 +279,21 @@ const AdminDashboard = () => {
                     ) : <p>Yükleniyor...</p>}
                 </div>
             </div>
+
+            {/* NEW NOTE MODAL */}
+            {showNoteModal && (
+                <div className="fade-in" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(5px)' }}>
+                    <div className="glass-panel" style={{ width: '90%', maxWidth: '400px', padding: '30px', background: '#1e1e1e', position: 'relative', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <button onClick={() => setShowNoteModal(false)} style={{ position: 'absolute', top: 15, right: 15, background: 'transparent', border: 'none', color: '#666', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+                        <h3 style={{ marginBottom: '20px' }}>Yeni Not Ekle ({new Date(selectedDate).toLocaleDateString('tr-TR')})</h3>
+                        <form onSubmit={handleAddNote} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <input className="glass-input" autoFocus placeholder="Başlık" value={newNote.title} onChange={e => setNewNote({ ...newNote, title: e.target.value })} required style={{ padding: '12px' }} />
+                            <textarea className="glass-input" rows="3" placeholder="Açıklama" value={newNote.description} onChange={e => setNewNote({ ...newNote, description: e.target.value })} style={{ padding: '12px' }} />
+                            <button type="submit" className="glass-btn primary-btn" style={{ padding: '12px' }}>Kaydet</button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
