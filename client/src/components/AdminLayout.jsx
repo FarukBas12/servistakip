@@ -19,8 +19,7 @@ import ProjectDashboard from '../pages/ProjectDashboard';
 import ProjectDetail from '../pages/ProjectDetail';
 import StockPage from '../pages/StockPage'; // NEW
 
-import Suppliers from '../pages/Suppliers'; // NEW
-import SettingsPage from '../pages/SettingsPage';
+import UsersPage from '../pages/Users';
 
 const AdminLayout = () => {
     return (
@@ -33,6 +32,7 @@ const AdminLayout = () => {
                     <Route path="/create-user" element={<UserCreate />} />
                     <Route path="/import-stores" element={<StoreImport />} />
                     <Route path="/pool" element={<TaskPool />} />
+                    <Route path="/users" element={<UsersPage />} />
                     <Route path="/map" element={<GlobalMap />} />
                     <Route path="/daily" element={<DailyTracking />} />
                     <Route path="/archive" element={<CompletedTasks />} />

@@ -10,6 +10,7 @@ const Sidebar = () => {
     const menuItems = [
         { path: '/admin', icon: <LayoutDashboard size={22} />, label: 'Panel', exact: true },
         { path: '/admin/pool', icon: <Inbox size={22} />, label: 'Servisler' },
+        { path: '/admin/users', icon: <Users size={22} />, label: 'Personeller' },
         { path: '/admin/suppliers', icon: <Truck size={22} />, label: 'Tedarikçiler' },
         { path: '/admin/subs', icon: <Users size={22} />, label: 'Taşeronlar' },
         ...(!isTech ? [{ path: '/admin/projects', icon: <FolderOpen size={22} />, label: 'Projeler' }] : []),
