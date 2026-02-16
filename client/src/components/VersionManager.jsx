@@ -3,7 +3,7 @@ import { Activity } from 'lucide-react';
 
 const VersionManager = () => {
     // AUTO-UPDATE LOGIC
-    const APP_VERSION = '2.0.6'; // Client Version
+    const APP_VERSION = '2.0.7'; // Client Version
     const [updateAvailable, setUpdateAvailable] = useState(false);
 
     useEffect(() => {

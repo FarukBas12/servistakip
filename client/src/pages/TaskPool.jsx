@@ -309,7 +309,7 @@ const TaskPool = () => {
                         <button onClick={() => navigate('/admin/create-task')} className="glass-btn full-gradient-btn" style={{ padding: '10px 20px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <Plus size={20} /> Yeni Görev
                         </button>
-                        <button onClick={() => navigate('/admin/daily')} className="glass-btn" style={{ padding: '10px 20px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <button onClick={() => navigate('/admin/daily-report')} className="glass-btn" style={{ padding: '10px 20px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
                             <Activity size={20} /> Günlük Plan
                         </button>
                     </div>
