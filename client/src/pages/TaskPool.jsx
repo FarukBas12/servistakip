@@ -359,6 +359,43 @@ const TaskPool = () => {
                 </div>
             </div>
 
+            {/* DAILY PLAN SUMMARY - "Günlük Plan Alanı" */}
+            {activeTab === 'active' && (
+                <div className="glass-panel" style={{ padding: '20px', marginBottom: '25px', borderRadius: '16px', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                    <h3 style={{ margin: '0 0 15px 0', fontSize: '1.2rem', color: '#60a5fa', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <ClipboardList size={20} /> Günlük Plan (Atanan İşler)
+                    </h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
+                        {Object.entries(tasks.filter(t => t.assigned_users?.length > 0).reduce((acc, task) => {
+                            task.assigned_users.forEach(u => {
+                                if (!acc[u.username]) acc[u.username] = [];
+                                acc[u.username].push(task);
+                            });
+                            return acc;
+                        }, {})).map(([username, userTasks]) => (
+                            <div key={username} style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '12px' }}>
+                                <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <div className="initials-avatar" style={{ width: '24px', height: '24px', fontSize: '0.7rem', backgroundColor: stringToColor(username) }}>{getInitials(username)}</div>
+                                    {username}
+                                </div>
+                                <div style={{ fontSize: '0.85rem', color: '#aaa' }}>
+                                    {userTasks.length} Görev Atandı
+                                    <ul style={{ margin: '5px 0 0 15px', padding: 0, color: '#666' }}>
+                                        {userTasks.slice(0, 3).map(t => <li key={t.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.title}</li>)}
+                                        {userTasks.length > 3 && <li>+ {userTasks.length - 3} diğer</li>}
+                                    </ul>
+                                </div>
+                            </div>
+                        ))}
+                        {Object.keys(tasks.filter(t => t.assigned_users?.length > 0).reduce((acc, task) => {
+                            task.assigned_users.forEach(u => { if (!acc[u.username]) acc[u.username] = true; }); return acc;
+                        }, {})).length === 0 && (
+                                <p style={{ color: '#666', fontStyle: 'italic' }}>Henüz atama yapılmamış.</p>
+                            )}
+                    </div>
+                </div>
+            )}
+
             {loading ? (
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '50px' }}><div className="spinner"></div></div>
             ) : (
@@ -461,33 +498,37 @@ const TaskPool = () => {
                                     </div>
 
                                     {/* RIGHT: Actions */}
-                                    <div style={{ display: 'flex', items: 'center', gap: '10px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative', zIndex: 50 }}>
+                                        {/* WHATSAPP BUTTON */}
                                         <button
-                                            onClick={() => handleWhatsAppShare(task)}
-                                            className="glass-btn icon-btn-hover"
+                                            onClick={(e) => { e.stopPropagation(); handleWhatsAppShare(task); }}
                                             style={{
-                                                width: '42px', height: '42px', borderRadius: '12px',
-                                                background: 'rgba(37, 211, 102, 0.1)', color: '#25D366',
+                                                width: '40px', height: '40px', borderRadius: '10px',
+                                                background: '#25D366', color: 'white',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                border: '1px solid rgba(37, 211, 102, 0.2)'
+                                                border: '2px solid rgba(255,255,255,0.2)',
+                                                boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+                                                cursor: 'pointer', zIndex: 51
                                             }}
                                             title="WhatsApp"
                                         >
-                                            <MessageCircle size={22} />
+                                            <MessageCircle size={20} color="white" strokeWidth={2.5} />
                                         </button>
 
+                                        {/* ASSIGN BUTTON */}
                                         <button
-                                            onClick={() => openAssignModal(task)}
-                                            className="glass-btn icon-btn-hover"
+                                            onClick={(e) => { e.stopPropagation(); openAssignModal(task); }}
                                             style={{
-                                                width: '42px', height: '42px', borderRadius: '12px',
-                                                background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8',
+                                                width: '40px', height: '40px', borderRadius: '10px',
+                                                background: '#0ea5e9', color: 'white',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                border: '1px solid rgba(56, 189, 248, 0.2)'
+                                                border: '2px solid rgba(255,255,255,0.2)',
+                                                boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+                                                cursor: 'pointer', zIndex: 51
                                             }}
                                             title="Personel Ata"
                                         >
-                                            <UserPlus size={22} />
+                                            <UserPlus size={20} color="white" strokeWidth={2.5} />
                                         </button>
 
                                         {/* MENU */}

@@ -77,7 +77,7 @@ app.get('/api/health-check', async (req, res) => {
         }
         res.json({
             status: 'online',
-            version: '2.0.4',
+            version: '2.0.5',
             dbConnected: true,
             tableExists: !!tableCheck.rows[0].table_exists,
             rowCount: rowCount,
@@ -121,7 +121,7 @@ app.use('/api/calendar', require('./routes/calendar')); // NEW: Calendar Notes R
 
 // Version Endpoint for Auto-Update
 app.get('/api/version', (req, res) => {
-    res.json({ version: '2.0.4' });
+    res.json({ version: '2.0.5' });
 });
 
 // The "catchall" handler: for any request that doesn't

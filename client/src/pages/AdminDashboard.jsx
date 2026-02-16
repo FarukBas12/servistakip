@@ -190,13 +190,7 @@ const AdminDashboard = () => {
                         <div style={{ color: '#888', fontSize: '0.9rem' }}>Bekleyen İşler</div>
                     </div>
                 </div>
-                <div className="glass-panel" style={{ padding: '20px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '15px', background: 'linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(74, 222, 128, 0.02))', border: '1px solid rgba(74, 222, 128, 0.2)' }}>
-                    <div style={{ padding: '12px', borderRadius: '12px', background: 'rgba(74, 222, 128, 0.2)', color: '#4ade80' }}><Wallet size={24} /></div>
-                    <div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>₺{stats.totalStock.toLocaleString('tr-TR')}</div>
-                        <div style={{ color: '#888', fontSize: '0.9rem' }}>Tahmini Stok</div>
-                    </div>
-                </div>
+                {/* Stock Widget Removed */}
                 <div className="glass-panel" style={{ padding: '20px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '15px', background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(168, 85, 247, 0.02))', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
                     <div style={{ padding: '12px', borderRadius: '12px', background: 'rgba(168, 85, 247, 0.2)', color: '#a855f7' }}><Users size={24} /></div>
                     <div>
