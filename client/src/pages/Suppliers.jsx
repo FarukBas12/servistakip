@@ -211,6 +211,9 @@ const Suppliers = () => {
                                 <div style={{
                                     width: '45px',
                                     height: '45px',
+                                    minWidth: '45px',
+                                    minHeight: '45px',
+                                    flexShrink: 0,
                                     borderRadius: '12px',
                                     background: stringToColor(sup.company_name),
                                     display: 'flex',
