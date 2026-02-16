@@ -18,6 +18,8 @@ import DailyPlanReport from '../pages/DailyPlanReport';
 import ProjectDashboard from '../pages/ProjectDashboard';
 import ProjectDetail from '../pages/ProjectDetail';
 import StockPage from '../pages/StockPage'; // NEW
+import Suppliers from '../pages/Suppliers';
+import SettingsPage from '../pages/SettingsPage';
 
 import UsersPage from '../pages/Users';
 
