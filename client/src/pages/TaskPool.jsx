@@ -336,7 +336,8 @@ const TaskPool = () => {
                             flexWrap: 'wrap',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            gap: '15px'
+                            gap: '15px',
+                            zIndex: menuOpenId === task.id ? 100 : 1 // Fix for dropdown stacking
                         }}>
                             {/* CENTER: Title & Address */}
                             <div style={{ flex: 1, minWidth: '250px' }}>
