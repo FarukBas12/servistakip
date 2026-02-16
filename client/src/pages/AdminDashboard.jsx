@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, ShoppingBag, Cloud, Sun, CloudRain, CloudSnow, Wind, Calendar, Check, Bell, Activity, ClipboardList, Wrench, Wallet } from 'lucide-react';
+import { Users, ShoppingBag, Cloud, Sun, CloudRain, CloudSnow, Wind, Calendar, Check, Bell, Activity, ClipboardList, Wrench, Wallet, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../utils/api';
 
 const AdminDashboard = () => {
@@ -12,10 +12,13 @@ const AdminDashboard = () => {
         technicians: 0
     });
 
-    // Weather & Notes State (Simplified for Dashboard)
+    // Weather & Notes State
     const [weather, setWeather] = useState(null);
     const [cityName, setCityName] = useState('..');
     const [notes, setNotes] = useState([]);
+
+    // Calendar State
+    const [currentDate, setCurrentDate] = useState(new Date());
 
     useEffect(() => {
         fetchDashboardData();
@@ -49,10 +52,7 @@ const AdminDashboard = () => {
         } catch (err) { console.error(err); setLoading(false); }
     };
 
-    const fetchWeather = async () => { /* Keeps existing logic simplified */
-        // ... (Assuming standard logic or mock for brevity in this rewrite)
-        // For now, let's just use a simple placeholder logic or copy relevant parts if needed.
-        // Let's assume weather fetch works similarly to before but cleaner.
+    const fetchWeather = async () => {
         try {
             const ipRes = await fetch('https://ipapi.co/json/');
             const ipData = await ipRes.json();
@@ -67,7 +67,7 @@ const AdminDashboard = () => {
     };
 
     const loadNotes = async () => {
-        try { const res = await api.get('/calendar'); setNotes(res.data.filter(n => !n.completed).slice(0, 5)); } catch (e) { }
+        try { const res = await api.get('/calendar'); setNotes(res.data.filter(n => !n.completed)); } catch (e) { }
     };
 
     const getWeatherIcon = (code) => {
@@ -76,6 +76,46 @@ const AdminDashboard = () => {
         if (code >= 51) return <CloudRain size={24} color="#60a5fa" />;
         return <Cloud size={24} color="#94a3b8" />;
     };
+
+    // Calendar Helpers
+    const getDaysInMonth = (date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    const getFirstDayOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay(); // 0 = Sun
+
+    const renderCalendar = () => {
+        const daysInMonth = getDaysInMonth(currentDate);
+        const firstDay = getFirstDayOfMonth(currentDate);
+        const startDay = firstDay === 0 ? 6 : firstDay - 1; // Adjust for Monday start
+
+        const days = [];
+        // Empty slots
+        for (let i = 0; i < startDay; i++) {
+            days.push(<div key={`empty-${i}`} style={{ height: '40px' }}></div>);
+        }
+        // Days
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dateStr = new Date(currentDate.getFullYear(), currentDate.getMonth(), i).toISOString().split('T')[0];
+            const hasNote = notes.some(n => n.date && n.date.startsWith(dateStr));
+            const isToday = new Date().toISOString().split('T')[0] === dateStr;
+
+            days.push(
+                <div key={i} style={{
+                    height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    borderRadius: '8px', cursor: 'pointer', position: 'relative',
+                    background: isToday ? 'rgba(33, 150, 243, 0.3)' : 'transparent',
+                    border: isToday ? '1px solid rgba(33, 150, 243, 0.5)' : 'none',
+                    color: isToday ? '#2196f3' : 'white',
+                    fontWeight: isToday ? 'bold' : 'normal'
+                }}>
+                    {i}
+                    {hasNote && <div style={{ position: 'absolute', bottom: '5px', width: '4px', height: '4px', borderRadius: '50%', background: '#ffa726' }}></div>}
+                </div>
+            );
+        }
+        return days;
+    };
+
+    const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
 
     return (
         <div className="dashboard fade-in">
@@ -93,7 +133,6 @@ const AdminDashboard = () => {
                         <div style={{ color: '#888', fontSize: '0.9rem' }}>Sahadaki İşler</div>
                     </div>
                 </div>
-
                 <div className="glass-panel" style={{ padding: '20px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '15px', background: 'linear-gradient(135deg, rgba(255, 167, 38, 0.1), rgba(255, 167, 38, 0.02))', border: '1px solid rgba(255, 167, 38, 0.2)' }}>
                     <div style={{ padding: '12px', borderRadius: '12px', background: 'rgba(255, 167, 38, 0.2)', color: '#ffa726' }}><ClipboardList size={24} /></div>
                     <div>
@@ -101,7 +140,6 @@ const AdminDashboard = () => {
                         <div style={{ color: '#888', fontSize: '0.9rem' }}>Bekleyen İşler</div>
                     </div>
                 </div>
-
                 <div className="glass-panel" style={{ padding: '20px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '15px', background: 'linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(74, 222, 128, 0.02))', border: '1px solid rgba(74, 222, 128, 0.2)' }}>
                     <div style={{ padding: '12px', borderRadius: '12px', background: 'rgba(74, 222, 128, 0.2)', color: '#4ade80' }}><Wallet size={24} /></div>
                     <div>
@@ -109,7 +147,6 @@ const AdminDashboard = () => {
                         <div style={{ color: '#888', fontSize: '0.9rem' }}>Tahmini Stok</div>
                     </div>
                 </div>
-
                 <div className="glass-panel" style={{ padding: '20px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '15px', background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(168, 85, 247, 0.02))', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
                     <div style={{ padding: '12px', borderRadius: '12px', background: 'rgba(168, 85, 247, 0.2)', color: '#a855f7' }}><Users size={24} /></div>
                     <div>
@@ -120,27 +157,48 @@ const AdminDashboard = () => {
             </div>
 
             {/* MAIN CONTENT GRID */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '20px' }}>
 
-                {/* CALENDAR / NOTES WIDGET */}
+                {/* CALENDAR WIDGET */}
+                <div className="glass-panel" style={{ padding: '25px', borderRadius: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <h3 style={{ margin: 0 }}>📅 Takvim</h3>
+                        <div style={{ display: 'flex', gap: '5px' }}>
+                            <button onClick={prevMonth} className="icon-btn"><ChevronLeft size={20} /></button>
+                            <span style={{ fontWeight: 'bold', minWidth: '100px', textAlign: 'center' }}>
+                                {currentDate.toLocaleString('tr-TR', { month: 'long', year: 'numeric' })}
+                            </span>
+                            <button onClick={nextMonth} className="icon-btn"><ChevronRight size={20} /></button>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '5px', textAlign: 'center', fontSize: '0.8rem', color: '#888', marginBottom: '10px' }}>
+                        <div>Pzt</div><div>Sal</div><div>Çar</div><div>Per</div><div>Cum</div><div>Cmt</div><div>Paz</div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '5px' }}>
+                        {renderCalendar()}
+                    </div>
+                </div>
+
+                {/* NOTES WIDGET */}
                 <div className="glass-panel" style={{ padding: '25px', borderRadius: '16px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                        <h3 style={{ margin: 0 }}>📅 Yaklaşan Notlar</h3>
-                        <Link to="/admin/daily-report" className="glass-btn" style={{ fontSize: '0.8rem', padding: '5px 10px' }}>Tümünü Gör</Link>
+                        <h3 style={{ margin: 0 }}>📌 Notlar</h3>
+                        <Link to="/admin/daily-report" className="glass-btn" style={{ fontSize: '0.8rem', padding: '5px 10px' }}>Düzenle</Link>
                     </div>
                     {notes.length === 0 ? (
                         <p style={{ color: '#666', fontStyle: 'italic' }}>Hiç not bulunmuyor.</p>
                     ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            {notes.map(n => (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
+                            {notes.slice(0, 5).map(n => (
                                 <div key={n.id} style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', display: 'flex', gap: '10px', alignItems: 'center' }}>
                                     <div style={{ background: '#333', padding: '5px 10px', borderRadius: '6px', textAlign: 'center' }}>
                                         <div style={{ fontSize: '0.7rem', color: '#888' }}>{new Date(n.date).toLocaleString('tr-TR', { month: 'short' })}</div>
                                         <div style={{ fontWeight: 'bold', fontSize: '1rem' }}>{new Date(n.date).getDate()}</div>
                                     </div>
-                                    <div>
+                                    <div style={{ flex: 1 }}>
                                         <div style={{ fontWeight: 500 }}>{n.title}</div>
-                                        {n.description && <div style={{ fontSize: '0.8rem', color: '#666' }}>{n.description}</div>}
+                                        {n.description && <div style={{ fontSize: '0.8rem', color: '#666', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>{n.description}</div>}
                                     </div>
                                 </div>
                             ))}

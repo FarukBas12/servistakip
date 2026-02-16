@@ -491,10 +491,12 @@ const TaskPool = () => {
                                         <div style={{ position: 'relative' }}>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === task.id ? null : task.id); }}
-                                                className="glass-btn"
                                                 style={{
                                                     width: '42px', height: '42px', borderRadius: '12px',
-                                                    color: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                    background: 'rgba(255, 255, 255, 0.05)', color: '#ccc',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                    cursor: 'pointer', transition: 'all 0.2s'
                                                 }}
                                             >
                                                 <MoreVertical size={22} />
