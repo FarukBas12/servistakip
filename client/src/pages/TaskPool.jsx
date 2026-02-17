@@ -273,137 +273,85 @@ const TaskPool = () => {
 
     return (
         <div className="dashboard fade-in">
-            {/* INLINE STYLES FOR ANIMATIONS */}
-            <style>{`
-                .task-card {
-                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                    border: 1px solid rgba(255,255,255,0.05);
-                }
-                .task-card:hover {
-                    transform: translateY(-3px);
-                    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-                    border-color: rgba(255,255,255,0.1);
-                }
-                .status-pill {
-                    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                    backdrop-filter: blur(4px);
-                }
-                .avatar-stack {
-                    display: flex;
-                }
-                .avatar-stack img, .avatar-stack .initials-avatar {
-                    width: 30px;
-                    height: 30px;
-                    border-radius: 50%;
-                    border: 2px solid #1e1e1e;
-                    margin-left: -10px;
-                    transition: transform 0.2s;
-                }
-                .avatar-stack .initials-avatar {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 0.7rem;
-                    font-weight: bold;
-                    color: white;
-                }
-                .avatar-stack > *:first-child {
-                    margin-left: 0;
-                }
-                .avatar-stack > *:hover {
-                    transform: translateY(-2px);
-                    z-index: 10;
-                }
-            `}</style>
-
 
             {/* HEADER */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                    <button onClick={() => navigate('/admin')} className="glass-btn" style={{ borderRadius: '12px' }}>&larr;</button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                    <button onClick={() => navigate('/admin')} className="glass-btn" style={{ borderRadius: '12px', padding: '10px 14px' }}>&larr;</button>
                     <div>
-                        <h2 style={{ margin: 0, fontSize: '1.8rem', background: 'linear-gradient(90deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>İş Yönetimi</h2>
-                        <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>Servis takibi ve teknisyen atamaları</p>
+                        <h2 style={{ margin: 0, fontSize: '1.8rem', background: 'linear-gradient(90deg, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>İş Yönetimi</h2>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>Servis takibi ve teknisyen atamaları</p>
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px' }}>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        <button onClick={() => navigate('/admin/create-task')} className="glass-btn full-gradient-btn" style={{ padding: '10px 20px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Plus size={20} /> Yeni Görev
-                        </button>
-                        <button onClick={() => navigate('/admin/daily-report')} className="glass-btn" style={{ padding: '10px 20px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                            <Activity size={20} /> Günlük Plan
-                        </button>
-                    </div>
-                    <div className="glass-panel" style={{ padding: '5px', display: 'flex', gap: '5px', borderRadius: '12px' }}>
-                        <button onClick={() => navigate('/admin/map')} className="icon-btn" title="Harita"><Map size={20} /></button>
-                        <button onClick={() => navigate('/admin/archive')} className="icon-btn" title="Arşiv"><FolderArchive size={20} /></button>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <button onClick={() => navigate('/admin/create-task')} className="glass-btn glass-btn-primary" style={{ padding: '10px 20px', fontWeight: '600' }}>
+                        <Plus size={18} /> Yeni Görev
+                    </button>
+                    <button onClick={() => navigate('/admin/daily-report')} className="glass-btn" style={{ padding: '10px 20px', fontWeight: '600' }}>
+                        <Activity size={18} /> Günlük Plan
+                    </button>
+                    <div style={{ display: 'flex', gap: '4px', background: 'rgba(255,255,255,0.03)', padding: '4px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                        <button onClick={() => navigate('/admin/map')} className="icon-btn" title="Harita"><Map size={18} /></button>
+                        <button onClick={() => navigate('/admin/archive')} className="icon-btn" title="Arşiv"><FolderArchive size={18} /></button>
                     </div>
                 </div>
             </div>
 
             {/* TAB & FILTER BAR */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '20px' }}>
-                {/* TABS */}
-                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '5px', borderRadius: '16px', display: 'flex' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+                <div className="tp-tabs">
                     <button
                         onClick={() => setActiveTab('pool')}
-                        style={{
-                            background: activeTab === 'pool' ? 'rgba(255,255,255,0.1)' : 'transparent',
-                            color: activeTab === 'pool' ? '#fff' : '#888',
-                            border: 'none', borderRadius: '12px', padding: '10px 25px', cursor: 'pointer', fontWeight: '600', transition: 'all 0.2s'
-                        }}
+                        className={`tp-tab ${activeTab === 'pool' ? 'tp-tab--active' : ''}`}
                     >
-                        Havuz <span style={{ fontSize: '0.8rem', opacity: 0.7, marginLeft: '5px' }}>({tasks.filter(t => !t.assigned_users?.length).length})</span>
+                        Havuz <span className="tp-tab-count">({tasks.filter(t => !t.assigned_users?.length).length})</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('active')}
-                        style={{
-                            background: activeTab === 'active' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
-                            color: activeTab === 'active' ? '#60a5fa' : '#888',
-                            border: 'none', borderRadius: '12px', padding: '10px 25px', cursor: 'pointer', fontWeight: '600', transition: 'all 0.2s'
-                        }}
+                        className={`tp-tab ${activeTab === 'active' ? 'tp-tab--active-blue' : ''}`}
                     >
-                        Saha <span style={{ fontSize: '0.8rem', opacity: 0.7, marginLeft: '5px' }}>({tasks.filter(t => t.assigned_users?.length > 0).length})</span>
+                        Saha <span className="tp-tab-count">({tasks.filter(t => t.assigned_users?.length > 0).length})</span>
                     </button>
                 </div>
 
-                {/* FILTER */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <select
-                        className="glass-input"
-                        value={selectedRegion}
-                        onChange={e => setSelectedRegion(e.target.value)}
-                        style={{ padding: '10px 15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', minWidth: '180px' }}
-                    >
-                        <option value="Hepsi">Tüm Bölgeler</option>
-                        {regions.map(r => <option key={r} value={r}>{r}</option>)}
-                    </select>
-                </div>
+                <select
+                    className="glass-input"
+                    value={selectedRegion}
+                    onChange={e => setSelectedRegion(e.target.value)}
+                    style={{ padding: '10px 16px', borderRadius: '12px', minWidth: '180px', width: 'auto' }}
+                >
+                    <option value="Hepsi">Tüm Bölgeler</option>
+                    {regions.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
             </div>
 
-            {/* DAILY PLAN SUMMARY - "Günlük Plan Alanı" */}
+            {/* DAILY PLAN SUMMARY */}
             {activeTab === 'active' && (
-                <div className="glass-panel" style={{ padding: '20px', marginBottom: '25px', borderRadius: '16px', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
-                    <h3 style={{ margin: '0 0 15px 0', fontSize: '1.2rem', color: '#60a5fa', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div className="tp-daily-plan">
+                    <h3>
                         <ClipboardList size={20} /> Günlük Plan (Atanan İşler)
                     </h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
                         {dailyPlanGroups.length === 0 ? (
                             <p style={{ color: '#666', fontStyle: 'italic', gridColumn: '1 / -1' }}>Henüz atama yapılmamış.</p>
                         ) : (
                             dailyPlanGroups.map(({ username, tasks: userTasks }) => (
-                                <div key={username} style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '12px' }}>
-                                    <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <div className="initials-avatar" style={{ width: '24px', height: '24px', fontSize: '0.7rem', backgroundColor: stringToColor(username || 'U') }}>{getInitials(username || 'U')}</div>
+                                <div key={username} className="tp-daily-user">
+                                    <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div className="tp-initials" style={{ width: '28px', height: '28px', borderRadius: '50%', fontSize: '0.7rem', backgroundColor: stringToColor(username || 'U') }}>{getInitials(username || 'U')}</div>
                                         {username}
                                     </div>
-                                    <div style={{ fontSize: '0.85rem', color: '#aaa' }}>
+                                    <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
                                         {userTasks.length} Görev Atandı
-                                        <ul style={{ margin: '5px 0 0 15px', padding: 0, color: '#666' }}>
-                                            {userTasks.slice(0, 3).map(t => <li key={t.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.title}</li>)}
-                                            {userTasks.length > 3 && <li>+ {userTasks.length - 3} diğer</li>}
+                                        <ul style={{ margin: '6px 0 0 16px', padding: 0, color: '#64748b', listStyle: 'none' }}>
+                                            {userTasks.slice(0, 3).map(t => (
+                                                <li key={t.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '2px 0', position: 'relative', paddingLeft: '12px' }}>
+                                                    <span style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: '4px', height: '4px', borderRadius: '50%', background: '#818cf8' }} />
+                                                    {t.title}
+                                                </li>
+                                            ))}
+                                            {userTasks.length > 3 && <li style={{ paddingLeft: '12px', color: '#4b5563' }}>+ {userTasks.length - 3} diğer</li>}
                                         </ul>
                                     </div>
                                 </div>
@@ -412,177 +360,119 @@ const TaskPool = () => {
                     </div>
                 </div>
             )}
+
+            {/* TASK LIST */}
             {loading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', padding: '50px' }}><div className="spinner"></div></div>
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '60px' }}><div className="spinner"></div></div>
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {filteredTasks.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '60px', color: '#666', border: '2px dashed rgba(255,255,255,0.05)', borderRadius: '20px' }}>
-                            <FolderArchive size={48} style={{ opacity: 0.2, marginBottom: '20px' }} />
+                        <div className="tp-empty">
+                            <FolderArchive size={48} />
                             <p>Bu filtrede gösterilecek görev bulunamadı.</p>
                         </div>
                     ) : (
                         filteredTasks.map(task => {
                             const isSahada = task.status === 'in_progress';
-                            const gradientBg = isSahada
-                                ? 'linear-gradient(145deg, rgba(33, 150, 243, 0.15) 0%, rgba(33, 150, 243, 0.02) 100%)'
-                                : 'linear-gradient(145deg, rgba(255, 167, 38, 0.15) 0%, rgba(255, 167, 38, 0.02) 100%)';
-                            const borderColor = isSahada ? 'rgba(33, 150, 243, 0.2)' : 'rgba(255, 167, 38, 0.2)';
+                            const cardClass = `tp-card ${isSahada ? 'tp-card--active' : 'tp-card--waiting'}`;
 
                             return (
-                                <div key={task.id} className="glass-panel task-card" style={{
-                                    padding: '20px',
-                                    position: 'relative',
-                                    background: gradientBg,
-                                    border: `1px solid ${borderColor}`,
-                                    borderRadius: '16px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    gap: '20px',
-                                    zIndex: menuOpenId === task.id ? 100 : 1
-                                }}>
+                                <div key={task.id} className={cardClass} style={{ zIndex: menuOpenId === task.id ? 100 : 1 }}>
                                     {/* LEFT CONTENT */}
-                                    <div style={{ flex: 1, minWidth: '300px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                                            {/* Status Badge */}
-                                            <span className="status-pill" style={{
-                                                background: isSahada ? '#2196f3' : '#ffa726',
-                                                color: isSahada ? 'white' : 'black',
-                                                padding: '4px 12px',
-                                                borderRadius: '20px',
-                                                fontSize: '0.75rem',
-                                                fontWeight: '800',
-                                                letterSpacing: '0.5px',
-                                                textTransform: 'uppercase',
-                                                boxShadow: isSahada ? '0 0 10px rgba(33, 150, 243, 0.4)' : '0 0 10px rgba(255, 167, 38, 0.4)'
-                                            }}>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                                            <span className={`tp-status ${isSahada ? 'tp-status--active' : 'tp-status--waiting'}`}>
                                                 {isSahada ? 'SAHADA' : 'BEKLİYOR'}
                                             </span>
 
                                             {task.region && (
-                                                <span style={{ fontSize: '0.8rem', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                    <MapPin size={14} /> {task.region}
+                                                <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    <MapPin size={13} /> {task.region}
                                                 </span>
                                             )}
                                         </div>
 
-                                        <h3 style={{ margin: '0 0 8px 0', fontSize: '1.2rem', fontWeight: '700', color: '#fff', letterSpacing: '-0.5px' }}>
+                                        <h3 style={{ margin: '0 0 6px 0', fontSize: '1.15rem', fontWeight: '700', color: '#f1f5f9', letterSpacing: '-0.3px', background: 'none', WebkitBackgroundClip: 'unset', WebkitTextFillColor: 'unset' }}>
                                             {task.title}
                                         </h3>
 
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#aaa', fontSize: '0.95rem' }}>
-                                            <MapPin size={16} color="#666" />
-                                            {task.address}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#94a3b8', fontSize: '0.9rem' }}>
+                                            <MapPin size={14} color="#475569" />
+                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.address}</span>
                                         </div>
 
-                                        {/* Verification Alert */}
                                         {task.source === 'email' && !task.verified_by && (
-                                            <div style={{ marginTop: '12px', display: 'inline-flex' }}>
-                                                <div className="blinking-badge" style={{
-                                                    background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5',
-                                                    padding: '6px 12px', borderRadius: '8px',
-                                                    fontSize: '0.8rem', fontWeight: '600',
-                                                    display: 'flex', alignItems: 'center', gap: '6px',
-                                                    border: '1px solid rgba(239, 68, 68, 0.3)'
-                                                }}>
-                                                    <AlertTriangle size={14} /> KONTROL BEKLİYOR
-                                                </div>
+                                            <div style={{ marginTop: '10px' }}>
+                                                <span className="tp-verify-badge">
+                                                    <AlertTriangle size={13} /> KONTROL BEKLİYOR
+                                                </span>
                                             </div>
                                         )}
                                     </div>
 
                                     {/* MIDDLE: Assignees & Date */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', minWidth: '120px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', flexShrink: 0 }}>
                                         {task.assigned_users && task.assigned_users.length > 0 ? (
-                                            <div className="avatar-stack" title={task.assigned_users.map(u => u?.username).join(', ')}>
+                                            <div className="tp-avatar-stack" title={task.assigned_users.map(u => u?.username).join(', ')}>
                                                 {task.assigned_users.map(u => {
                                                     if (!u) return null;
                                                     return u.photo_url ?
                                                         <img key={u.id} src={u.photo_url} alt={u.username} /> :
-                                                        <div key={u.id} className="initials-avatar" style={{ backgroundColor: stringToColor(u.username || '?') }}>{getInitials(u.username)}</div>;
+                                                        <div key={u.id} className="tp-initials" style={{ backgroundColor: stringToColor(u.username || '?') }}>{getInitials(u.username)}</div>;
                                                 })}
                                             </div>
                                         ) : (
-                                            <span style={{ fontSize: '0.85rem', color: '#666', fontStyle: 'italic' }}>Atama Yok</span>
+                                            <span style={{ fontSize: '0.82rem', color: '#475569', fontStyle: 'italic' }}>Atama Yok</span>
                                         )}
 
                                         {task.due_date && (
-                                            <div style={{ fontSize: '0.8rem', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <Clock size={14} /> {new Date(task.due_date).toLocaleDateString('tr-TR')}
+                                            <div style={{ fontSize: '0.78rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <Clock size={13} /> {new Date(task.due_date).toLocaleDateString('tr-TR')}
                                             </div>
                                         )}
                                     </div>
 
                                     {/* RIGHT: Actions */}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative', zIndex: 50 }}>
-                                        {/* WHATSAPP BUTTON */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative', flexShrink: 0 }}>
                                         <button
+                                            className="tp-action-btn tp-action-btn--whatsapp"
                                             onClick={(e) => { e.stopPropagation(); handleWhatsAppShare(task); }}
-                                            style={{
-                                                width: '40px', height: '40px', borderRadius: '10px',
-                                                background: '#25D366', color: 'white',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                border: '2px solid rgba(255,255,255,0.2)',
-                                                boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
-                                                cursor: 'pointer', zIndex: 51
-                                            }}
                                             title="WhatsApp"
                                         >
-                                            <MessageCircle size={20} color="white" strokeWidth={2.5} />
+                                            <MessageCircle size={18} strokeWidth={2.5} />
                                         </button>
 
-                                        {/* ASSIGN BUTTON */}
                                         <button
+                                            className="tp-action-btn tp-action-btn--assign"
                                             onClick={(e) => { e.stopPropagation(); openAssignModal(task); }}
-                                            style={{
-                                                width: '40px', height: '40px', borderRadius: '10px',
-                                                background: '#0ea5e9', color: 'white',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                border: '2px solid rgba(255,255,255,0.2)',
-                                                boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
-                                                cursor: 'pointer', zIndex: 51
-                                            }}
                                             title="Personel Ata"
                                         >
-                                            <UserPlus size={20} color="white" strokeWidth={2.5} />
+                                            <UserPlus size={18} strokeWidth={2.5} />
                                         </button>
 
-                                        {/* MENU */}
                                         <div style={{ position: 'relative' }}>
                                             <button
+                                                className="tp-action-btn tp-action-btn--menu"
                                                 onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === task.id ? null : task.id); }}
-                                                style={{
-                                                    width: '42px', height: '42px', borderRadius: '12px',
-                                                    background: 'rgba(255, 255, 255, 0.05)', color: '#ccc',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                                                    cursor: 'pointer', transition: 'all 0.2s'
-                                                }}
                                             >
-                                                <MoreVertical size={22} />
+                                                <MoreVertical size={18} />
                                             </button>
 
                                             {menuOpenId === task.id && (
-                                                <div className="fade-in" style={{
-                                                    position: 'absolute', top: '110%', right: 0,
-                                                    background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px',
-                                                    display: 'flex', flexDirection: 'column', minWidth: '180px',
-                                                    boxShadow: '0 10px 40px rgba(0,0,0,0.5)', overflow: 'hidden', zIndex: 999
-                                                }}>
-                                                    <button onClick={() => openViewModal(task)} className="menu-item" style={{ padding: '12px 16px', textAlign: 'left', background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.9rem' }}>
-                                                        <Eye size={16} /> Görüntüle
+                                                <div className="tp-dropdown">
+                                                    <button onClick={() => openViewModal(task)}>
+                                                        <Eye size={15} /> Görüntüle
                                                     </button>
-                                                    <button onClick={() => openEditModal(task)} className="menu-item" style={{ padding: '12px 16px', textAlign: 'left', background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.9rem' }}>
-                                                        <Edit2 size={16} /> Düzenle
+                                                    <button onClick={() => openEditModal(task)}>
+                                                        <Edit2 size={15} /> Düzenle
                                                     </button>
                                                     {task.source === 'email' && !task.verified_by && (
-                                                        <button onClick={() => handleVerify(task.id)} className="menu-item" style={{ padding: '12px 16px', textAlign: 'left', background: 'transparent', border: 'none', color: '#81c784', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.9rem' }}>
-                                                            <CheckCircle size={16} /> Onayla
+                                                        <button className="success" onClick={() => handleVerify(task.id)}>
+                                                            <CheckCircle size={15} /> Onayla
                                                         </button>
                                                     )}
-                                                    <button onClick={() => handleDelete(task.id)} className="menu-item" style={{ padding: '12px 16px', textAlign: 'left', background: 'transparent', border: 'none', color: '#ef5350', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem' }}>
-                                                        <Trash2 size={16} /> Sil
+                                                    <button className="danger" onClick={() => handleDelete(task.id)}>
+                                                        <Trash2 size={15} /> Sil
                                                     </button>
                                                 </div>
                                             )}
@@ -595,85 +485,77 @@ const TaskPool = () => {
                 </div>
             )}
 
-            {/* MODAL (Kept Functional, minimized for brevity in this display, logic same as before) */}
+            {/* MODAL */}
             {(editingTask || viewTask) && (
-                <div className="fade-in" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(5px)' }}>
-                    <div className="glass-panel" style={{ width: '95%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', padding: '30px', background: '#1e1e1e', position: 'relative', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
-                        <button onClick={() => { setEditingTask(null); setViewTask(null); }} style={{ position: 'absolute', top: 15, right: 15, background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>&times;</button>
+                <div className="modal-overlay" onClick={() => { setEditingTask(null); setViewTask(null); }}>
+                    <div className="glass-panel modal-content" onClick={e => e.stopPropagation()} style={{ background: 'linear-gradient(180deg, #1e1e2e, #151520)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <button onClick={() => { setEditingTask(null); setViewTask(null); }} style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.08)', border: 'none', color: '#94a3b8', borderRadius: '50%', width: '34px', height: '34px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', transition: 'all 0.2s' }}>&times;</button>
 
                         {viewTask ? (
                             <div>
-                                <h2 style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '15px', marginBottom: '20px', fontSize: '1.5rem' }}>{viewTask.title}</h2>
-                                {/* Detail View Content... Same as previous, just styling tweaks if needed. Keeping simpler for this file write. */}
-                                <p style={{ color: '#aaa', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}><MapPin size={18} /> {viewTask.address}</p>
-                                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-                                    <span className="status-pill" style={{
-                                        background: viewTask.status === 'in_progress' ? '#2196f3' : '#ffa726',
-                                        color: viewTask.status === 'in_progress' ? 'white' : 'black',
-                                        padding: '4px 12px',
-                                        borderRadius: '20px',
-                                        fontSize: '0.8rem',
-                                        fontWeight: 'bold'
-                                    }}>
+                                <h2 style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '16px', marginBottom: '20px', fontSize: '1.4rem' }}>{viewTask.title}</h2>
+                                <p style={{ color: '#94a3b8', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}><MapPin size={16} /> {viewTask.address}</p>
+                                <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+                                    <span className={`tp-status ${viewTask.status === 'in_progress' ? 'tp-status--active' : 'tp-status--waiting'}`}>
                                         {viewTask.status === 'in_progress' ? 'SAHADA' : 'BEKLİYOR'}
                                     </span>
                                 </div>
-                                <div style={{ marginTop: '25px', background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '12px' }}>
-                                    <h4 style={{ marginTop: 0, color: '#ddd' }}>Açıklama</h4>
-                                    <p style={{ whiteSpace: 'pre-wrap', color: '#bbb', lineHeight: '1.6' }}>{viewTask.description || 'Açıklama yok.'}</p>
+                                <div style={{ marginTop: '24px', background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <h4 style={{ marginTop: 0, color: '#cbd5e1', fontSize: '0.95rem' }}>Açıklama</h4>
+                                    <p style={{ whiteSpace: 'pre-wrap', color: '#94a3b8', lineHeight: '1.7' }}>{viewTask.description || 'Açıklama yok.'}</p>
                                 </div>
-                                {viewTask.maps_link && <a href={viewTask.maps_link} target="_blank" rel="noopener noreferrer" className="glass-btn full-gradient-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginTop: '20px', padding: '10px 20px' }}><MapPin size={18} /> Haritada Git</a>}
-                                <h4 style={{ marginTop: '30px' }}>📸 Fotoğraflar ({viewTask.photos?.length || 0})</h4>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px', marginTop: '15px' }}>
+                                {viewTask.maps_link && <a href={viewTask.maps_link} target="_blank" rel="noopener noreferrer" className="glass-btn glass-btn-primary" style={{ marginTop: '20px', padding: '10px 20px' }}><MapPin size={16} /> Haritada Git</a>}
+                                <h4 style={{ marginTop: '28px', color: '#cbd5e1' }}>📸 Fotoğraflar ({viewTask.photos?.length || 0})</h4>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px', marginTop: '12px' }}>
                                     {viewTask.photos && viewTask.photos.map(photo => (
                                         <a key={photo.id} href={photo.url} target="_blank" rel="noopener noreferrer">
-                                            <img src={photo.url} alt="Task" style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                                            <img src={photo.url} alt="Task" style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)' }} />
                                         </a>
                                     ))}
                                 </div>
                             </div>
                         ) : (
                             <>
-                                <h3 style={{ marginBottom: '20px', fontSize: '1.4rem' }}>{modalMode === 'edit' ? 'Görevi Düzenle' : 'Personel Yönetimi'}</h3>
+                                <h3 style={{ marginBottom: '20px', fontSize: '1.3rem' }}>{modalMode === 'edit' ? 'Görevi Düzenle' : 'Personel Yönetimi'}</h3>
                                 {modalMode === 'edit' ? (
-                                    <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                        <input className="glass-input" value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} required placeholder="Başlık" style={{ padding: '12px' }} />
-                                        <input className="glass-input" value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} required placeholder="Adres" style={{ padding: '12px' }} />
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                                            <select className="glass-input" value={editForm.region} onChange={(e) => setEditForm({ ...editForm, region: e.target.value })} style={{ background: '#2a2a2a', color: 'white', padding: '12px' }}>{regions.filter(r => r !== 'Hepsi').map(r => <option key={r} value={r}>{r}</option>)}</select>
-                                            <input type="datetime-local" className="glass-input" value={editForm.due_date} onChange={(e) => setEditForm({ ...editForm, due_date: e.target.value })} style={{ padding: '12px' }} />
+                                    <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                        <input className="glass-input" value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} required placeholder="Başlık" />
+                                        <input className="glass-input" value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} required placeholder="Adres" />
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                                            <select className="glass-input" value={editForm.region} onChange={(e) => setEditForm({ ...editForm, region: e.target.value })}>{regions.filter(r => r !== 'Hepsi').map(r => <option key={r} value={r}>{r}</option>)}</select>
+                                            <input type="datetime-local" className="glass-input" value={editForm.due_date} onChange={(e) => setEditForm({ ...editForm, due_date: e.target.value })} />
                                         </div>
-                                        <textarea className="glass-input" rows="4" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} placeholder="Açıklama" style={{ padding: '12px' }} />
-                                        <label>Mevcut Fotoğraflar</label>
+                                        <textarea className="glass-input" rows="4" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} placeholder="Açıklama" />
+                                        <label style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Mevcut Fotoğraflar</label>
                                         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                                             {existingPhotos.map(p => (
-                                                <div key={p.id} style={{ position: 'relative', width: '60px', height: '60px' }}>
-                                                    <img src={p.url} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
-                                                    <button type="button" onClick={() => handleDeletePhoto(p.id)} style={{ position: 'absolute', top: -5, right: -5, background: 'red', color: 'white', borderRadius: '50%', width: '18px', height: '18px', fontSize: '10px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>x</button>
+                                                <div key={p.id} style={{ position: 'relative', width: '64px', height: '64px' }}>
+                                                    <img src={p.url} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }} />
+                                                    <button type="button" onClick={() => handleDeletePhoto(p.id)} style={{ position: 'absolute', top: -6, right: -6, background: '#ef4444', color: 'white', borderRadius: '50%', width: '20px', height: '20px', fontSize: '11px', border: '2px solid #1e1e2e', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
                                                 </div>
                                             ))}
                                         </div>
-                                        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.2)' }}>
-                                            <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#aaa' }}>Yeni Fotoğraf Ekle</p>
+                                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '14px', border: '1px dashed rgba(255,255,255,0.15)' }}>
+                                            <p style={{ margin: '0 0 10px 0', fontSize: '0.88rem', color: '#64748b' }}>Yeni Fotoğraf Ekle</p>
                                             <input type="file" multiple accept="image/*" className="glass-input" onChange={(e) => setEditFiles(e.target.files)} />
                                         </div>
-                                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}><button type="submit" className="glass-btn primary-btn" style={{ flex: 1, padding: '12px' }}>Değişiklikleri Kaydet</button></div>
+                                        <button type="submit" className="glass-btn glass-btn-primary" style={{ padding: '14px', fontWeight: '600', marginTop: '6px' }}>Değişiklikleri Kaydet</button>
                                     </form>
                                 ) : (
-                                    <form onSubmit={handleAssignSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                        <p style={{ color: '#aaa' }}>Görevlendirilecek personelleri seçiniz:</p>
+                                    <form onSubmit={handleAssignSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                        <p style={{ color: '#94a3b8', margin: '0 0 4px 0' }}>Görevlendirilecek personelleri seçiniz:</p>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto', paddingRight: '5px' }}>
                                             {users.map(u => (
-                                                <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '12px', background: selectedAssignees.includes(u.id) ? 'rgba(33, 150, 243, 0.2)' : 'rgba(255,255,255,0.03)', borderRadius: '10px', cursor: 'pointer', border: selectedAssignees.includes(u.id) ? '1px solid rgba(33, 150, 243, 0.4)' : '1px solid transparent', transition: 'all 0.2s' }}>
-                                                    <input type="checkbox" checked={selectedAssignees.includes(u.id)} onChange={() => handleAssignCheckboxChange(u.id)} style={{ transform: 'scale(1.2)' }} />
+                                                <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 14px', background: selectedAssignees.includes(u.id) ? 'rgba(99, 102, 241, 0.12)' : 'rgba(255,255,255,0.02)', borderRadius: '12px', cursor: 'pointer', border: selectedAssignees.includes(u.id) ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid rgba(255,255,255,0.05)', transition: 'all 0.2s' }}>
+                                                    <input type="checkbox" checked={selectedAssignees.includes(u.id)} onChange={() => handleAssignCheckboxChange(u.id)} style={{ transform: 'scale(1.2)', accentColor: 'var(--primary)' }} />
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                        {u.photo_url ? <img src={u.photo_url} style={{ width: '32px', height: '32px', borderRadius: '50%' }} /> : <div className="initials-avatar" style={{ width: '32px', height: '32px', borderRadius: '50%', background: stringToColor(u.username), display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>{getInitials(u.username)}</div>}
-                                                        <span style={{ fontWeight: selectedAssignees.includes(u.id) ? 'bold' : 'normal', color: selectedAssignees.includes(u.id) ? '#fff' : '#ccc' }}>{u.username}</span>
+                                                        {u.photo_url ? <img src={u.photo_url} style={{ width: '34px', height: '34px', borderRadius: '50%' }} /> : <div className="tp-initials" style={{ width: '34px', height: '34px', borderRadius: '50%', background: stringToColor(u.username) }}>{getInitials(u.username)}</div>}
+                                                        <span style={{ fontWeight: selectedAssignees.includes(u.id) ? '600' : '400', color: selectedAssignees.includes(u.id) ? '#fff' : '#94a3b8' }}>{u.username}</span>
                                                     </div>
                                                 </label>
                                             ))}
                                         </div>
-                                        <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}><button type="submit" className="glass-btn primary-btn" style={{ flex: 1, padding: '12px' }}>Atamayı Tamamla</button></div>
+                                        <button type="submit" className="glass-btn glass-btn-primary" style={{ padding: '14px', fontWeight: '600', marginTop: '8px' }}>Atamayı Tamamla</button>
                                     </form>
                                 )}
                             </>
