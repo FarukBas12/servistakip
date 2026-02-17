@@ -152,24 +152,24 @@ const ProjectDashboard = () => {
                                 <div
                                     key={project.id}
                                     style={{
-                                        background: 'rgba(30, 30, 30, 0.4)', // More transparent
-                                        backdropFilter: 'blur(10px)',
-                                        borderRadius: '15px',
-                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        background: 'rgba(255, 255, 255, 0.03)',
+                                        backdropFilter: 'blur(12px)',
+                                        borderRadius: '14px',
+                                        border: '1px solid rgba(255,255,255,0.06)',
                                         overflow: 'hidden',
                                         cursor: 'pointer',
-                                        transition: 'transform 0.2s',
+                                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
                                         position: 'relative',
                                         color: 'white'
                                     }}
                                     onClick={() => navigate(isTech ? `/tech/projects/${project.id}` : `/admin/projects/${project.id}`)}
                                     onMouseEnter={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(-5px)';
-                                        e.currentTarget.style.background = 'rgba(30, 30, 30, 0.6)';
+                                        e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.3)';
+                                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)';
                                     }}
                                     onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                        e.currentTarget.style.background = 'rgba(30, 30, 30, 0.4)';
+                                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+                                        e.currentTarget.style.boxShadow = 'none';
                                     }}
                                 >
                                     <div style={{ padding: '20px', display: 'flex', justifyContent: 'space-between' }}>
@@ -263,42 +263,42 @@ const ProjectDashboard = () => {
             {/* CREATE MODAL */}
             {
                 showModal && (
-                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-                        <div style={{ background: '#1e1e1e', padding: '30px', borderRadius: '15px', width: '400px', border: '1px solid #333' }}>
-                            <h2 style={{ marginTop: 0 }}>Yeni Proje / İhale</h2>
+                    <div onClick={() => setShowModal(false)} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
+                        <div onClick={e => e.stopPropagation()} className="glass-panel" style={{ padding: '28px', width: '420px', maxWidth: '90vw' }}>
+                            <h2 style={{ marginTop: 0, marginBottom: '20px' }}>Yeni Proje / İhale</h2>
                             <form onSubmit={handleCreate}>
                                 <div className="form-group">
-                                    <label>Proje Adı</label>
-                                    <input required type="text" value={newProject.name} onChange={e => setNewProject({ ...newProject, name: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
+                                    <label style={{ fontSize: '0.85rem', color: '#8b9dc3', marginBottom: '4px', display: 'block' }}>Proje Adı</label>
+                                    <input required type="text" value={newProject.name} onChange={e => setNewProject({ ...newProject, name: e.target.value })} className="glass-input" />
                                 </div>
-                                <div className="form-group" style={{ marginTop: '15px' }}>
-                                    <label>Açıklama</label>
-                                    <textarea value={newProject.description} onChange={e => setNewProject({ ...newProject, description: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-                                    <div className="form-group" style={{ flex: 1 }}>
-                                        <label>İhale Bedeli</label>
-                                        <input type="number" value={newProject.tender_price || ''} onChange={e => setNewProject({ ...newProject, tender_price: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
-                                    </div>
-                                    <div className="form-group" style={{ flex: 1 }}>
-                                        <label>Hakediş (Alınan)</label>
-                                        <input type="number" value={newProject.progress_payment || ''} onChange={e => setNewProject({ ...newProject, progress_payment: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
-                                    </div>
+                                <div className="form-group">
+                                    <label style={{ fontSize: '0.85rem', color: '#8b9dc3', marginBottom: '4px', display: 'block' }}>Açıklama</label>
+                                    <textarea value={newProject.description} onChange={e => setNewProject({ ...newProject, description: e.target.value })} className="glass-input" style={{ minHeight: '60px', resize: 'vertical' }} />
                                 </div>
 
-                                <div className="form-group" style={{ marginTop: '15px' }}>
-                                    <label>Başlangıç Tarihi</label>
-                                    <input required type="date" value={newProject.start_date} onChange={e => setNewProject({ ...newProject, start_date: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <div className="form-group" style={{ flex: 1 }}>
+                                        <label style={{ fontSize: '0.85rem', color: '#8b9dc3', marginBottom: '4px', display: 'block' }}>İhale Bedeli</label>
+                                        <input type="number" value={newProject.tender_price || ''} onChange={e => setNewProject({ ...newProject, tender_price: e.target.value })} className="glass-input" />
+                                    </div>
+                                    <div className="form-group" style={{ flex: 1 }}>
+                                        <label style={{ fontSize: '0.85rem', color: '#8b9dc3', marginBottom: '4px', display: 'block' }}>Hakediş (Alınan)</label>
+                                        <input type="number" value={newProject.progress_payment || ''} onChange={e => setNewProject({ ...newProject, progress_payment: e.target.value })} className="glass-input" />
+                                    </div>
                                 </div>
-                                <div className="form-group" style={{ marginTop: '15px' }}>
-                                    <label>Bitiş Tarihi</label>
-                                    <input required type="date" value={newProject.end_date} onChange={e => setNewProject({ ...newProject, end_date: e.target.value })} className="dark-input" style={{ width: '100%', padding: '10px', marginTop: '5px', background: '#333', border: 'none', color: 'white', borderRadius: '5px' }} />
+
+                                <div className="form-group">
+                                    <label style={{ fontSize: '0.85rem', color: '#8b9dc3', marginBottom: '4px', display: 'block' }}>Başlangıç Tarihi</label>
+                                    <input required type="date" value={newProject.start_date} onChange={e => setNewProject({ ...newProject, start_date: e.target.value })} className="glass-input" />
+                                </div>
+                                <div className="form-group">
+                                    <label style={{ fontSize: '0.85rem', color: '#8b9dc3', marginBottom: '4px', display: 'block' }}>Bitiş Tarihi</label>
+                                    <input required type="date" value={newProject.end_date} onChange={e => setNewProject({ ...newProject, end_date: e.target.value })} className="glass-input" />
                                 </div>
 
                                 <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                                    <button type="button" onClick={() => setShowModal(false)} style={{ padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#444', color: 'white', cursor: 'pointer' }}>İptal</button>
-                                    <button type="submit" style={{ padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#4facfe', color: 'white', cursor: 'pointer' }}>Oluştur</button>
+                                    <button type="button" onClick={() => setShowModal(false)} className="glass-btn">İptal</button>
+                                    <button type="submit" className="glass-btn" style={{ background: 'rgba(99, 102, 241, 0.25)', borderColor: 'rgba(99, 102, 241, 0.5)', color: '#a5b4fc' }}>Oluştur</button>
                                 </div>
                             </form>
                         </div>
