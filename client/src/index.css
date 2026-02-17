@@ -83,7 +83,7 @@ body::before {
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), var(--glass-shadow);
     border-radius: 24px;
     color: var(--text-primary);
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .glass-panel:hover {
@@ -126,8 +126,7 @@ body::before {
 .glass-btn:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.3);
 }
 
 .glass-btn:hover::after {
@@ -135,7 +134,7 @@ body::before {
 }
 
 .glass-btn:active {
-    transform: translateY(0);
+    transform: scale(0.98);
 }
 
 /* Button Variants */
