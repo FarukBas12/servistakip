@@ -17,7 +17,8 @@ import {
     CheckCircle,
     MapPin,
     Clock,
-    AlertTriangle
+    AlertTriangle,
+    ClipboardList
 } from 'lucide-react';
 import { getInitials, stringToColor } from '../utils/helpers'; // Assuming helpers exist from previous context
 
