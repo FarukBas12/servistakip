@@ -245,7 +245,8 @@ const TaskPool = () => {
         if (activeTab === 'pool' && hasAssignees) return false;
         if (activeTab === 'active' && !hasAssignees) return false;
         if (selectedRegion === 'Hepsi') return true;
-        return (task.region || 'Diğer').toLocaleLowerCase('tr-TR') === selectedRegion.toLocaleLowerCase('tr-TR');
+        const r = String(task.region || 'Diğer');
+        return r.toLocaleLowerCase('tr-TR') === selectedRegion.toLocaleLowerCase('tr-TR');
     });
 
     // Safely computed Daily Plan Groups
@@ -493,12 +494,13 @@ const TaskPool = () => {
                                     {/* MIDDLE: Assignees & Date */}
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', minWidth: '120px' }}>
                                         {task.assigned_users && task.assigned_users.length > 0 ? (
-                                            <div className="avatar-stack" title={task.assigned_users.map(u => u.username).join(', ')}>
-                                                {task.assigned_users.map(u => (
-                                                    u.photo_url ?
+                                            <div className="avatar-stack" title={task.assigned_users.map(u => u?.username).join(', ')}>
+                                                {task.assigned_users.map(u => {
+                                                    if (!u) return null;
+                                                    return u.photo_url ?
                                                         <img key={u.id} src={u.photo_url} alt={u.username} /> :
-                                                        <div key={u.id} className="initials-avatar" style={{ backgroundColor: stringToColor(u.username) }}>{getInitials(u.username)}</div>
-                                                ))}
+                                                        <div key={u.id} className="initials-avatar" style={{ backgroundColor: stringToColor(u.username || '?') }}>{getInitials(u.username)}</div>;
+                                                })}
                                             </div>
                                         ) : (
                                             <span style={{ fontSize: '0.85rem', color: '#666', fontStyle: 'italic' }}>Atama Yok</span>
