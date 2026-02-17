@@ -250,21 +250,10 @@ const TaskPool = () => {
         return r.toLocaleLowerCase('tr-TR') === selectedRegion.toLocaleLowerCase('tr-TR');
     });
 
-    // Safely computed Daily Plan Groups
-    const dailyPlanGroups = React.useMemo(() => {
+    // Daily Plan: tasks that have assigned users (grouped by task)
+    const assignedTasks = React.useMemo(() => {
         try {
-            const groups = {};
-            tasks.forEach(task => {
-                if (task && task.assigned_users && Array.isArray(task.assigned_users)) {
-                    task.assigned_users.forEach(u => {
-                        if (u && u.username) {
-                            if (!groups[u.username]) groups[u.username] = [];
-                            groups[u.username].push(task);
-                        }
-                    });
-                }
-            });
-            return Object.entries(groups).map(([username, tasks]) => ({ username, tasks }));
+            return tasks.filter(t => t && t.assigned_users && t.assigned_users.length > 0);
         } catch (e) {
             console.error("Daily Plan error:", e);
             return [];
@@ -333,22 +322,22 @@ const TaskPool = () => {
                         <ClipboardList size={15} /> Günlük Plan (Atanan İşler)
                     </h3>
                     <div className="tp-daily-grid">
-                        {dailyPlanGroups.length === 0 ? (
+                        {assignedTasks.length === 0 ? (
                             <p style={{ color: '#555', fontStyle: 'italic', gridColumn: '1 / -1', fontSize: '0.82rem' }}>Henüz atama yapılmamış.</p>
                         ) : (
-                            dailyPlanGroups.map(({ username, tasks: userTasks }) => (
-                                <div key={username} className="tp-daily-user">
+                            assignedTasks.map(task => (
+                                <div key={task.id} className="tp-daily-user">
                                     <div className="tp-daily-user-header">
-                                        <div className="tp-initials" style={{ width: '26px', height: '26px', borderRadius: '50%', fontSize: '0.6rem', backgroundColor: stringToColor(username || 'U') }}>{getInitials(username || 'U')}</div>
-                                        <span className="tp-daily-user-name">{username}</span>
-                                        <span className="tp-daily-user-count">{userTasks.length} görev</span>
+                                        <span className="tp-daily-user-name" style={{ fontSize: '0.82rem' }}>{task.title}</span>
                                     </div>
-                                    <ul className="tp-daily-task-list">
-                                        {userTasks.slice(0, 3).map(t => (
-                                            <li key={t.id}>{t.title}</li>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                        {task.assigned_users.map(u => (
+                                            u && <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                <div className="tp-initials" style={{ width: '22px', height: '22px', borderRadius: '50%', fontSize: '0.55rem', backgroundColor: stringToColor(u.username || '?') }}>{getInitials(u.username)}</div>
+                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{u.username}</span>
+                                            </div>
                                         ))}
-                                        {userTasks.length > 3 && <li className="more">+ {userTasks.length - 3} diğer</li>}
-                                    </ul>
+                                    </div>
                                 </div>
                             ))
                         )}

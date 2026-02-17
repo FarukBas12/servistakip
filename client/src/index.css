@@ -1147,7 +1147,7 @@ h3 {
 }
 
 .tp-avatar-stack>*:hover {
-    transform: translateY(-3px);
+    transform: scale(1.1);
     z-index: 10;
 }
 
