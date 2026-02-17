@@ -684,4 +684,12 @@ const TaskPool = () => {
     );
 };
 
-export default TaskPool;
+import ErrorBoundary from '../components/ErrorBoundary';
+
+const SafeTaskPool = (props) => (
+    <ErrorBoundary>
+        <TaskPool {...props} />
+    </ErrorBoundary>
+);
+
+export default SafeTaskPool;
