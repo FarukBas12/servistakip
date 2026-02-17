@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, ShoppingBag, Cloud, Sun, CloudRain, CloudSnow, Wind, Calendar, Check, Bell, Activity, ClipboardList, Wrench, Wallet, ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
+import { Users, ShoppingBag, Cloud, Sun, CloudRain, CloudSnow, Wind, Calendar, Check, Bell, Activity, ClipboardList, Wrench, ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import api from '../utils/api';
 
 const AdminDashboard = () => {

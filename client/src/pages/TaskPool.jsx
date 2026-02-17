@@ -248,6 +248,27 @@ const TaskPool = () => {
         return (task.region || 'Diğer').toLocaleLowerCase('tr-TR') === selectedRegion.toLocaleLowerCase('tr-TR');
     });
 
+    // Safely computed Daily Plan Groups
+    const dailyPlanGroups = React.useMemo(() => {
+        try {
+            const groups = {};
+            tasks.forEach(task => {
+                if (task && task.assigned_users && Array.isArray(task.assigned_users)) {
+                    task.assigned_users.forEach(u => {
+                        if (u && u.username) {
+                            if (!groups[u.username]) groups[u.username] = [];
+                            groups[u.username].push(task);
+                        }
+                    });
+                }
+            });
+            return Object.entries(groups).map(([username, tasks]) => ({ username, tasks }));
+        } catch (e) {
+            console.error("Daily Plan error:", e);
+            return [];
+        }
+    }, [tasks]);
+
     return (
         <div className="dashboard fade-in">
             {/* INLINE STYLES FOR ANIMATIONS */}
@@ -366,37 +387,29 @@ const TaskPool = () => {
                     <h3 style={{ margin: '0 0 15px 0', fontSize: '1.2rem', color: '#60a5fa', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <ClipboardList size={20} /> Günlük Plan (Atanan İşler)
                     </h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
-                        {Object.entries(tasks.filter(t => t.assigned_users?.length > 0).reduce((acc, task) => {
-                            task.assigned_users.forEach(u => {
-                                if (!acc[u.username]) acc[u.username] = [];
-                                acc[u.username].push(task);
-                            });
-                            return acc;
-                        }, {})).map(([username, userTasks]) => (
-                            <div key={username} style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '12px' }}>
-                                <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <div className="initials-avatar" style={{ width: '24px', height: '24px', fontSize: '0.7rem', backgroundColor: stringToColor(username) }}>{getInitials(username)}</div>
-                                    {username}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                        {dailyPlanGroups.length === 0 ? (
+                            <p style={{ color: '#666', fontStyle: 'italic', gridColumn: '1 / -1' }}>Henüz atama yapılmamış.</p>
+                        ) : (
+                            dailyPlanGroups.map(({ username, tasks: userTasks }) => (
+                                <div key={username} style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '12px' }}>
+                                    <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div className="initials-avatar" style={{ width: '24px', height: '24px', fontSize: '0.7rem', backgroundColor: stringToColor(username || 'U') }}>{getInitials(username || 'U')}</div>
+                                        {username}
+                                    </div>
+                                    <div style={{ fontSize: '0.85rem', color: '#aaa' }}>
+                                        {userTasks.length} Görev Atandı
+                                        <ul style={{ margin: '5px 0 0 15px', padding: 0, color: '#666' }}>
+                                            {userTasks.slice(0, 3).map(t => <li key={t.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.title}</li>)}
+                                            {userTasks.length > 3 && <li>+ {userTasks.length - 3} diğer</li>}
+                                        </ul>
+                                    </div>
                                 </div>
-                                <div style={{ fontSize: '0.85rem', color: '#aaa' }}>
-                                    {userTasks.length} Görev Atandı
-                                    <ul style={{ margin: '5px 0 0 15px', padding: 0, color: '#666' }}>
-                                        {userTasks.slice(0, 3).map(t => <li key={t.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.title}</li>)}
-                                        {userTasks.length > 3 && <li>+ {userTasks.length - 3} diğer</li>}
-                                    </ul>
-                                </div>
-                            </div>
-                        ))}
-                        {Object.keys(tasks.filter(t => t.assigned_users?.length > 0).reduce((acc, task) => {
-                            task.assigned_users.forEach(u => { if (!acc[u.username]) acc[u.username] = true; }); return acc;
-                        }, {})).length === 0 && (
-                                <p style={{ color: '#666', fontStyle: 'italic' }}>Henüz atama yapılmamış.</p>
-                            )}
+                            ))
+                        )}
                     </div>
                 </div>
             )}
-
             {loading ? (
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '50px' }}><div className="spinner"></div></div>
             ) : (
