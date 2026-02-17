@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Calendar, FolderOpen, ArrowRight } from 'lucide-react';
+import { Plus, Calendar, FolderOpen, ArrowRight, CheckCircle, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const ProjectDashboard = () => {
@@ -83,7 +83,7 @@ const ProjectDashboard = () => {
         <div style={{ padding: '20px', color: 'white' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <h1 style={{ fontSize: '2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <FolderOpen size={32} color="#4facfe" />
+                    <FolderOpen size={32} color="#6366f1" />
                     <span>Şantiye & Proje Yönetimi</span>
                 </h1>
 
@@ -130,131 +130,135 @@ const ProjectDashboard = () => {
             </div>
 
             {loading ? <p>Yükleniyor...</p> : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
                     {projects
                         .filter(p => activeTab === 'active' ? p.status !== 'completed' : p.status === 'completed')
                         .map(project => {
                             const progress = calculateProgress(project.start_date, project.end_date);
                             const progressColor = getProgressColor(progress);
                             const isOverdue = new Date() > new Date(project.end_date) && project.status !== 'completed';
+                            const progressPct = Math.round(progress);
 
                             // Financials
-                            const income = parseFloat(project.progress_payment) || parseFloat(project.tender_price) || 1; // Avoid divide by zero
+                            const income = parseFloat(project.progress_payment) || parseFloat(project.tender_price) || 0;
                             const expense = parseFloat(project.total_expenses) || 0;
                             const profit = income - expense;
-                            const expensePct = Math.min(100, (expense / income) * 100);
-                            const isProfitable = profit >= 0;
+                            const hasFinancials = income > 0 || expense > 0;
 
-                            // Circular Graph Data
-                            const radius = 30;
-                            const circumference = 2 * Math.PI * radius;
-                            const offset = circumference - (expensePct / 100) * circumference;
+                            // Accent strip color
+                            const accentColor = isOverdue ? '#ef4444' : progress > 75 ? '#f59e0b' : '#10b981';
 
                             return (
                                 <div
                                     key={project.id}
                                     style={{
-                                        background: 'rgba(255, 255, 255, 0.03)',
-                                        backdropFilter: 'blur(12px)',
+                                        background: 'rgba(255, 255, 255, 0.04)',
+                                        backdropFilter: 'blur(16px)',
                                         borderRadius: '14px',
-                                        border: '1px solid rgba(255,255,255,0.06)',
+                                        border: `1px solid ${isOverdue ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255,255,255,0.07)'}`,
                                         overflow: 'hidden',
                                         cursor: 'pointer',
                                         transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-                                        position: 'relative',
+                                        display: 'flex',
                                         color: 'white'
                                     }}
                                     onClick={() => navigate(isTech ? `/tech/projects/${project.id}` : `/admin/projects/${project.id}`)}
                                     onMouseEnter={(e) => {
-                                        e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.3)';
-                                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)';
+                                        e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.35)';
+                                        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.3)';
                                     }}
                                     onMouseLeave={(e) => {
-                                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+                                        e.currentTarget.style.borderColor = isOverdue ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255,255,255,0.07)';
                                         e.currentTarget.style.boxShadow = 'none';
                                     }}
                                 >
-                                    <div style={{ padding: '20px', display: 'flex', justifyContent: 'space-between' }}>
-                                        <div style={{ flex: 1, paddingRight: '10px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                                                <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#fff', fontWeight: '600' }}>{project.name}</h3>
-                                                {isOverdue && <span style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', padding: '3px 10px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.5px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>SÜRE BİTTİ</span>}
-                                            </div>
+                                    {/* Left Accent Strip */}
+                                    <div style={{ width: '4px', background: accentColor, flexShrink: 0 }} />
 
-                                            <p style={{ color: '#8b9dc3', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '10px', margin: '0 0 10px 0' }}>
+                                    {/* Card Content */}
+                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                        {/* Header */}
+                                        <div style={{ padding: '16px 16px 0 16px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                                                <h3 style={{ margin: 0, fontSize: '0.95rem', color: '#fff', fontWeight: '600' }}>{project.name}</h3>
+                                                {isOverdue && (
+                                                    <span style={{
+                                                        background: 'rgba(239, 68, 68, 0.12)',
+                                                        color: '#f87171',
+                                                        padding: '2px 8px',
+                                                        borderRadius: '4px',
+                                                        fontSize: '0.65rem',
+                                                        fontWeight: '700',
+                                                        letterSpacing: '0.5px',
+                                                        border: '1px solid rgba(239, 68, 68, 0.2)'
+                                                    }}>SÜRE BİTTİ</span>
+                                                )}
+                                            </div>
+                                            <p style={{ color: '#6b7fa3', fontSize: '0.8rem', margin: '0 0 10px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                 {project.description || 'Açıklama yok'}
                                             </p>
-
-                                            <div style={{ display: 'flex', gap: '15px', fontSize: '0.85rem', color: '#888' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                                    <Calendar size={14} />
-                                                    {new Date(project.start_date).toLocaleDateString('tr-TR')}
-                                                </div>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                                    <ArrowRight size={14} />
-                                                    {new Date(project.end_date).toLocaleDateString('tr-TR')}
-                                                </div>
-                                            </div>
                                         </div>
 
-                                        {/* DONUT CHART AREA */}
-                                        <div style={{ width: '80px', height: '80px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <svg width="80" height="80">
-                                                {/* Background Circle (Profit/Income) */}
-                                                <circle cx="40" cy="40" r={radius} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="6" />
-                                                {/* Foreground Circle (Expense) */}
-                                                <circle
-                                                    cx="40" cy="40" r={radius}
-                                                    fill="none"
-                                                    stroke={isProfitable ? '#10b981' : '#ef4444'}
-                                                    strokeWidth="6"
-                                                    strokeDasharray={circumference}
-                                                    strokeDashoffset={offset}
-                                                    strokeLinecap="round"
-                                                    transform="rotate(-90 40 40)"
-                                                />
-                                            </svg>
-                                            <div style={{ position: 'absolute', textAlign: 'center', fontSize: '0.7rem', color: '#aaa' }}>
-                                                <div style={{ fontWeight: 'bold', color: isProfitable ? '#10b981' : '#ef4444' }}>
-                                                    {isProfitable ? 'KAR' : 'ZARAR'}
-                                                </div>
-                                                <div>%{Math.round(isProfitable ? (100 - expensePct) : expensePct)}</div>
+                                        {/* Date Row */}
+                                        <div style={{ padding: '0 16px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#5a6d8a' }}>
+                                            <Calendar size={12} />
+                                            <span>{new Date(project.start_date).toLocaleDateString('tr-TR')}</span>
+                                            <ArrowRight size={10} style={{ opacity: 0.5 }} />
+                                            <span>{new Date(project.end_date).toLocaleDateString('tr-TR')}</span>
+                                        </div>
+
+                                        {/* Progress Bar Row */}
+                                        <div style={{ padding: '12px 16px 0 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <div style={{ flex: 1, background: 'rgba(255,255,255,0.06)', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
+                                                <div style={{
+                                                    width: `${progress}%`,
+                                                    height: '100%',
+                                                    background: progressColor,
+                                                    borderRadius: '3px',
+                                                    transition: 'width 0.5s ease-in-out'
+                                                }} />
                                             </div>
+                                            <span style={{ fontSize: '0.72rem', color: progressColor, fontWeight: '600', minWidth: '32px', textAlign: 'right' }}>%{progressPct}</span>
+                                        </div>
+
+                                        {/* Footer: Stats + Tamamla */}
+                                        <div style={{ padding: '10px 16px 14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+                                            {/* Financial Stat */}
+                                            <div style={{ fontSize: '0.75rem', color: '#5a6d8a' }}>
+                                                {hasFinancials ? (
+                                                    <span style={{ color: profit >= 0 ? '#10b981' : '#ef4444', fontWeight: '600' }}>
+                                                        {profit >= 0 ? 'Kâr' : 'Zarar'}: {Math.abs(profit).toLocaleString('tr-TR')} ₺
+                                                    </span>
+                                                ) : (
+                                                    <span style={{ opacity: 0.5, fontStyle: 'italic' }}>Finansal veri yok</span>
+                                                )}
+                                            </div>
+
+                                            {/* Tamamla Button */}
+                                            {activeTab === 'active' && !isTech && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleComplete(project.id, project.name);
+                                                    }}
+                                                    className="glass-btn"
+                                                    style={{
+                                                        padding: '4px 10px',
+                                                        fontSize: '0.72rem',
+                                                        background: 'rgba(16, 185, 129, 0.1)',
+                                                        color: '#10b981',
+                                                        borderColor: 'rgba(16, 185, 129, 0.25)',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px'
+                                                    }}
+                                                >
+                                                    <CheckCircle size={13} />
+                                                    Tamamla
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
-
-                                    {/* Progress Bar */}
-                                    <div style={{ background: 'rgba(255,255,255,0.08)', height: '6px', width: '100%' }}>
-                                        <div style={{
-                                            width: `${progress}%`,
-                                            height: '100%',
-                                            background: `linear-gradient(90deg, ${progressColor}, ${progressColor}cc)`,
-                                            borderRadius: '0 3px 3px 0',
-                                            transition: 'width 0.5s ease-in-out'
-                                        }} />
-                                    </div>
-
-                                    {/* Tamamla Button */}
-                                    {activeTab === 'active' && !isTech && (
-                                        <div style={{ padding: '10px 16px', display: 'flex', justifyContent: 'flex-end' }}>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleComplete(project.id, project.name);
-                                                }}
-                                                className="glass-btn"
-                                                style={{
-                                                    padding: '5px 12px',
-                                                    fontSize: '0.78rem',
-                                                    background: 'rgba(16, 185, 129, 0.15)',
-                                                    color: '#10b981',
-                                                    borderColor: 'rgba(16, 185, 129, 0.3)'
-                                                }}
-                                            >
-                                                ✓ Tamamla
-                                            </button>
-                                        </div>
-                                    )}
                                 </div>
                             );
                         })}
