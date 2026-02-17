@@ -330,30 +330,25 @@ const TaskPool = () => {
             {activeTab === 'active' && (
                 <div className="tp-daily-plan">
                     <h3>
-                        <ClipboardList size={16} /> Günlük Plan (Atanan İşler)
+                        <ClipboardList size={15} /> Günlük Plan (Atanan İşler)
                     </h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '10px' }}>
+                    <div className="tp-daily-grid">
                         {dailyPlanGroups.length === 0 ? (
-                            <p style={{ color: '#666', fontStyle: 'italic', gridColumn: '1 / -1' }}>Henüz atama yapılmamış.</p>
+                            <p style={{ color: '#555', fontStyle: 'italic', gridColumn: '1 / -1', fontSize: '0.82rem' }}>Henüz atama yapılmamış.</p>
                         ) : (
                             dailyPlanGroups.map(({ username, tasks: userTasks }) => (
                                 <div key={username} className="tp-daily-user">
-                                    <div style={{ fontWeight: 'bold', marginBottom: '6px', color: '#fff', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
-                                        <div className="tp-initials" style={{ width: '24px', height: '24px', borderRadius: '50%', fontSize: '0.6rem', backgroundColor: stringToColor(username || 'U') }}>{getInitials(username || 'U')}</div>
-                                        {username}
+                                    <div className="tp-daily-user-header">
+                                        <div className="tp-initials" style={{ width: '26px', height: '26px', borderRadius: '50%', fontSize: '0.6rem', backgroundColor: stringToColor(username || 'U') }}>{getInitials(username || 'U')}</div>
+                                        <span className="tp-daily-user-name">{username}</span>
+                                        <span className="tp-daily-user-count">{userTasks.length} görev</span>
                                     </div>
-                                    <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-                                        {userTasks.length} Görev Atandı
-                                        <ul style={{ margin: '4px 0 0 14px', padding: 0, color: '#64748b', listStyle: 'none' }}>
-                                            {userTasks.slice(0, 3).map(t => (
-                                                <li key={t.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '1px 0', position: 'relative', paddingLeft: '10px', fontSize: '0.75rem' }}>
-                                                    <span style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: '3px', height: '3px', borderRadius: '50%', background: '#818cf8' }} />
-                                                    {t.title}
-                                                </li>
-                                            ))}
-                                            {userTasks.length > 3 && <li style={{ paddingLeft: '10px', color: '#4b5563', fontSize: '0.75rem' }}>+ {userTasks.length - 3} diğer</li>}
-                                        </ul>
-                                    </div>
+                                    <ul className="tp-daily-task-list">
+                                        {userTasks.slice(0, 3).map(t => (
+                                            <li key={t.id}>{t.title}</li>
+                                        ))}
+                                        {userTasks.length > 3 && <li className="more">+ {userTasks.length - 3} diğer</li>}
+                                    </ul>
                                 </div>
                             ))
                         )}
