@@ -147,9 +147,9 @@ const AdminDashboard = () => {
                 <div key={i} onClick={() => handleDayClick(i)} style={{
                     height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     borderRadius: '8px', cursor: 'pointer', position: 'relative',
-                    background: isToday ? 'rgba(33, 150, 243, 0.3)' : 'transparent',
-                    border: isToday ? '1px solid rgba(33, 150, 243, 0.5)' : 'none',
-                    color: isToday ? '#2196f3' : 'white',
+                    background: isToday ? 'rgba(99, 102, 241, 0.25)' : 'transparent',
+                    border: isToday ? '1px solid rgba(99, 102, 241, 0.5)' : 'none',
+                    color: isToday ? '#818cf8' : 'white',
                     fontWeight: isToday ? 'bold' : 'normal',
                     transition: 'background 0.2s'
                 }}
@@ -169,10 +169,10 @@ const AdminDashboard = () => {
 
     return (
         <div className="dashboard fade-in">
-            <h1 style={{ marginBottom: '10px', fontSize: '2rem', background: 'linear-gradient(90deg, #fff, #888)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            <h1 style={{ marginBottom: '10px', fontSize: '2rem', background: 'linear-gradient(90deg, #e0e7ff, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 Genel Bakış
             </h1>
-            <p style={{ color: '#666', marginBottom: '30px' }}>Sistem durumu ve özet raporlar</p>
+            <p style={{ color: '#5a6d8a', marginBottom: '30px' }}>Sistem durumu ve özet raporlar</p>
 
             {/* KPI WIDGETS */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '30px' }}>
@@ -245,7 +245,7 @@ const AdminDashboard = () => {
                                         </div>
                                         <div style={{ flex: 1 }}>
                                             <div style={{ fontWeight: 500 }}>{n.title}</div>
-                                            {n.description && <div style={{ fontSize: '0.8rem', color: '#666', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>{n.description}</div>}
+                                            {n.description && <div style={{ fontSize: '0.8rem', color: '#5a6d8a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '280px' }}>{n.description}</div>}
                                         </div>
                                         <button onClick={() => handleDeleteNote(n.id)} className="icon-btn" style={{ color: '#ef5350', opacity: 0.5 }}><Trash2 size={14} /></button>
                                     </div>

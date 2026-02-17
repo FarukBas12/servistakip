@@ -87,11 +87,9 @@ const CompletedTasks = () => {
     return (
         <div className="dashboard">
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '15px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <button onClick={() => navigate('/admin')} className="glass-btn" style={{ padding: '8px' }}>
-                        <ArrowLeft size={20} />
-                    </button>
-                    <h2 style={{ margin: 0 }}>Biten İşler Arşivi</h2>
+                <div>
+                    <h2 style={{ margin: 0, fontSize: '1.8rem', background: 'linear-gradient(90deg, #e0e7ff, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Biten İşler Arşivi</h2>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#5a6d8a' }}>Tamamlanan servis kayıtları</p>
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
@@ -106,7 +104,7 @@ const CompletedTasks = () => {
                             style={{ paddingLeft: '35px', width: '250px', margin: 0 }}
                         />
                     </div>
-                    <button onClick={exportToExcel} className="glass-btn" style={{ background: 'rgba(76, 175, 80, 0.3)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button onClick={exportToExcel} className="glass-btn" style={{ background: 'rgba(99, 102, 241, 0.2)', border: '1px solid rgba(99, 102, 241, 0.3)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Download size={18} /> Excel
                     </button>
                 </div>
@@ -132,7 +130,10 @@ const CompletedTasks = () => {
                             </tr>
                         ) : (
                             filteredTasks.map(task => (
-                                <tr key={task.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                <tr key={task.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s', cursor: 'pointer' }}
+                                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.05)'}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                >
                                     <td style={{ padding: '15px' }}>
                                         <div style={{ fontWeight: '500' }}>{task.title}</div>
                                         <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>{task.address.substring(0, 30)}...</div>

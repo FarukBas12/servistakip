@@ -62,8 +62,8 @@ const TechDashboard = () => {
     return (
         <div className="dashboard" style={{ paddingBottom: '80px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h1 style={{ margin: 0 }}>Saha Paneli</h1>
-                <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>
+                <h1 style={{ margin: 0, fontSize: '1.8rem', background: 'linear-gradient(90deg, #e0e7ff, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Saha Paneli</h1>
+                <div style={{ fontSize: '0.9rem', color: '#5a6d8a' }}>
                     {new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </div>
             </div>
@@ -87,9 +87,9 @@ const TechDashboard = () => {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         style={{
-                            background: activeTab === tab.id ? 'rgba(255,255,255,0.1)' : 'transparent',
-                            border: 'none',
-                            color: activeTab === tab.id ? 'white' : 'rgba(255,255,255,0.5)',
+                            background: activeTab === tab.id ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
+                            border: activeTab === tab.id ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid transparent',
+                            color: activeTab === tab.id ? '#a5b4fc' : 'rgba(255,255,255,0.5)',
                             padding: '10px',
                             borderRadius: '8px',
                             fontWeight: 'bold',
@@ -123,8 +123,8 @@ const TechDashboard = () => {
                     <div key={task.id} className="glass-panel" style={{
                         padding: '0', // Reset padding for custom layout
                         overflow: 'hidden',
-                        borderLeft: task.status === 'in_progress' ? '5px solid #2196f3' :
-                            task.status === 'pending' ? '5px solid #ffb300' : '5px solid #4caf50'
+                        borderLeft: task.status === 'in_progress' ? '5px solid #6366f1' :
+                            task.status === 'pending' ? '5px solid #f59e0b' : '5px solid #10b981'
                     }}>
                         {/* HEADER */}
                         <div style={{ padding: '15px 15px 5px 15px' }}>

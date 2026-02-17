@@ -106,7 +106,7 @@ const DailyPlanReport = () => {
                     }}
                 >
                     <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                        <h2 style={{ margin: '0', fontSize: '2rem', background: 'linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                        <h2 style={{ margin: '0', fontSize: '2rem', background: 'linear-gradient(90deg, #e0e7ff, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textTransform: 'uppercase', letterSpacing: '2px' }}>
                             Günlük Saha Çalışma Planı
                         </h2>
                         <div style={{ color: '#888', marginTop: '5px', fontSize: '1.1rem' }}>📅 {new Date().toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>

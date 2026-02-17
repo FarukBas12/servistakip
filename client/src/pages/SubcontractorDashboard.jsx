@@ -106,7 +106,10 @@ const SubcontractorDashboard = () => {
 
     return (
         <div className="dashboard">
-            <h2 style={{ marginBottom: '20px' }}>Taşeron Listesi</h2>
+            <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ margin: 0, fontSize: '1.8rem', background: 'linear-gradient(90deg, #e0e7ff, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Taşeron Yönetimi</h2>
+                <p style={{ margin: '5px 0 0', color: '#5a6d8a' }}>Bakiye takibi ve hakediş işlemleri</p>
+            </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
                 {subs.map(sub => {

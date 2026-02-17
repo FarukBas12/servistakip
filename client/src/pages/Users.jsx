@@ -138,8 +138,8 @@ const UsersPage = () => {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
                 <div>
-                    <h2 style={{ margin: 0, fontSize: '1.8rem', background: 'linear-gradient(90deg, #fff, #bbb)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Personel Yönetimi</h2>
-                    <p style={{ margin: '5px 0 0', color: '#666' }}>Sistem kullanıcıları ve yetkilendirme</p>
+                    <h2 style={{ margin: 0, fontSize: '1.8rem', background: 'linear-gradient(90deg, #e0e7ff, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Personel Yönetimi</h2>
+                    <p style={{ margin: '5px 0 0', color: '#5a6d8a' }}>Sistem kullanıcıları ve yetkilendirme</p>
                 </div>
                 <button onClick={resetForm} className="glass-btn primary-btn" style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Plus size={20} /> Yeni Personel
