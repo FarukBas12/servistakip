@@ -330,28 +330,28 @@ const TaskPool = () => {
             {activeTab === 'active' && (
                 <div className="tp-daily-plan">
                     <h3>
-                        <ClipboardList size={20} /> Günlük Plan (Atanan İşler)
+                        <ClipboardList size={16} /> Günlük Plan (Atanan İşler)
                     </h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '10px' }}>
                         {dailyPlanGroups.length === 0 ? (
                             <p style={{ color: '#666', fontStyle: 'italic', gridColumn: '1 / -1' }}>Henüz atama yapılmamış.</p>
                         ) : (
                             dailyPlanGroups.map(({ username, tasks: userTasks }) => (
                                 <div key={username} className="tp-daily-user">
-                                    <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <div className="tp-initials" style={{ width: '28px', height: '28px', borderRadius: '50%', fontSize: '0.7rem', backgroundColor: stringToColor(username || 'U') }}>{getInitials(username || 'U')}</div>
+                                    <div style={{ fontWeight: 'bold', marginBottom: '6px', color: '#fff', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+                                        <div className="tp-initials" style={{ width: '24px', height: '24px', borderRadius: '50%', fontSize: '0.6rem', backgroundColor: stringToColor(username || 'U') }}>{getInitials(username || 'U')}</div>
                                         {username}
                                     </div>
-                                    <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                                    <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
                                         {userTasks.length} Görev Atandı
-                                        <ul style={{ margin: '6px 0 0 16px', padding: 0, color: '#64748b', listStyle: 'none' }}>
+                                        <ul style={{ margin: '4px 0 0 14px', padding: 0, color: '#64748b', listStyle: 'none' }}>
                                             {userTasks.slice(0, 3).map(t => (
-                                                <li key={t.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '2px 0', position: 'relative', paddingLeft: '12px' }}>
-                                                    <span style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: '4px', height: '4px', borderRadius: '50%', background: '#818cf8' }} />
+                                                <li key={t.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '1px 0', position: 'relative', paddingLeft: '10px', fontSize: '0.75rem' }}>
+                                                    <span style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: '3px', height: '3px', borderRadius: '50%', background: '#818cf8' }} />
                                                     {t.title}
                                                 </li>
                                             ))}
-                                            {userTasks.length > 3 && <li style={{ paddingLeft: '12px', color: '#4b5563' }}>+ {userTasks.length - 3} diğer</li>}
+                                            {userTasks.length > 3 && <li style={{ paddingLeft: '10px', color: '#4b5563', fontSize: '0.75rem' }}>+ {userTasks.length - 3} diğer</li>}
                                         </ul>
                                     </div>
                                 </div>
@@ -365,7 +365,7 @@ const TaskPool = () => {
             {loading ? (
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '60px' }}><div className="spinner"></div></div>
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {filteredTasks.length === 0 ? (
                         <div className="tp-empty">
                             <FolderArchive size={48} />
@@ -380,29 +380,29 @@ const TaskPool = () => {
                                 <div key={task.id} className={cardClass} style={{ zIndex: menuOpenId === task.id ? 100 : 1 }}>
                                     {/* LEFT CONTENT */}
                                     <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px', flexWrap: 'wrap' }}>
                                             <span className={`tp-status ${isSahada ? 'tp-status--active' : 'tp-status--waiting'}`}>
                                                 {isSahada ? 'SAHADA' : 'BEKLİYOR'}
                                             </span>
 
                                             {task.region && (
-                                                <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                    <MapPin size={13} /> {task.region}
+                                                <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                    <MapPin size={11} /> {task.region}
                                                 </span>
                                             )}
                                         </div>
 
-                                        <h3 style={{ margin: '0 0 6px 0', fontSize: '1.15rem', fontWeight: '700', color: '#f1f5f9', letterSpacing: '-0.3px', background: 'none', WebkitBackgroundClip: 'unset', WebkitTextFillColor: 'unset' }}>
+                                        <h3 style={{ margin: '0 0 3px 0', fontSize: '1rem', fontWeight: '700', color: '#f1f5f9', letterSpacing: '-0.3px', background: 'none', WebkitBackgroundClip: 'unset', WebkitTextFillColor: 'unset' }}>
                                             {task.title}
                                         </h3>
 
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#94a3b8', fontSize: '0.9rem' }}>
-                                            <MapPin size={14} color="#475569" />
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#94a3b8', fontSize: '0.82rem' }}>
+                                            <MapPin size={12} color="#475569" />
                                             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.address}</span>
                                         </div>
 
                                         {task.source === 'email' && !task.verified_by && (
-                                            <div style={{ marginTop: '10px' }}>
+                                            <div style={{ marginTop: '6px' }}>
                                                 <span className="tp-verify-badge">
                                                     <AlertTriangle size={13} /> KONTROL BEKLİYOR
                                                 </span>
@@ -410,72 +410,74 @@ const TaskPool = () => {
                                         )}
                                     </div>
 
-                                    {/* MIDDLE: Assignees & Date */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', flexShrink: 0 }}>
-                                        {task.assigned_users && task.assigned_users.length > 0 ? (
-                                            <div className="tp-avatar-stack" title={task.assigned_users.map(u => u?.username).join(', ')}>
-                                                {task.assigned_users.map(u => {
-                                                    if (!u) return null;
-                                                    return u.photo_url ?
-                                                        <img key={u.id} src={u.photo_url} alt={u.username} /> :
-                                                        <div key={u.id} className="tp-initials" style={{ backgroundColor: stringToColor(u.username || '?') }}>{getInitials(u.username)}</div>;
-                                                })}
-                                            </div>
-                                        ) : (
-                                            <span style={{ fontSize: '0.82rem', color: '#475569', fontStyle: 'italic' }}>Atama Yok</span>
-                                        )}
+                                    {/* RIGHT SIDE: Assignees + Date + Actions */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
+                                            {task.assigned_users && task.assigned_users.length > 0 ? (
+                                                <div className="tp-avatar-stack" title={task.assigned_users.map(u => u?.username).join(', ')}>
+                                                    {task.assigned_users.map(u => {
+                                                        if (!u) return null;
+                                                        return u.photo_url ?
+                                                            <img key={u.id} src={u.photo_url} alt={u.username} /> :
+                                                            <div key={u.id} className="tp-initials" style={{ backgroundColor: stringToColor(u.username || '?') }}>{getInitials(u.username)}</div>;
+                                                    })}
+                                                </div>
+                                            ) : (
+                                                <span style={{ fontSize: '0.82rem', color: '#475569', fontStyle: 'italic' }}>Atama Yok</span>
+                                            )}
 
-                                        {task.due_date && (
-                                            <div style={{ fontSize: '0.78rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <Clock size={13} /> {new Date(task.due_date).toLocaleDateString('tr-TR')}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* RIGHT: Actions */}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative', flexShrink: 0 }}>
-                                        <button
-                                            className="tp-action-btn tp-action-btn--whatsapp"
-                                            onClick={(e) => { e.stopPropagation(); handleWhatsAppShare(task); }}
-                                            title="WhatsApp"
-                                        >
-                                            <MessageCircle size={18} strokeWidth={2.5} />
-                                        </button>
-
-                                        <button
-                                            className="tp-action-btn tp-action-btn--assign"
-                                            onClick={(e) => { e.stopPropagation(); openAssignModal(task); }}
-                                            title="Personel Ata"
-                                        >
-                                            <UserPlus size={18} strokeWidth={2.5} />
-                                        </button>
-
-                                        <div style={{ position: 'relative' }}>
-                                            <button
-                                                className="tp-action-btn tp-action-btn--menu"
-                                                onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === task.id ? null : task.id); }}
-                                            >
-                                                <MoreVertical size={18} />
-                                            </button>
-
-                                            {menuOpenId === task.id && (
-                                                <div className="tp-dropdown">
-                                                    <button onClick={() => openViewModal(task)}>
-                                                        <Eye size={15} /> Görüntüle
-                                                    </button>
-                                                    <button onClick={() => openEditModal(task)}>
-                                                        <Edit2 size={15} /> Düzenle
-                                                    </button>
-                                                    {task.source === 'email' && !task.verified_by && (
-                                                        <button className="success" onClick={() => handleVerify(task.id)}>
-                                                            <CheckCircle size={15} /> Onayla
-                                                        </button>
-                                                    )}
-                                                    <button className="danger" onClick={() => handleDelete(task.id)}>
-                                                        <Trash2 size={15} /> Sil
-                                                    </button>
+                                            {task.due_date && (
+                                                <div style={{ fontSize: '0.78rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    <Clock size={13} /> {new Date(task.due_date).toLocaleDateString('tr-TR')}
                                                 </div>
                                             )}
+                                        </div>
+
+                                        {/* Action Buttons */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', position: 'relative', flexShrink: 0 }}>
+                                            <button
+                                                className="tp-action-btn tp-action-btn--whatsapp"
+                                                onClick={(e) => { e.stopPropagation(); handleWhatsAppShare(task); }}
+                                                title="WhatsApp"
+                                            >
+                                                <MessageCircle size={16} strokeWidth={2.5} />
+                                            </button>
+
+                                            <button
+                                                className="tp-action-btn tp-action-btn--assign"
+                                                onClick={(e) => { e.stopPropagation(); openAssignModal(task); }}
+                                                title="Personel Ata"
+                                            >
+                                                <UserPlus size={16} strokeWidth={2.5} />
+                                            </button>
+
+                                            <div style={{ position: 'relative' }}>
+                                                <button
+                                                    className="tp-action-btn tp-action-btn--menu"
+                                                    onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === task.id ? null : task.id); }}
+                                                >
+                                                    <MoreVertical size={16} />
+                                                </button>
+
+                                                {menuOpenId === task.id && (
+                                                    <div className="tp-dropdown">
+                                                        <button onClick={() => openViewModal(task)}>
+                                                            <Eye size={15} /> Görüntüle
+                                                        </button>
+                                                        <button onClick={() => openEditModal(task)}>
+                                                            <Edit2 size={15} /> Düzenle
+                                                        </button>
+                                                        {task.source === 'email' && !task.verified_by && (
+                                                            <button className="success" onClick={() => handleVerify(task.id)}>
+                                                                <CheckCircle size={15} /> Onayla
+                                                            </button>
+                                                        )}
+                                                        <button className="danger" onClick={() => handleDelete(task.id)}>
+                                                            <Trash2 size={15} /> Sil
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

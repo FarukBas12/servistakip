@@ -824,12 +824,12 @@ h3 {
 /* Task Card - No layout shift on hover */
 .tp-card {
     position: relative;
-    padding: 22px 24px;
-    border-radius: 18px;
+    padding: 14px 18px 14px 26px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
+    gap: 14px;
     transition: box-shadow 0.25s ease, border-color 0.25s ease;
     overflow: visible;
 }
@@ -845,11 +845,10 @@ h3 {
     content: '';
     position: absolute;
     left: 0;
-    top: 12px;
-    bottom: 12px;
+    top: 0;
+    bottom: 0;
     width: 4px;
-    border-radius: 0 4px 4px 0;
-    transition: height 0.2s;
+    border-radius: 14px 0 0 14px;
 }
 
 .tp-card--waiting::before {
@@ -882,13 +881,13 @@ h3 {
 
 /* Status Pill */
 .tp-status {
-    padding: 5px 14px;
+    padding: 3px 10px;
     border-radius: 20px;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 800;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.6px;
     text-transform: uppercase;
-    backdrop-filter: blur(4px);
+    line-height: 1.4;
 }
 
 .tp-status--waiting {
@@ -905,23 +904,24 @@ h3 {
 
 /* Daily Plan Section */
 .tp-daily-plan {
-    padding: 24px;
-    margin-bottom: 28px;
-    border-radius: 20px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+    border-radius: 14px;
     background: linear-gradient(145deg, rgba(99, 102, 241, 0.06) 0%, rgba(59, 130, 246, 0.03) 100%);
     border: 1px solid rgba(99, 102, 241, 0.12);
     backdrop-filter: blur(12px);
 }
 
 .tp-daily-plan h3 {
-    margin: 0 0 18px 0;
-    font-size: 1.15rem;
+    margin: 0 0 12px 0;
+    font-size: 0.95rem;
     background: linear-gradient(135deg, #818cf8, #60a5fa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .tp-daily-plan h3 svg {
@@ -930,8 +930,8 @@ h3 {
 
 .tp-daily-user {
     background: rgba(255, 255, 255, 0.03);
-    padding: 16px;
-    border-radius: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     transition: border-color 0.2s, background 0.2s;
 }
@@ -943,9 +943,9 @@ h3 {
 
 /* Action Buttons */
 .tp-action-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -984,8 +984,8 @@ h3 {
 }
 
 .tp-action-btn--menu {
-    width: 38px;
-    height: 38px;
+    width: 34px;
+    height: 34px;
     background: rgba(255, 255, 255, 0.05);
     color: #999;
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1019,6 +1019,7 @@ h3 {
         opacity: 0;
         transform: translateY(-6px) scale(0.97);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -1061,20 +1062,20 @@ h3 {
     display: flex;
 }
 
-.tp-avatar-stack > * {
-    width: 32px;
-    height: 32px;
+.tp-avatar-stack>* {
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     border: 2px solid #1a1a2e;
     margin-left: -8px;
     transition: transform 0.15s;
 }
 
-.tp-avatar-stack > *:first-child {
+.tp-avatar-stack>*:first-child {
     margin-left: 0;
 }
 
-.tp-avatar-stack > *:hover {
+.tp-avatar-stack>*:hover {
     transform: translateY(-3px);
     z-index: 10;
 }
@@ -1083,7 +1084,7 @@ h3 {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 700;
     color: white;
 }
@@ -1147,13 +1148,13 @@ h3 {
 .tp-verify-badge {
     background: rgba(239, 68, 68, 0.15);
     color: #fca5a5;
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 0.78rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     border: 1px solid rgba(239, 68, 68, 0.2);
     animation: blink 2s infinite;
 }
