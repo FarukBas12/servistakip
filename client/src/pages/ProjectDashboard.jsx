@@ -88,7 +88,7 @@ const ProjectDashboard = () => {
                 </h1>
 
                 {!isTech && (
-                    <button onClick={() => setShowModal(true)} className="glass-btn" style={{ background: 'rgba(76, 175, 80, 0.2)', border: '1px solid #4CAF50' }}>
+                    <button onClick={() => setShowModal(true)} className="glass-btn" style={{ background: 'rgba(99, 102, 241, 0.2)', border: '1px solid rgba(99, 102, 241, 0.4)', color: '#a5b4fc' }}>
                         <Plus size={18} style={{ marginRight: '5px' }} /> Yeni Proje
                     </button>
                 )}
@@ -100,12 +100,13 @@ const ProjectDashboard = () => {
                     style={{
                         background: 'transparent',
                         border: 'none',
-                        color: activeTab === 'active' ? '#4facfe' : 'white',
-                        borderBottom: activeTab === 'active' ? '2px solid #4facfe' : 'none',
+                        color: activeTab === 'active' ? '#6366f1' : '#8b9dc3',
+                        borderBottom: activeTab === 'active' ? '2px solid #6366f1' : '2px solid transparent',
                         padding: '10px 20px',
                         cursor: 'pointer',
-                        fontWeight: 'bold',
-                        fontSize: '1rem'
+                        fontWeight: '600',
+                        fontSize: '0.95rem',
+                        transition: 'color 0.2s ease'
                     }}
                 >
                     Devam Edenler
@@ -115,12 +116,13 @@ const ProjectDashboard = () => {
                     style={{
                         background: 'transparent',
                         border: 'none',
-                        color: activeTab === 'completed' ? '#4facfe' : 'white',
-                        borderBottom: activeTab === 'completed' ? '2px solid #4facfe' : 'none',
+                        color: activeTab === 'completed' ? '#6366f1' : '#8b9dc3',
+                        borderBottom: activeTab === 'completed' ? '2px solid #6366f1' : '2px solid transparent',
                         padding: '10px 20px',
                         cursor: 'pointer',
-                        fontWeight: 'bold',
-                        fontSize: '1rem'
+                        fontWeight: '600',
+                        fontSize: '0.95rem',
+                        transition: 'color 0.2s ease'
                     }}
                 >
                     Tamamlananlar (Arşiv)
@@ -174,12 +176,12 @@ const ProjectDashboard = () => {
                                 >
                                     <div style={{ padding: '20px', display: 'flex', justifyContent: 'space-between' }}>
                                         <div style={{ flex: 1, paddingRight: '10px' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                                <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '600' }}>{project.name}</h3>
-                                                {isOverdue && <span style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem' }}>SÜRE BİTTİ</span>}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                                                <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#fff', fontWeight: '600' }}>{project.name}</h3>
+                                                {isOverdue && <span style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', padding: '3px 10px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.5px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>SÜRE BİTTİ</span>}
                                             </div>
 
-                                            <p style={{ color: '#aaa', fontSize: '0.9rem', height: '40px', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '15px' }}>
+                                            <p style={{ color: '#8b9dc3', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '10px', margin: '0 0 10px 0' }}>
                                                 {project.description || 'Açıklama yok'}
                                             </p>
 
@@ -204,7 +206,7 @@ const ProjectDashboard = () => {
                                                 <circle
                                                     cx="40" cy="40" r={radius}
                                                     fill="none"
-                                                    stroke={isProfitable ? '#ef4444' : '#ef4444'} // Expenses usually red
+                                                    stroke={isProfitable ? '#10b981' : '#ef4444'}
                                                     strokeWidth="6"
                                                     strokeDasharray={circumference}
                                                     strokeDashoffset={offset}
@@ -221,37 +223,37 @@ const ProjectDashboard = () => {
                                         </div>
                                     </div>
 
-                                    {/* Progress Bar Container */}
-                                    <div style={{ background: 'rgba(255,255,255,0.1)', height: '4px', width: '100%' }}>
+                                    {/* Progress Bar */}
+                                    <div style={{ background: 'rgba(255,255,255,0.08)', height: '6px', width: '100%' }}>
                                         <div style={{
                                             width: `${progress}%`,
                                             height: '100%',
-                                            background: progressColor,
+                                            background: `linear-gradient(90deg, ${progressColor}, ${progressColor}cc)`,
+                                            borderRadius: '0 3px 3px 0',
                                             transition: 'width 0.5s ease-in-out'
                                         }} />
                                     </div>
 
-                                    {/* Quick Action: Mark as Completed */}
+                                    {/* Tamamla Button */}
                                     {activeTab === 'active' && !isTech && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleComplete(project.id, project.name);
-                                            }}
-                                            className="glass-btn"
-                                            style={{
-                                                position: 'absolute',
-                                                bottom: '10px',
-                                                right: '10px',
-                                                padding: '5px 10px',
-                                                fontSize: '0.8rem',
-                                                background: 'rgba(16, 185, 129, 0.2)',
-                                                color: '#10b981',
-                                                border: '1px solid #10b981'
-                                            }}
-                                        >
-                                            ✓ Tamamla
-                                        </button>
+                                        <div style={{ padding: '10px 16px', display: 'flex', justifyContent: 'flex-end' }}>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleComplete(project.id, project.name);
+                                                }}
+                                                className="glass-btn"
+                                                style={{
+                                                    padding: '5px 12px',
+                                                    fontSize: '0.78rem',
+                                                    background: 'rgba(16, 185, 129, 0.15)',
+                                                    color: '#10b981',
+                                                    borderColor: 'rgba(16, 185, 129, 0.3)'
+                                                }}
+                                            >
+                                                ✓ Tamamla
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             );
