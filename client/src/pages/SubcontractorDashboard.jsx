@@ -134,7 +134,7 @@ const SubcontractorDashboard = () => {
     return (
         <div className="dashboard">
             <div style={{ marginBottom: '20px' }}>
-                <h2 style={{ margin: 0, fontSize: '1.8rem', background: 'linear-gradient(90deg, #e0e7ff, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Taşeron Yönetimi</h2>
+                <h2 style={{ margin: 0, fontSize: '1.8rem', background: 'linear-gradient(90deg, #e0e7ff, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Taşeron Yönetimi <span style={{ fontSize: '0.8rem', color: '#4caf50' }}>(v2.0.13 - FIXED)</span></h2>
                 <p style={{ margin: '5px 0 0', color: '#5a6d8a' }}>Bakiye takibi ve hakediş işlemleri</p>
             </div>
 
