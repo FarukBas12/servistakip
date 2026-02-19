@@ -215,6 +215,12 @@ exports.createPayment = async (req, res) => {
             waybill_image = req.file.path;
         }
 
+        // Validate Date (Fix for 1700s issue)
+        if (!payment_date || payment_date === 'undefined' || payment_date === 'null') {
+            payment_date = new Date();
+            console.log('Date fixed to now:', payment_date);
+        }
+
         // Calculate total
         const subTotal = items.reduce((acc, item) => acc + (parseFloat(item.quantity) * parseFloat(item.unit_price)), 0);
         const vatRate = parseFloat(kdv_rate) || 0;
@@ -322,6 +328,11 @@ exports.updatePayment = async (req, res) => {
         let waybill_image = null;
         if (req.file) {
             waybill_image = req.file.path;
+        }
+
+        // Validate Date
+        if (!payment_date || payment_date === 'undefined' || payment_date === 'null') {
+            payment_date = new Date();
         }
 
         // Calculate total

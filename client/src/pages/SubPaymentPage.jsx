@@ -25,6 +25,7 @@ const SubPaymentPage = () => {
     const [customPrices, setCustomPrices] = useState({}); // Overridden prices
     const [customNames, setCustomNames] = useState({}); // Overridden names
     const [deletedItemIds, setDeletedItemIds] = useState(new Set()); // Hidden items
+    const [loading, setLoading] = useState(false);
 
     // Modals
     const [showDataModal, setShowDataModal] = useState(false);
@@ -73,6 +74,7 @@ const SubPaymentPage = () => {
     }
 
     const handleSave = async () => {
+        if (loading) return;
         if (!header.store_name || !header.title) return alert('Mağaza ve Hakediş Adı giriniz');
 
         // Filter out deleted items and items with 0 quantity
@@ -90,19 +92,26 @@ const SubPaymentPage = () => {
         formData.append('subcontractor_id', id);
         formData.append('title', header.title);
         formData.append('store_name', header.store_name);
-        formData.append('payment_date', header.date);
+        // Date Validation: Ensure valid date or default to today
+        const validDate = header.date ? header.date : new Date().toISOString().split('T')[0];
+        formData.append('payment_date', validDate);
         formData.append('waybill_info', header.waybill_info);
         formData.append('kdv_rate', header.kdv_rate || 20);
         if (waybillFile) formData.append('waybill', waybillFile);
         formData.append('items', JSON.stringify(items));
 
         try {
+            setLoading(true);
             await api.post('/subs/payments', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             alert('Hakediş Kaydedildi');
             navigate('/admin/subs');
-        } catch (err) { alert('Hata'); }
+        } catch (err) {
+            alert('Hata');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const deleteItem = async (id) => {
@@ -297,8 +306,8 @@ const SubPaymentPage = () => {
                         </span>
                     </div>
 
-                    <button onClick={handleSave} className="glass-btn" style={{ background: '#4caf50', marginTop: '20px', padding: '15px 50px', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                        <Save size={24} style={{ marginRight: '10px' }} /> Hakedişi Kaydet
+                    <button onClick={handleSave} disabled={loading} className="glass-btn" style={{ background: loading ? '#666' : '#4caf50', marginTop: '20px', padding: '15px 50px', fontSize: '1.2rem', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer' }}>
+                        <Save size={24} style={{ marginRight: '10px' }} /> {loading ? 'Kaydediliyor...' : 'Hakedişi Kaydet'}
                     </button>
                 </div>
             </div>

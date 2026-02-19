@@ -4,6 +4,24 @@ import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Edit2, FileText, DollarSign, Trash2, ScrollText } from 'lucide-react';
 import { getInitials, stringToColor } from '../utils/helpers';
 
+// Reusable modal overlay moved outside
+const ModalOverlay = ({ children, onClose }) => (
+    <div
+        onClick={onClose}
+        style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1000
+        }}
+    >
+        <div onClick={e => e.stopPropagation()} className="glass-panel" style={{ width: '400px', maxWidth: '90vw', padding: '28px' }}>
+            {children}
+        </div>
+    </div>
+);
+
 const SubcontractorDashboard = () => {
     const navigate = useNavigate();
     const [subs, setSubs] = useState([]);
@@ -85,24 +103,6 @@ const SubcontractorDashboard = () => {
         if (val < 0) return '#ef4444';
         return '#8b9dc3';
     };
-
-    // Reusable modal overlay
-    const ModalOverlay = ({ children, onClose }) => (
-        <div
-            onClick={onClose}
-            style={{
-                position: 'fixed', inset: 0,
-                background: 'rgba(0,0,0,0.7)',
-                backdropFilter: 'blur(4px)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                zIndex: 1000
-            }}
-        >
-            <div onClick={e => e.stopPropagation()} className="glass-panel" style={{ width: '400px', maxWidth: '90vw', padding: '28px' }}>
-                {children}
-            </div>
-        </div>
-    );
 
     return (
         <div className="dashboard">
