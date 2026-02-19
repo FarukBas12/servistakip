@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import DashboardV2 from '../pages/DashboardV2';
+import AdminDashboard from '../pages/AdminDashboard'; \n// import DashboardV2 from '../pages/DashboardV2';
 import TaskCreate from '../pages/TaskCreate';
 import UserCreate from '../pages/UserCreate';
 import UsersPage from '../pages/Users';
