@@ -11,7 +11,7 @@ const SubPaymentPage = () => {
     const [header, setHeader] = useState({
         store_name: '',
         title: '',
-        date: new Date().toISOString().split('T')[0],
+        date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
         waybill_info: '',
         kdv_rate: 20
     });
