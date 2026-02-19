@@ -1,7 +1,8 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import AdminDashboard from '../pages/AdminDashboard'; \n// import DashboardV2 from '../pages/DashboardV2';
+import AdminDashboard from '../pages/AdminDashboard';
+// import DashboardV2 from '../pages/DashboardV2';
 import TaskCreate from '../pages/TaskCreate';
 import UserCreate from '../pages/UserCreate';
 import UsersPage from '../pages/Users';
@@ -28,7 +29,7 @@ const AdminLayout = () => {
             <Sidebar />
             <div className="admin-content" style={{ flex: 1, minHeight: '100vh', background: 'var(--bg-color)' }}>
                 <Routes>
-                    <Route path="/" element={<DashboardV2 />} />
+                    <Route path="/" element={<AdminDashboard />} />
                     <Route path="/create-task" element={<TaskCreate />} />
                     <Route path="/create-user" element={<UserCreate />} />
                     <Route path="/import-stores" element={<StoreImport />} />
