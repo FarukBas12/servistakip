@@ -25,7 +25,7 @@ const ModalOverlay = ({ children, onClose }) => (
 
 
 const CashPaymentModal = ({ sub, onClose, onSuccess }) => {
-    const [data, setData] = useState({ amount: '', description: '', date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] });
+    const [data, setData] = useState({ amount: '', description: '', transaction_date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] });
 
     const handleSubmit = async () => {
         if (!data.amount) return alert('Tutar giriniz');
@@ -41,7 +41,7 @@ const CashPaymentModal = ({ sub, onClose, onSuccess }) => {
             <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Nakit Ödeme: {sub.name}</h3>
             <div className="form-group">
                 <label style={{ fontSize: '0.85rem', color: '#8b9dc3', display: 'block', marginBottom: '4px' }}>Tarih</label>
-                <input type="date" className="glass-input" value={data.date} onChange={e => setData({ ...data, date: e.target.value })} />
+                <input type="date" className="glass-input" value={data.transaction_date} onChange={e => setData({ ...data, transaction_date: e.target.value })} />
             </div>
             <div className="form-group">
                 <label style={{ fontSize: '0.85rem', color: '#8b9dc3', display: 'block', marginBottom: '4px' }}>Tutar</label>

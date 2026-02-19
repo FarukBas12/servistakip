@@ -259,7 +259,7 @@ const SubLedger = () => {
                                             {isSelected ? <CheckSquare size={20} color="#4caf50" /> : <Square size={20} style={{ opacity: 0.5 }} />}
                                         </div>
                                     </td>
-                                    <td style={{ padding: '10px' }}>{new Date(t.date).toLocaleDateString('tr-TR')}</td>
+                                    <td style={{ padding: '10px' }}>{t.date ? new Date(t.date).toLocaleDateString('tr-TR') : '-'}</td>
                                     <td style={{ padding: '10px' }}>{t.store_name || '-'}</td>
                                     <td style={{ padding: '10px' }}>{t.description} {t.type === 'hakedis' ? '(Hakediş)' : ''}</td>
                                     <td style={{ padding: '10px', color: '#f44336' }}>
