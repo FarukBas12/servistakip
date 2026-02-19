@@ -1,11 +1,26 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import DashboardV2 from '../pages/DashboardV2'; // Fixed & Safe
-// import AdminDashboard from '../pages/AdminDashboard'; // Legacy
+import DashboardV2 from '../pages/DashboardV2';
 import TaskCreate from '../pages/TaskCreate';
-
-// ... (imports)
+import UserCreate from '../pages/UserCreate';
+import UsersPage from '../pages/Users';
+import StoreImport from '../pages/StoreImport';
+import TaskPool from '../pages/TaskPool';
+import GlobalMap from '../pages/GlobalMap';
+import DailyTracking from '../pages/DailyTracking';
+import CompletedTasks from '../pages/CompletedTasks';
+import SubcontractorDashboard from '../pages/SubcontractorDashboard';
+import SubcontractorDetail from '../pages/SubcontractorDetail';
+import SubPaymentPage from '../pages/SubPaymentPage';
+import SubLedger from '../pages/SubLedger';
+import Reports from '../pages/Reports';
+import DailyPlanReport from '../pages/DailyPlanReport';
+import ProjectDashboard from '../pages/ProjectDashboard';
+import ProjectDetail from '../pages/ProjectDetail';
+import StockPage from '../pages/StockPage';
+import Suppliers from '../pages/Suppliers';
+import SettingsPage from '../pages/SettingsPage';
 
 const AdminLayout = () => {
     return (
