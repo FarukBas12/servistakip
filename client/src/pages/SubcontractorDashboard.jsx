@@ -22,6 +22,43 @@ const ModalOverlay = ({ children, onClose }) => (
     </div>
 );
 
+
+
+const CashPaymentModal = ({ sub, onClose, onSuccess }) => {
+    const [data, setData] = useState({ amount: '', description: '', date: new Date().toISOString().split('T')[0] });
+
+    const handleSubmit = async () => {
+        if (!data.amount) return alert('Tutar giriniz');
+        try {
+            await api.post('/subs/cash', { subcontractor_id: sub.id, ...data });
+            alert('Ödeme Kaydedildi');
+            onSuccess();
+        } catch (err) { alert('Hata'); }
+    };
+
+    return (
+        <ModalOverlay onClose={onClose}>
+            <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Nakit Ödeme: {sub.name}</h3>
+            <div className="form-group">
+                <label style={{ fontSize: '0.85rem', color: '#8b9dc3', display: 'block', marginBottom: '4px' }}>Tarih</label>
+                <input type="date" className="glass-input" value={data.date} onChange={e => setData({ ...data, date: e.target.value })} />
+            </div>
+            <div className="form-group">
+                <label style={{ fontSize: '0.85rem', color: '#8b9dc3', display: 'block', marginBottom: '4px' }}>Tutar</label>
+                <input type="number" className="glass-input" placeholder="0.00" value={data.amount} onChange={e => setData({ ...data, amount: e.target.value })} />
+            </div>
+            <div className="form-group">
+                <label style={{ fontSize: '0.85rem', color: '#8b9dc3', display: 'block', marginBottom: '4px' }}>Açıklama</label>
+                <input className="glass-input" placeholder="İsteğe bağlı" value={data.description} onChange={e => setData({ ...data, description: e.target.value })} />
+            </div>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                <button onClick={handleSubmit} className="glass-btn" style={{ flex: 1, background: 'rgba(16, 185, 129, 0.2)', borderColor: 'rgba(16, 185, 129, 0.4)', color: '#86efac' }}>Kaydet</button>
+                <button onClick={onClose} className="glass-btn" style={{ flex: 1 }}>İptal</button>
+            </div>
+        </ModalOverlay>
+    );
+};
+
 const SubcontractorDashboard = () => {
     const navigate = useNavigate();
     const [subs, setSubs] = useState([]);
@@ -29,7 +66,6 @@ const SubcontractorDashboard = () => {
 
     const [showPayModal, setShowPayModal] = useState(false);
     const [selectedSub, setSelectedSub] = useState(null);
-    const [payData, setPayData] = useState({ amount: '', description: '', date: new Date().toISOString().split('T')[0] });
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
@@ -47,16 +83,7 @@ const SubcontractorDashboard = () => {
         } catch (err) { console.error(err); setLoading(false); }
     };
 
-    const handleCashPayload = async () => {
-        if (!payData.amount) return alert('Tutar giriniz');
-        try {
-            await api.post('/subs/cash', { subcontractor_id: selectedSub.id, ...payData });
-            alert('Ödeme Kaydedildi');
-            setShowPayModal(false);
-            setPayData({ amount: '', description: '', date: new Date().toISOString().split('T')[0] });
-            fetchSubs();
-        } catch (err) { alert('Hata'); }
-    };
+
 
     const handleCreateSub = async () => {
         if (!newSub.name) return alert('İsim Giriniz');
@@ -210,26 +237,13 @@ const SubcontractorDashboard = () => {
             </div>
 
             {/* Cash Payment Modal */}
-            {showPayModal && (
-                <ModalOverlay onClose={() => setShowPayModal(false)}>
-                    <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Nakit Ödeme: {selectedSub.name}</h3>
-                    <div className="form-group">
-                        <label style={{ fontSize: '0.85rem', color: '#8b9dc3', display: 'block', marginBottom: '4px' }}>Tarih</label>
-                        <input type="date" className="glass-input" value={payData.date} onChange={e => setPayData({ ...payData, date: e.target.value })} />
-                    </div>
-                    <div className="form-group">
-                        <label style={{ fontSize: '0.85rem', color: '#8b9dc3', display: 'block', marginBottom: '4px' }}>Tutar</label>
-                        <input type="number" className="glass-input" placeholder="0.00" value={payData.amount} onChange={e => setPayData({ ...payData, amount: e.target.value })} />
-                    </div>
-                    <div className="form-group">
-                        <label style={{ fontSize: '0.85rem', color: '#8b9dc3', display: 'block', marginBottom: '4px' }}>Açıklama</label>
-                        <input className="glass-input" placeholder="İsteğe bağlı" value={payData.description} onChange={e => setPayData({ ...payData, description: e.target.value })} />
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-                        <button onClick={handleCashPayload} className="glass-btn" style={{ flex: 1, background: 'rgba(16, 185, 129, 0.2)', borderColor: 'rgba(16, 185, 129, 0.4)', color: '#86efac' }}>Kaydet</button>
-                        <button onClick={() => setShowPayModal(false)} className="glass-btn" style={{ flex: 1 }}>İptal</button>
-                    </div>
-                </ModalOverlay>
+            {/* Cash Payment Modal */}
+            {showPayModal && selectedSub && (
+                <CashPaymentModal
+                    sub={selectedSub}
+                    onClose={() => setShowPayModal(false)}
+                    onSuccess={() => { setShowPayModal(false); fetchSubs(); }}
+                />
             )}
 
             {/* Create Sub Modal */}
