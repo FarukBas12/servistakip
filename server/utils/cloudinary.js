@@ -7,6 +7,8 @@ cloudinary.config({
     api_secret: 'CEqiNkgMKnr0GQ0qh8BvM_57a6s'
 });
 
+const multer = require('multer');
+
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
@@ -14,6 +16,8 @@ const storage = new CloudinaryStorage({
         allowed_formats: ['jpg', 'png', 'jpeg'],
     },
 });
+
+const upload = multer({ storage: storage });
 
 const uploadStream = (buffer) => {
     return new Promise((resolve, reject) => {
@@ -35,5 +39,6 @@ const uploadStream = (buffer) => {
 module.exports = {
     cloudinary,
     storage,
+    upload,
     uploadStream
 };
