@@ -446,7 +446,7 @@ const ProjectDetail = () => {
                     </div>
 
                     <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', color: '#ddd' }}>
+                        <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse', color: '#ddd' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid #444', textAlign: 'left', background: 'rgba(255,255,255,0.05)' }}>
                                     <th style={{ padding: '15px' }}>Tarih</th>
@@ -460,18 +460,18 @@ const ProjectDetail = () => {
                             <tbody>
                                 {expenses.map(exp => (
                                     <tr key={exp.id} style={{ borderBottom: '1px solid #333' }}>
-                                        <td style={{ padding: '15px' }}>{new Date(exp.expense_date).toLocaleDateString()}</td>
-                                        <td style={{ padding: '15px' }}>
+                                        <td style={{ padding: '15px' }} data-label="Tarih">{new Date(exp.expense_date).toLocaleDateString()}</td>
+                                        <td style={{ padding: '15px' }} data-label="Kategori">
                                             <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(255,255,255,0.1)', fontSize: '0.8rem' }}>{exp.category}</span>
                                         </td>
-                                        <td style={{ padding: '15px' }}>{exp.description}</td>
-                                        <td style={{ padding: '15px', fontWeight: 'bold', color: '#f59e0b' }}>{formatCurrency(exp.amount)}</td>
-                                        <td style={{ padding: '15px' }} className="no-print">
+                                        <td style={{ padding: '15px' }} data-label="Açıklama">{exp.description}</td>
+                                        <td style={{ padding: '15px', fontWeight: 'bold', color: '#f59e0b' }} data-label="Tutar">{formatCurrency(exp.amount)}</td>
+                                        <td style={{ padding: '15px' }} className="no-print" data-label="Fiş">
                                             {exp.receipt_url ? (
                                                 <a href={exp.receipt_url} target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa' }}>Görüntüle</a>
                                             ) : '-'}
                                         </td>
-                                        <td style={{ padding: '15px', display: 'flex', gap: '10px' }} className="no-print">
+                                        <td style={{ padding: '15px', display: 'flex', gap: '10px' }} className="no-print" data-label="İşlem">
                                             <button onClick={() => openEditExpense(exp)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#60a5fa' }}><Edit size={16} /></button>
                                             <button onClick={() => handleDeleteExpense(exp.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={16} /></button>
                                         </td>

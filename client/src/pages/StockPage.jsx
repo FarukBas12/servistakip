@@ -571,7 +571,7 @@ const StockPage = () => {
                                         <button onClick={() => setHistoryId(null)} className="glass-btn glass-btn-secondary" style={{ padding: '2px 8px', fontSize: '0.7rem' }}>Kapat</button>
                                     </div>
                                     <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                                        <table className="history-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                        <table className="history-table responsive-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                                             <thead>
                                                 <tr>
                                                     <th>Tarih</th>
@@ -583,15 +583,15 @@ const StockPage = () => {
                                             <tbody>
                                                 {stockHistory.map(h => (
                                                     <tr key={h.id}>
-                                                        <td style={{ color: '#aaa' }}>{new Date(h.transaction_date).toLocaleDateString('tr-TR')} {new Date(h.transaction_date).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</td>
-                                                        <td>
+                                                        <td style={{ color: '#aaa' }} data-label="Tarih">{new Date(h.transaction_date).toLocaleDateString('tr-TR')} {new Date(h.transaction_date).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</td>
+                                                        <td data-label="İşlem">
                                                             {h.type === 'in'
                                                                 ? <span style={{ color: '#22c55e', display: 'flex', alignItems: 'center', gap: '4px' }}><ArrowLeft size={14} /> Giriş</span>
                                                                 : <span style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px' }}>Çıkış <ArrowRight size={14} /></span>
                                                             }
                                                         </td>
-                                                        <td style={{ fontWeight: 'bold' }}>{h.quantity}</td>
-                                                        <td style={{ fontSize: '0.8rem' }}>
+                                                        <td style={{ fontWeight: 'bold' }} data-label="Miktar">{h.quantity}</td>
+                                                        <td style={{ fontSize: '0.8rem' }} data-label="Detay">
                                                             {h.project_name && <div style={{ color: '#4facfe' }}>📂 {h.project_name}</div>}
                                                             <div style={{ color: '#bbb' }}>{h.description}</div>
                                                             <div style={{ color: '#666', fontSize: '0.7rem' }}>👤 {h.username}</div>
@@ -780,7 +780,7 @@ const StockPage = () => {
                             <button onClick={() => setHistoryModalOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><Archive size={18} /></button>
                         </div>
                         <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                            <table className="history-table responsive-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                                 <thead>
                                     <tr style={{ background: 'rgba(255,255,255,0.1)', textAlign: 'left' }}>
                                         <th style={{ padding: '8px' }}>Tarih</th>
@@ -792,15 +792,15 @@ const StockPage = () => {
                                 <tbody>
                                     {stockHistory.map(h => (
                                         <tr key={h.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '8px', color: '#aaa' }}>{new Date(h.transaction_date).toLocaleDateString('tr-TR')}</td>
-                                            <td style={{ padding: '8px' }}>
+                                            <td style={{ padding: '8px', color: '#aaa' }} data-label="Tarih">{new Date(h.transaction_date).toLocaleDateString('tr-TR')}</td>
+                                            <td style={{ padding: '8px' }} data-label="İşlem">
                                                 {h.type === 'in'
                                                     ? <span style={{ color: '#22c55e', display: 'flex', alignItems: 'center', gap: '4px' }}><ArrowLeft size={14} /> Giriş</span>
                                                     : <span style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px' }}>Çıkış <ArrowRight size={14} /></span>
                                                 }
                                             </td>
-                                            <td style={{ padding: '8px', fontWeight: 'bold' }}>{h.quantity}</td>
-                                            <td style={{ padding: '8px', fontSize: '0.8rem' }}>
+                                            <td style={{ padding: '8px', fontWeight: 'bold' }} data-label="Miktar">{h.quantity}</td>
+                                            <td style={{ padding: '8px', fontSize: '0.8rem' }} data-label="Detay">
                                                 {h.project_name && <div style={{ color: '#4facfe' }}>📂 {h.project_name}</div>}
                                                 <div style={{ color: '#bbb' }}>{h.description}</div>
                                                 <div style={{ color: '#666', fontSize: '0.7rem' }}>👤 {h.username}</div>

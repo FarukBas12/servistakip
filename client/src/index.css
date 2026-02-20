@@ -801,6 +801,79 @@ h3 {
     }
 }
 
+/* Responsive Table (Card View on Mobile) */
+@media (max-width: 768px) {
+
+    .responsive-table,
+    .responsive-table tbody,
+    .responsive-table tr,
+    .responsive-table td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .responsive-table thead {
+        display: none;
+    }
+
+    .responsive-table tr {
+        margin-bottom: 15px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .responsive-table td {
+        text-align: right;
+        padding: 10px 0;
+        padding-left: 45%;
+        position: relative;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        min-height: 40px;
+    }
+
+    .responsive-table td:last-child {
+        border-bottom: none;
+        justify-content: center;
+        padding-left: 0;
+    }
+
+    .responsive-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 40%;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .responsive-table td[data-label="Seç"] {
+        padding-left: 0;
+        justify-content: flex-start;
+    }
+
+    .responsive-table td[data-label="Seç"]::before {
+        display: none;
+    }
+
+    .responsive-table td[data-label="İşlemler"] {
+        padding-left: 0;
+        justify-content: flex-end;
+    }
+
+    .responsive-table td[data-label="İşlemler"]::before {
+        display: none;
+    }
+}
+
 .blinking-badge {
     animation: blink 2s infinite;
 }

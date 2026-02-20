@@ -1,48 +1,36 @@
 const express = require('express');
 const router = express.Router();
+const authorize = require('../middleware/authorize');
 const taskController = require('../controllers/taskController');
-const auth = require('../middleware/auth');
-const multer = require('multer');
-const path = require('path');
+const { upload } = require('../utils/cloudinary');
+const { validate, schemas } = require('../middleware/validation'); // Import validation
 
-const { storage } = require('../utils/cloudinary');
+// Get All Tasks (Technician sees assigned, Admin sees all)
+router.get('/', authorize(['admin', 'technician', 'depocu']), taskController.getTasks);
 
-// Init Upload
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 10000000 }, // 10MB
-}).array('photos', 20); // 'photos' is the form field name, max 20 files
+// Get Single Task
+router.get('/:id', authorize(['admin', 'technician', 'depocu']), taskController.getTaskById);
 
-function checkFileType(file, cb) {
-    // Allowed ext
-    const filetypes = /jpeg|jpg|png|gif/;
-    // Check ext
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    // Check mime
-    const mimetype = filetypes.test(file.mimetype);
+// Create Task
+router.post('/', authorize(['admin']), validate(schemas.createTask), taskController.createTask); // Added validation
 
-    if (mimetype && extname) {
-        return cb(null, true);
-    } else {
-        cb('Error: Images Only!');
-    }
-}
+// Update Task
+router.put('/:id', authorize(['admin', 'technician']), validate(schemas.updateTask), taskController.updateTask); // Added validation
 
+// Add Photo (Uses Multer -> Cloudinary)
+// 'photos' is the field name in FormData, max 5 photos at once
+router.post('/:id/photos', authorize(['admin', 'technician']), upload.array('photos', 5), taskController.addPhoto);
 
-// All routes protected
-router.use(auth);
+// Delete Photo
+router.delete('/:id/photos/:photoId', authorize(['admin']), taskController.deletePhoto);
 
-// Routes
-router.get('/', taskController.getTasks);
-router.post('/', taskController.createTask); // Should ideally restrict to Admin
-router.get('/:id', taskController.getTaskById);
-router.put('/:id', taskController.updateTask);
-router.delete('/:id', taskController.deleteTask);
-router.post('/:id/photos', upload, taskController.addPhoto);
-router.delete('/:id/photos/:photoId', taskController.deletePhoto); // NEW: Delete photo
-router.post('/:id/cancel', taskController.cancelTask); // Return task to pool
-router.put('/:id/verify', taskController.verifyTask); // NEW: Verify task (Email check)
+// Delete Task
+router.delete('/:id', authorize(['admin']), taskController.deleteTask);
 
+// Cancel Task (Return to Pool)
+router.post('/:id/cancel', authorize(['technician', 'admin']), taskController.cancelTask);
 
+// Verify Task
+router.put('/:id/verify', authorize(['admin']), taskController.verifyTask);
 
 module.exports = router;

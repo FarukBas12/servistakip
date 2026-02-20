@@ -230,7 +230,7 @@ const SubLedger = () => {
                     Toplam Bakiye: <span style={{ color: totalBalance >= 0 ? '#ff9800' : '#4caf50' }}>{totalBalance.toLocaleString('tr-TR')} ₺</span>
                 </div>
 
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr style={{ textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
                             <th style={{ padding: '10px', width: '40px' }}>
@@ -254,21 +254,21 @@ const SubLedger = () => {
                             const isSelected = selectedIds.has(uniqId);
                             return (
                                 <tr key={uniqId} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: isSelected ? 'rgba(76, 175, 80, 0.1)' : 'transparent' }}>
-                                    <td style={{ padding: '10px' }}>
+                                    <td style={{ padding: '10px' }} data-label="Seç">
                                         <div onClick={() => toggleSelect(uniqId)} style={{ cursor: 'pointer' }}>
                                             {isSelected ? <CheckSquare size={20} color="#4caf50" /> : <Square size={20} style={{ opacity: 0.5 }} />}
                                         </div>
                                     </td>
-                                    <td style={{ padding: '10px' }}>{t.date ? new Date(t.date).toLocaleDateString('tr-TR') : '-'}</td>
-                                    <td style={{ padding: '10px' }}>{t.store_name || '-'}</td>
-                                    <td style={{ padding: '10px' }}>{t.description} {t.type === 'hakedis' ? '(Hakediş)' : ''}</td>
-                                    <td style={{ padding: '10px', color: '#f44336' }}>
+                                    <td style={{ padding: '10px' }} data-label="Tarih">{t.date ? new Date(t.date).toLocaleDateString('tr-TR') : '-'}</td>
+                                    <td style={{ padding: '10px' }} data-label="Mağaza">{t.store_name || '-'}</td>
+                                    <td style={{ padding: '10px' }} data-label="Açıklama">{t.description} {t.type === 'hakedis' ? '(Hakediş)' : ''}</td>
+                                    <td style={{ padding: '10px', color: '#f44336' }} data-label="Borç">
                                         {t.type === 'odeme' ? parseFloat(t.amount).toLocaleString('tr-TR') + ' ₺' : '-'}
                                     </td>
-                                    <td style={{ padding: '10px', color: '#4caf50' }}>
+                                    <td style={{ padding: '10px', color: '#4caf50' }} data-label="Alacak">
                                         {t.type === 'hakedis' ? parseFloat(t.amount).toLocaleString('tr-TR') + ' ₺' : '-'}
                                     </td>
-                                    <td style={{ padding: '10px' }}>
+                                    <td style={{ padding: '10px' }} data-label="İşlemler">
                                         <div style={{ display: 'flex', gap: '5px' }}>
                                             <button onClick={() => handleEdit(t)} className="glass-btn" style={{ padding: '5px' }} title="Düzenle">
                                                 <Edit2 size={16} />

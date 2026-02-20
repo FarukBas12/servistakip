@@ -186,7 +186,7 @@ const SubPaymentPage = () => {
                 </div>
 
                 {/* Table */}
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr style={{ background: 'rgba(255,255,255,0.1)', textAlign: 'left' }}>
                             <th style={{ padding: '12px' }}>Kalem (Düzenlenebilir)</th>
@@ -203,7 +203,7 @@ const SubPaymentPage = () => {
                             const total = qty * unitPrice;
                             return (
                                 <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: qty > 0 ? 'rgba(76, 175, 80, 0.1)' : 'transparent' }}>
-                                    <td style={{ padding: '8px' }}>
+                                    <td style={{ padding: '8px' }} data-label="Kalem">
                                         <input
                                             className="glass-input"
                                             value={customNames[p.id] !== undefined ? customNames[p.id] : p.work_item}
@@ -211,7 +211,7 @@ const SubPaymentPage = () => {
                                             style={{ width: '100%' }}
                                         />
                                     </td>
-                                    <td style={{ padding: '8px' }}>
+                                    <td style={{ padding: '8px' }} data-label="Birim Fiyat">
                                         <input
                                             type="number"
                                             className="glass-input"
@@ -221,7 +221,7 @@ const SubPaymentPage = () => {
                                         />
                                         <span style={{ marginLeft: '5px', fontSize: '0.8rem', opacity: 0.6 }}>₺</span>
                                     </td>
-                                    <td style={{ padding: '8px' }}>
+                                    <td style={{ padding: '8px' }} data-label="Metraj">
                                         <input
                                             type="number"
                                             className="glass-input"
@@ -231,10 +231,10 @@ const SubPaymentPage = () => {
                                             onChange={e => setQuantities({ ...quantities, [p.id]: e.target.value })}
                                         />
                                     </td>
-                                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>
+                                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold' }} data-label="Tutar">
                                         {total > 0 ? total.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) + ' ₺' : '-'}
                                     </td>
-                                    <td style={{ padding: '8px', textAlign: 'center' }}>
+                                    <td style={{ padding: '8px', textAlign: 'center' }} data-label="İşlem">
                                         <button onClick={() => deleteItem(p.id)} className="glass-btn" style={{ padding: '5px', color: '#f44336' }} title="Listeden Çıkar">
                                             <Trash2 size={18} />
                                         </button>

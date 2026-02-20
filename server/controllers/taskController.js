@@ -122,25 +122,31 @@ exports.updateTask = async (req, res) => {
             // Clear existing
             await db.query('DELETE FROM task_assignments WHERE task_id = $1', [id]);
 
-            // Insert New
-            const userIds = Array.isArray(assigned_to) ? assigned_to : [assigned_to];
-            // Filter out null/empty if any
-            const validIds = userIds.filter(uid => uid);
-
-            for (const uid of validIds) {
-                await db.query('INSERT INTO task_assignments (task_id, user_id) VALUES ($1, $2)', [id, uid]);
-            }
-        }
-
-        // Return updated task with new assignments
-        const result = await exports.getTaskByIdInternal(id); // Helper to get full object
-
-        // NOTIFICATION FOR NEW ASSIGNMENTS
-        if (assigned_to !== undefined && result) {
+            // Insert New (Bulk Insert)
             const userIds = Array.isArray(assigned_to) ? assigned_to : [assigned_to];
             const validIds = userIds.filter(uid => uid);
-            for (const uid of validIds) {
-                await notificationController.createNotification(uid, `Size yeni bir görev atandı: ${result.title}`, 'task');
+
+            if (validIds.length > 0) {
+                // Construct ($1, $2), ($1, $3), ...
+                const values = [];
+                const valueParams = [id];
+                let paramCounter = 2;
+
+                validIds.forEach(uid => {
+                    values.push(`($1, $${paramCounter++})`);
+                    valueParams.push(uid);
+                });
+
+                const insertQuery = `INSERT INTO task_assignments (task_id, user_id) VALUES ${values.join(', ')}`;
+                await db.query(insertQuery, valueParams);
+
+                // NOTIFICATIONS (Still loop effectively, but db write is batched)
+                // Sending notifications is async fire-and-forget ideally, but here we await to ensure delivery
+                // Optimization: Promise.all
+                const notificationPromises = validIds.map(uid =>
+                    notificationController.createNotification(uid, `Size yeni bir görev atandı: ${result ? result.title : 'Görev'}`, 'task')
+                );
+                await Promise.all(notificationPromises);
             }
         }
 

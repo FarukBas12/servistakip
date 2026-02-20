@@ -16,6 +16,8 @@ const ProjectDashboard = React.lazy(() => import('./pages/ProjectDashboard'));
 const ProjectDetail = React.lazy(() => import('./pages/ProjectDetail'));
 
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   return (
     <AuthProvider>
@@ -49,6 +51,7 @@ function App() {
         </Suspense>
         <PWAInstallPrompt />
         <VersionManager />
+        <Toaster position="top-right" toastOptions={{ duration: 3000, style: { background: '#333', color: '#fff' } }} />
       </Router>
     </AuthProvider>
   );
