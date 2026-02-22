@@ -36,6 +36,15 @@ const NotesPage = () => {
         }
     };
 
+    const handleComplete = async (id) => {
+        try {
+            await api.put(`/calendar/${id}`, { completed: true });
+            setNotes(notes.map(n => n.id === id ? { ...n, completed: true } : n));
+        } catch (err) {
+            alert('Güncellenemedi');
+        }
+    };
+
     const filteredNotes = notes.filter(n =>
         n.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (n.description && n.description.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -99,19 +108,30 @@ const NotesPage = () => {
                             </tr>
                         ) : (
                             filteredNotes.map(note => (
-                                <tr key={note.id} style={{ borderBottom: '1px solid var(--glass-border)', transition: 'background 0.2s' }} className="table-row-hover">
+                                <tr key={note.id} style={{
+                                    borderBottom: '1px solid var(--glass-border)',
+                                    transition: 'background 0.2s',
+                                    opacity: note.completed ? 0.6 : 1
+                                }} className="table-row-hover">
                                     <td style={{ padding: '15px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <div style={{ width: '4px', height: '24px', borderRadius: '2px', background: getNoteColor(note.date) }}></div>
-                                            <span style={{ fontWeight: 500 }}>{new Date(note.date).toLocaleDateString('tr-TR')}</span>
+                                            <div style={{ width: '4px', height: '24px', borderRadius: '2px', background: note.completed ? '#aaa' : getNoteColor(note.date) }}></div>
+                                            <span style={{ fontWeight: 500, textDecoration: note.completed ? 'line-through' : 'none' }}>{new Date(note.date).toLocaleDateString('tr-TR')}</span>
                                         </div>
                                     </td>
-                                    <td style={{ padding: '15px', fontWeight: 600 }}>{note.title}</td>
-                                    <td style={{ padding: '15px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{note.description || '—'}</td>
+                                    <td style={{ padding: '15px', fontWeight: 600, textDecoration: note.completed ? 'line-through' : 'none' }}>{note.title}</td>
+                                    <td style={{ padding: '15px', color: 'var(--text-secondary)', fontSize: '0.9rem', textDecoration: note.completed ? 'line-through' : 'none' }}>{note.description || '—'}</td>
                                     <td style={{ padding: '15px', textAlign: 'right' }}>
-                                        <button onClick={() => handleDelete(note.id)} className="icon-btn" style={{ color: 'var(--danger)', opacity: 0.7 }}>
-                                            <Trash2 size={18} />
-                                        </button>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                                            {!note.completed && (
+                                                <button onClick={() => handleComplete(note.id)} title="Tamamlandı" className="icon-btn" style={{ color: 'var(--success)', opacity: 0.7 }}>
+                                                    <Calendar size={18} />
+                                                </button>
+                                            )}
+                                            <button onClick={() => handleDelete(note.id)} title="Sil" className="icon-btn" style={{ color: 'var(--danger)', opacity: 0.7 }}>
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))

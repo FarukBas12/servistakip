@@ -6,6 +6,7 @@ import StatCard from '../components/Dashboard/StatCard';
 import WeatherWidget from '../components/Dashboard/WeatherWidget';
 import CalendarWidget from '../components/Dashboard/CalendarWidget';
 import NotesWidget from '../components/Dashboard/NotesWidget';
+import NoteAlert from '../components/Dashboard/NoteAlert';
 
 const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
@@ -20,6 +21,7 @@ const AdminDashboard = () => {
     const [weather, setWeather] = useState(null);
     const [cityName, setCityName] = useState('..');
     const [notes, setNotes] = useState([]);
+    const [todayNotes, setTodayNotes] = useState([]);
 
     // Calendar State
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -74,7 +76,16 @@ const AdminDashboard = () => {
     };
 
     const loadNotes = async () => {
-        try { const res = await api.get('/calendar'); setNotes(res.data.filter(n => !n.completed)); } catch (e) { }
+        try {
+            const res = await api.get('/calendar');
+            const allNotes = res.data.filter(n => !n.completed);
+            setNotes(allNotes);
+
+            // Filter for today's notes that haven't been dismissed in this session
+            const todayStr = new Date().toISOString().split('T')[0];
+            const alerts = allNotes.filter(n => n.date.startsWith(todayStr));
+            setTodayNotes(alerts);
+        } catch (e) { }
     };
 
     const handleDayClick = (day) => {
@@ -103,6 +114,17 @@ const AdminDashboard = () => {
             await api.delete(`/calendar/${id}`);
             loadNotes();
         } catch (err) { alert('Hata'); }
+    };
+
+    const handleCompleteNote = async (id) => {
+        try {
+            await api.put(`/calendar/${id}`, { completed: true });
+            loadNotes(); // Refresh to remove completed
+        } catch (err) { alert('Güncellenemedi'); }
+    };
+
+    const handleDismissAlert = (id) => {
+        setTodayNotes(todayNotes.filter(n => n.id !== id));
     };
 
     // Sorting & Coloring Logic
@@ -176,6 +198,12 @@ const AdminDashboard = () => {
                     <p style={{ color: 'var(--text-secondary)' }}>Sistem durumu ve özet raporlar</p>
                 </div>
             </div>
+
+            <NoteAlert
+                notes={todayNotes}
+                onComplete={handleCompleteNote}
+                onClose={handleDismissAlert}
+            />
 
             {/* KPI WIDGETS */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '30px' }}>
