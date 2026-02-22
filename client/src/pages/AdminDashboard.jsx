@@ -146,11 +146,11 @@ const AdminDashboard = () => {
                     borderRadius: '8px', cursor: 'pointer', position: 'relative',
                     background: isToday ? 'rgba(99, 102, 241, 0.25)' : 'transparent',
                     border: isToday ? '1px solid rgba(99, 102, 241, 0.5)' : 'none',
-                    color: isToday ? '#818cf8' : 'white',
+                    color: isToday ? 'var(--primary)' : 'var(--text-primary)',
                     fontWeight: isToday ? 'bold' : 'normal',
-                    transition: 'background 0.2s'
+                    transition: 'all 0.2s'
                 }}
-                    onMouseEnter={e => !isToday && (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                    onMouseEnter={e => !isToday && (e.currentTarget.style.background = 'var(--glass-surface)')}
                     onMouseLeave={e => !isToday && (e.currentTarget.style.background = 'transparent')}
                 >
                     {i}
@@ -170,10 +170,10 @@ const AdminDashboard = () => {
         <div className="dashboard fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <div>
-                    <h1 style={{ marginBottom: '5px', fontSize: '2.4rem', background: 'linear-gradient(90deg, #e0e7ff, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    <h1 style={{ marginBottom: '5px', fontSize: '2.4rem', background: 'linear-gradient(90deg, var(--primary), var(--secondary))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                         Genel Bakış
                     </h1>
-                    <p style={{ color: '#5a6d8a' }}>Sistem durumu ve özet raporlar</p>
+                    <p style={{ color: 'var(--text-secondary)' }}>Sistem durumu ve özet raporlar</p>
                 </div>
             </div>
 
@@ -225,14 +225,14 @@ const AdminDashboard = () => {
 
             {/* NEW NOTE MODAL */}
             {showNoteModal && (
-                <div className="fade-in" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(5px)' }}>
-                    <div className="glass-panel" style={{ width: '90%', maxWidth: '400px', padding: '30px', background: '#1e1e1e', position: 'relative', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <button onClick={() => setShowNoteModal(false)} style={{ position: 'absolute', top: 15, right: 15, background: 'transparent', border: 'none', color: '#666', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+                <div className="fade-in" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.6)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
+                    <div className="glass-panel" style={{ width: '90%', maxWidth: '400px', padding: '30px', position: 'relative' }}>
+                        <button onClick={() => setShowNoteModal(false)} style={{ position: 'absolute', top: 15, right: 15, background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
                         <h3 style={{ marginBottom: '20px' }}>Yeni Not Ekle ({new Date(selectedDate).toLocaleDateString('tr-TR')})</h3>
                         <form onSubmit={handleAddNote} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                             <input className="glass-input" autoFocus placeholder="Başlık" value={newNote.title} onChange={e => setNewNote({ ...newNote, title: e.target.value })} required style={{ padding: '12px' }} />
                             <textarea className="glass-input" rows="3" placeholder="Açıklama" value={newNote.description} onChange={e => setNewNote({ ...newNote, description: e.target.value })} style={{ padding: '12px' }} />
-                            <button type="submit" className="glass-btn primary-btn" style={{ padding: '12px', width: '100%' }}>Kaydet</button>
+                            <button type="submit" className="glass-btn glass-btn-primary" style={{ padding: '12px', width: '100%' }}>Kaydet</button>
                         </form>
                     </div>
                 </div>
