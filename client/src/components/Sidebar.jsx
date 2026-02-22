@@ -1,10 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Inbox, Users, LogOut, FolderOpen, Package, Truck, Settings } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { LayoutDashboard, Inbox, Users, LogOut, FolderOpen, Package, Truck, Settings, Sun, Moon } from 'lucide-react';
 
 const Sidebar = () => {
     const { user, logout } = useAuth();
+    const { isDarkMode, toggleTheme } = useTheme();
     const isTech = user?.role === 'technician';
 
     const menuItems = [
@@ -55,6 +57,19 @@ const Sidebar = () => {
                 <span className="sidebar-icon"><Settings size={22} /></span>
                 <span className="sidebar-label">Ayarlar</span>
             </NavLink>
+
+            {/* Theme Toggle */}
+            <button
+                className="sidebar-link"
+                onClick={toggleTheme}
+                title={isDarkMode ? 'Aydınlık Mod' : 'Karanlık Mod'}
+                style={{ cursor: 'pointer', background: 'transparent', border: 'none' }}
+            >
+                <span className="sidebar-icon">
+                    {isDarkMode ? <Sun size={22} color="#fbbf24" /> : <Moon size={22} color="#6366f1" />}
+                </span>
+                <span className="sidebar-label">{isDarkMode ? 'Aydınlık' : 'Karanlık'}</span>
+            </button>
 
             {/* Logout */}
             <button className="sidebar-logout" onClick={logout} title="Çıkış Yap">

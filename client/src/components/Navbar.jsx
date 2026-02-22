@@ -1,10 +1,12 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, NavLink } from 'react-router-dom';
-import { List } from 'lucide-react';
+import { List, Sun, Moon } from 'lucide-react';
 import NotificationBell from './NotificationBell';
+import { useTheme } from '../context/ThemeContext';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
+    const { isDarkMode, toggleTheme } = useTheme();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -52,11 +54,20 @@ const Navbar = () => {
                     )}
                 </span>
             </div>
-            <div>
-                <span style={{ marginRight: '1rem', opacity: 0.8 }}>{user.role}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <span style={{ opacity: 0.8, fontSize: '0.9rem' }}>{user.role}</span>
+
+                <button
+                    onClick={toggleTheme}
+                    className="icon-btn"
+                    title={isDarkMode ? 'Aydınlık Mod' : 'Karanlık Mod'}
+                    style={{ padding: '8px', borderRadius: '50%' }}
+                >
+                    {isDarkMode ? <Sun size={20} color="#fbbf24" /> : <Moon size={20} color="#6366f1" />}
+                </button>
+
                 <NotificationBell />
-                <span style={{ margin: '0 10px' }}></span>
-                <button onClick={handleLogout} className="glass-btn" style={{ background: 'rgba(255, 107, 107, 0.3)', borderColor: 'rgba(255,107,107,0.5)' }}>Çıkış</button>
+                <button onClick={handleLogout} className="glass-btn" style={{ background: 'rgba(255, 107, 107, 0.2)', borderColor: 'rgba(255,107,107,0.3)', padding: '8px 16px' }}>Çıkış</button>
             </div>
         </nav >
     );

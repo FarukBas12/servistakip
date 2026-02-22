@@ -63,6 +63,8 @@ app.use(compression());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+const versionData = JSON.parse(fs.readFileSync(path.join(__dirname, '../version.json'), 'utf8'));
+
 // Debug / Health Check Endpoint (Moved to TOP)
 app.get('/api/health-check', async (req, res) => {
     try {
@@ -77,7 +79,7 @@ app.get('/api/health-check', async (req, res) => {
         }
         res.json({
             status: 'online',
-            version: '2.0.12',
+            version: versionData.version,
             dbConnected: true,
             tableExists: !!tableCheck.rows[0].table_exists,
             rowCount: rowCount,
@@ -121,7 +123,7 @@ app.use('/api/calendar', require('./routes/calendar')); // NEW: Calendar Notes R
 
 // Version Endpoint for Auto-Update
 app.get('/api/version', (req, res) => {
-    res.json({ version: '2.0.12' });
+    res.json({ version: versionData.version });
 });
 
 // The "catchall" handler: for any request that doesn't

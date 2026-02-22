@@ -1,19 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Check } from 'lucide-react';
+import { Bell, Check, BellOff } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
-// Simple "Ding" sound (Base64 MP3)
-const notificationSound = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWgAAAA0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQZAAABAAAAAAAAAAAAAgAAAAAAAPsABBAAAAAAAAAAEFkbWluQPC7/AAA//uQZAAABAAAAAAAAAAAAAgAAAAAAAPsABBAAAAAAAAAAEFkbWluQPC7/AAA//uQZAAABAAAAAAAAAAAAAgAAAAAAAPsABBAAAAAAAAAAEFkbWluQPC7/AAA//uQZAAABAAAAAAAAAAAAAgAAAAAAAPsABBAAAAAAAAAAEFkbWluQPC7/AAA//uQZAAABAAAAAAAAAAAAAgAAAAAAAPsABBAAAAAAAAAAEFkbWluQPC7/AAA//uQZAAABAAAAAAAAAAAAAgAAAAAAAPsABBAAAAAAAAAAEFkbWluQPC7/AAA//uQZAAABAAAAAAAAAAAAAgAAAAAAAPsABBAAAAAAAAAAEFkbWluQPC7/AAA';
-// Note: real base64 needed. I will use a simple beep function or a placeholder URL if base64 is too long.
-// Better approach: Use a standard free sound URL or just browser beep if possible. 
-// Let's use a public URL for a short beep sound for reliability.
 const NOTIFICATION_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
 
 const NotificationBell = ({ placement = 'bottom-right' }) => {
+    const { isDarkMode } = useTheme();
     const [notifications, setNotifications] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const dropdownRef = useRef(null);
-    const audioRef = useRef(new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3')); // Preload audio
+    const audioRef = useRef(new Audio(NOTIFICATION_SOUND_URL));
 
     const playSound = () => {
         audioRef.current.currentTime = 0;
@@ -25,15 +22,11 @@ const NotificationBell = ({ placement = 'bottom-right' }) => {
             const res = await fetch('/api/notifications');
             if (res.ok) {
                 const data = await res.json();
-
-                // Calculate new unread count
                 const newUnreadCount = data.filter(n => !n.is_read).length;
 
-                // SOUND LOGIC: If unread count INCREASED, play sound
                 setUnreadCount(prevCount => {
                     if (newUnreadCount > prevCount) {
-                        // Play sound
-                        audioRef.current.play().catch(e => console.log('Audio play failed (interaction needed):', e));
+                        playSound();
                     }
                     return newUnreadCount;
                 });
@@ -47,11 +40,10 @@ const NotificationBell = ({ placement = 'bottom-right' }) => {
 
     useEffect(() => {
         fetchNotifications();
-        const interval = setInterval(fetchNotifications, 5000); // 5 Seconds Polling (Faster)
+        const interval = setInterval(fetchNotifications, 10000); // 10s polling
         return () => clearInterval(interval);
     }, []);
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -83,61 +75,58 @@ const NotificationBell = ({ placement = 'bottom-right' }) => {
         }
     };
 
-    // Calculate Position styles
     const getDropdownStyle = () => {
         const baseStyle = {
             position: 'absolute',
-            width: '320px',
-            maxHeight: '400px',
-            backgroundColor: 'white',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-            borderRadius: '12px',
+            width: '350px',
+            maxHeight: '450px',
+            backgroundColor: isDarkMode ? 'rgba(13, 19, 33, 0.95)' : 'rgba(255, 255, 255, 0.98)',
+            backdropFilter: 'blur(20px)',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+            borderRadius: '16px',
             zIndex: 1000,
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
-            border: '1px solid #eee'
+            border: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)',
+            animation: 'slideIn 0.2s ease-out'
         };
 
         if (placement === 'right-start') {
             return { ...baseStyle, top: '0', left: '100%', marginLeft: '10px' };
         }
-        // Default: bottom-right
-        return { ...baseStyle, top: '100%', right: '0', marginTop: '10px' };
+        return { ...baseStyle, top: 'calc(100% + 10px)', right: '0' };
     };
 
     return (
         <div style={{ position: 'relative' }} ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
+                className="icon-btn"
                 style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
                     position: 'relative',
-                    color: 'inherit',
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '8px'
+                    padding: '8px',
+                    borderRadius: '50%'
                 }}
             >
-                <Bell size={24} />
+                <Bell size={22} color={unreadCount > 0 ? '#fbbf24' : 'currentColor'} />
                 {unreadCount > 0 && (
                     <span style={{
                         position: 'absolute',
-                        top: '0',
-                        right: '0',
+                        top: '4px',
+                        right: '4px',
                         backgroundColor: '#ef4444',
                         color: 'white',
                         borderRadius: '50%',
                         width: '18px',
                         height: '18px',
-                        fontSize: '11px',
+                        fontSize: '10px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontWeight: 'bold',
-                        border: '2px solid white'
+                        border: isDarkMode ? '2px solid #0d1321' : '2px solid white',
+                        boxShadow: '0 0 10px rgba(239, 68, 68, 0.4)'
                     }}>
                         {unreadCount}
                     </span>
@@ -147,17 +136,18 @@ const NotificationBell = ({ placement = 'bottom-right' }) => {
             {isOpen && (
                 <div style={getDropdownStyle()}>
                     <div style={{
-                        padding: '15px',
-                        borderBottom: '1px solid #eee',
+                        padding: '18px',
+                        borderBottom: isDarkMode ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.05)',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        backgroundColor: '#f9fafb'
-                        // ...
+                        background: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'
                     }}>
-                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                            <h4 style={{ margin: 0, fontSize: '14px', color: '#333' }}>Bildirimler</h4>
-                            <button onClick={playSound} style={{ fontSize: '10px', padding: '2px 5px', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer' }} title="Sesi Test Et">🔊 Test</button>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Bildirimler</h4>
+                            <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: 'rgba(99,102,241,0.2)', color: '#818cf8' }}>
+                                {unreadCount} Yeni
+                            </span>
                         </div>
                         {unreadCount > 0 && (
                             <button
@@ -165,65 +155,82 @@ const NotificationBell = ({ placement = 'bottom-right' }) => {
                                 style={{
                                     background: 'none',
                                     border: 'none',
-                                    color: '#2563eb',
-                                    fontSize: '12px',
+                                    color: '#818cf8',
+                                    fontSize: '0.8rem',
                                     cursor: 'pointer',
                                     fontWeight: '500'
                                 }}
                             >
-                                Tümünü Okundu İşaretle
+                                Tümünü Oku
                             </button>
                         )}
                     </div>
 
-                    <div style={{ overflowY: 'auto', maxHeight: '350px' }}>
+                    <div style={{ overflowY: 'auto', maxHeight: '350px' }} className="scrollbar-hidden">
                         {notifications.length === 0 ? (
-                            <div style={{ padding: '20px', textAlign: 'center', color: '#999', fontSize: '13px' }}>
-                                Hiç bildirim yok.
+                            <div style={{ padding: '40px 20px', textAlign: 'center', opacity: 0.5 }}>
+                                <BellOff size={32} style={{ marginBottom: '10px', opacity: 0.3 }} />
+                                <p style={{ fontSize: '0.9rem' }}>Henüz bildiriminiz yok.</p>
                             </div>
                         ) : (
                             notifications.map(n => (
                                 <div key={n.id} style={{
-                                    padding: '12px 15px',
-                                    borderBottom: '1px solid #f0f0f0',
-                                    backgroundColor: n.is_read ? 'white' : '#f0f9ff',
+                                    padding: '15px 18px',
+                                    borderBottom: isDarkMode ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.03)',
+                                    backgroundColor: n.is_read ? 'transparent' : (isDarkMode ? 'rgba(99,102,241,0.05)' : 'rgba(99,102,241,0.03)'),
                                     display: 'flex',
                                     alignItems: 'start',
-                                    gap: '10px',
-                                    transition: 'background 0.2s'
-                                }}>
+                                    gap: '12px',
+                                    transition: 'all 0.2s',
+                                    cursor: 'default'
+                                }}
+                                    onMouseEnter={e => e.currentTarget.style.background = isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.01)'}
+                                    onMouseLeave={e => e.currentTarget.style.background = n.is_read ? 'transparent' : (isDarkMode ? 'rgba(99,102,241,0.05)' : 'rgba(99,102,241,0.03)')}
+                                >
                                     <div style={{ flex: 1 }}>
-                                        <p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#333', lineHeight: '1.4' }}>
+                                        <p style={{ margin: '0 0 6px 0', fontSize: '0.9rem', lineHeight: '1.4', fontWeight: n.is_read ? 400 : 500 }}>
                                             {n.message}
                                         </p>
-                                        <span style={{ fontSize: '11px', color: '#999' }}>
+                                        <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>
                                             {new Date(n.created_at).toLocaleString('tr-TR')}
                                         </span>
                                     </div>
                                     {!n.is_read && (
                                         <button
                                             onClick={(e) => markAsRead(n.id, e)}
-                                            style={{
-                                                background: 'none',
-                                                border: 'none',
-                                                cursor: 'pointer',
-                                                color: '#2563eb',
-                                                padding: '4px',
-                                                borderRadius: '50%',
-                                                display: 'flex',
-                                                alignItems: 'center'
-                                            }}
+                                            className="icon-btn"
+                                            style={{ padding: '6px', color: '#818cf8' }}
                                             title="Okundu olarak işaretle"
                                         >
-                                            <Check size={16} />
+                                            <Check size={18} />
                                         </button>
                                     )}
                                 </div>
                             ))
                         )}
                     </div>
+
+                    <Link to="/admin" onClick={() => setIsOpen(false)} style={{
+                        padding: '12px',
+                        textAlign: 'center',
+                        fontSize: '0.85rem',
+                        color: '#818cf8',
+                        borderTop: isDarkMode ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.05)',
+                        background: isDarkMode ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.01)',
+                        textDecoration: 'none',
+                        fontWeight: 500
+                    }}>
+                        Tümünü Gör
+                    </Link>
                 </div>
             )}
+            <style>{`
+                @keyframes slideIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .scrollbar-hidden::-webkit-scrollbar { display: none; }
+            `}</style>
         </div>
     );
 };
