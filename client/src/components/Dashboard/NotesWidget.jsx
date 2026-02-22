@@ -16,10 +16,10 @@ const NotesWidget = ({ sortedNotes, getNoteColor, handleDeleteNote }) => {
                     {sortedNotes.slice(0, 5).map(n => {
                         const color = getNoteColor(n.date);
                         return (
-                            <div key={n.id} style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', display: 'flex', gap: '10px', alignItems: 'center', borderLeft: `3px solid ${color}` }}>
-                                <div style={{ background: '#333', padding: '5px 10px', borderRadius: '6px', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '0.7rem', color: '#888' }}>{new Date(n.date).toLocaleString('tr-TR', { month: 'short' })}</div>
-                                    <div style={{ fontWeight: 'bold', fontSize: '1rem', color }}>{new Date(n.date).getDate()}</div>
+                            <div key={n.id} style={{ padding: '12px', background: 'var(--glass-surface)', borderRadius: '10px', display: 'flex', gap: '10px', alignItems: 'center', borderLeft: `3px solid ${color}`, border: '1px solid var(--glass-border)', borderLeftWidth: '4px' }}>
+                                <div style={{ background: 'rgba(var(--primary), 0.1)', padding: '5px 10px', borderRadius: '6px', textAlign: 'center', border: '1px solid rgba(var(--primary), 0.2)' }}>
+                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{new Date(n.date).toLocaleString('tr-TR', { month: 'short' })}</div>
+                                    <div style={{ fontWeight: 'bold', fontSize: '1rem', color: 'var(--text-primary)' }}>{new Date(n.date).getDate()}</div>
                                 </div>
                                 <div style={{ flex: 1 }}>
                                     <div style={{ fontWeight: 500 }}>{n.title}</div>

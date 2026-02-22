@@ -15,11 +15,11 @@ const WeatherWidget = ({ weather, cityName }) => {
             {weather ? (
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
                     {weather.time.map((t, i) => (
-                        <div key={t} style={{ flex: 1, textAlign: 'center', padding: '15px 5px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
-                            <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '8px' }}>{new Date(t).toLocaleDateString('tr-TR', { weekday: 'short' })}</div>
+                        <div key={t} style={{ flex: 1, textAlign: 'center', padding: '15px 5px', background: 'var(--glass-surface)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>{new Date(t).toLocaleDateString('tr-TR', { weekday: 'short' })}</div>
                             {getWeatherIcon(weather.weather_code[i])}
-                            <div style={{ marginTop: '10px', fontWeight: 'bold' }}>
-                                {Math.round(weather.temperature_2m_max[i])}° <span style={{ color: '#666', fontSize: '0.8rem' }}>{Math.round(weather.temperature_2m_min[i])}°</span>
+                            <div style={{ marginTop: '10px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+                                {Math.round(weather.temperature_2m_max[i])}° <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{Math.round(weather.temperature_2m_min[i])}°</span>
                             </div>
                         </div>
                     ))}

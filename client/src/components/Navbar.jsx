@@ -36,7 +36,7 @@ const Navbar = () => {
                                 to="/tech"
                                 end
                                 style={({ isActive }) => ({
-                                    color: isActive ? '#4facfe' : '#aaa',
+                                    color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
                                     textDecoration: 'none',
                                     fontWeight: 'bold',
                                     fontSize: '0.9rem',

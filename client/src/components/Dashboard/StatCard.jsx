@@ -20,8 +20,8 @@ const StatCard = ({ icon: Icon, title, value, color, gradient }) => {
                 <Icon size={24} />
             </div>
             <div>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>{value}</div>
-                <div style={{ color: '#888', fontSize: '0.9rem' }}>{title}</div>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{value}</div>
+                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{title}</div>
             </div>
         </div>
     );
