@@ -38,15 +38,15 @@
     --secondary: #8b5cf6;
 
     /* Glass System - Light */
-    --glass-bg: rgba(255, 255, 255, 0.8);
-    --glass-border: 1px solid rgba(0, 0, 0, 0.05);
-    --glass-highlight: rgba(255, 255, 255, 0.5);
-    --glass-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: 1px solid rgba(0, 0, 0, 0.12);
+    --glass-highlight: rgba(255, 255, 255, 0.6);
+    --glass-shadow: 0 12px 35px -10px rgba(0, 0, 0, 0.15);
 
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --input-bg: rgba(0, 0, 0, 0.03);
-    --glass-surface: rgba(0, 0, 0, 0.02);
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --input-bg: rgba(0, 0, 0, 0.04);
+    --glass-surface: rgba(0, 0, 0, 0.03);
 
     /* Sidebar - Light */
     --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);

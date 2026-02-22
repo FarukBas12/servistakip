@@ -7,7 +7,7 @@ const NotesWidget = ({ sortedNotes, getNoteColor, handleDeleteNote }) => {
         <div className="glass-panel" style={{ padding: '25px', borderRadius: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <h3 style={{ margin: 0 }}>📌 Yaklaşan Notlar</h3>
-                <Link to="/admin/daily-report" className="glass-btn" style={{ fontSize: '0.8rem', padding: '5px 10px' }}>Tümünü Gör</Link>
+                <Link to="/admin/notes" className="glass-btn" style={{ fontSize: '0.8rem', padding: '5px 10px' }}>Tümünü Gör</Link>
             </div>
             {sortedNotes.length === 0 ? (
                 <p style={{ color: '#666', fontStyle: 'italic' }}>Hiç not bulunmuyor.</p>
