@@ -223,7 +223,7 @@ const CompletedTasks = () => {
                                                         <a href={p.url} target="_blank" rel="noopener noreferrer">
                                                             <img src={p.url} alt={p.type} style={{ height: '100px', borderRadius: '8px', border: p.type === 'service_form' ? '2px solid #2196f3' : '1px solid rgba(255,255,255,0.2)' }} />
                                                         </a>
-                                                        {p.type === 'service_form' && <span style={{ position: 'absolute', bottom: 5, left: 5, background: '#2196f3', color: 'white', fontSize: '9px', padding: '2px 5px', borderRadius: '4px' }}>Servis Formu</span>}
+                                                        {p.type === 'service_form' && <span style={{ position: 'absolute', bottom: 5, left: 5, background: 'var(--primary)', color: '#fff', fontSize: '9px', padding: '2px 5px', borderRadius: '4px' }}>Servis Formu</span>}
                                                     </div>
                                                 ))
                                             ) : (

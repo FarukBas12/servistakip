@@ -931,8 +931,8 @@ h3 {
 
 .tp-card:hover {
     box-shadow:
-        0 0 0 1px rgba(255, 255, 255, 0.12),
-        0 12px 32px -8px rgba(0, 0, 0, 0.45);
+        0 0 0 1px var(--sidebar-border),
+        var(--glass-shadow);
 }
 
 /* Status color strip on left */
@@ -1030,12 +1030,12 @@ h3 {
 }
 
 .tp-daily-user {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--glass-surface);
     padding: 12px 14px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--glass-border);
     border-left: 3px solid rgba(99, 102, 241, 0.4);
-    transition: border-color 0.2s ease;
+    transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
     min-height: 100px;
@@ -1052,13 +1052,13 @@ h3 {
     gap: 8px;
     margin-bottom: 8px;
     padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid var(--glass-border);
 }
 
 .tp-daily-user-name {
     font-weight: 700;
     font-size: 0.85rem;
-    color: #e2e8f0;
+    color: var(--text-primary);
     flex: 1;
 }
 
@@ -1153,15 +1153,15 @@ h3 {
 .tp-action-btn--menu {
     width: 34px;
     height: 34px;
-    background: rgba(255, 255, 255, 0.05);
-    color: #999;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--glass-surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--glass-border);
 }
 
 .tp-action-btn--menu:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.2);
+    background: var(--glass-surface);
+    color: var(--text-primary);
+    border-color: var(--primary);
 }
 
 /* Dropdown Menu */
@@ -1169,13 +1169,13 @@ h3 {
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    background: linear-gradient(180deg, #2c2c2e, #1c1c1e);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-dark);
+    border: 1px solid var(--glass-border);
     border-radius: 14px;
     display: flex;
     flex-direction: column;
     min-width: 190px;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+    box-shadow: var(--glass-shadow);
     overflow: hidden;
     z-index: 9999;
     animation: menuSlideIn 0.15s ease-out;
@@ -1198,7 +1198,7 @@ h3 {
     text-align: left;
     background: transparent;
     border: none;
-    color: #ddd;
+    color: var(--text-primary);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1209,11 +1209,11 @@ h3 {
 }
 
 .tp-dropdown button:hover {
-    background: rgba(255, 255, 255, 0.07);
+    background: var(--glass-surface);
 }
 
 .tp-dropdown button:not(:last-child) {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--glass-border);
 }
 
 .tp-dropdown button.danger {
@@ -1233,7 +1233,7 @@ h3 {
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    border: 2px solid #1a1a2e;
+    border: 2px solid var(--bg-dark);
     margin-left: -8px;
     transition: transform 0.15s;
 }
@@ -1264,11 +1264,11 @@ h3 {
 
 /* Tab Bar */
 .tp-tabs {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--glass-surface);
     padding: 4px;
     border-radius: 14px;
     display: inline-flex;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
 }
 
 .tp-tab {
@@ -1286,9 +1286,9 @@ h3 {
 }
 
 .tp-tab--active {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    background: var(--primary);
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .tp-tab--active-blue {
@@ -1307,8 +1307,8 @@ h3 {
 .tp-empty {
     text-align: center;
     padding: 70px 20px;
-    color: #555;
-    border: 2px dashed rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    border: 2px dashed var(--glass-border);
     border-radius: 20px;
 }
 

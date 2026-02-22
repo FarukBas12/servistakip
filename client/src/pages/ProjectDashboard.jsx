@@ -80,7 +80,7 @@ const ProjectDashboard = () => {
     };
 
     return (
-        <div style={{ padding: '20px', color: 'white' }}>
+        <div style={{ padding: '20px', color: 'var(--text-primary)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <h1 style={{ fontSize: '2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <FolderOpen size={32} color="#6366f1" />
@@ -180,7 +180,7 @@ const ProjectDashboard = () => {
                                         {/* Header */}
                                         <div style={{ padding: '16px 16px 0 16px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
-                                                <h3 style={{ margin: 0, fontSize: '0.95rem', color: '#fff', fontWeight: '600' }}>{project.name}</h3>
+                                                <h3 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: '600' }}>{project.name}</h3>
                                                 {isOverdue && (
                                                     <span style={{
                                                         background: 'rgba(239, 68, 68, 0.12)',

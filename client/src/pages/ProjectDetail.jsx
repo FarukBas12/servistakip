@@ -440,7 +440,7 @@ const ProjectDetail = () => {
                         <button onClick={() => { setEditingExpense(null); setShowExpenseModal(true); }} className="glass-btn" style={{ background: 'rgba(245, 158, 11, 0.2)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
                             <DollarSign size={16} style={{ marginRight: '5px' }} /> Gider Fişi Ekle
                         </button>
-                        <button onClick={handlePrint} className="glass-btn" style={{ background: '#fff', color: '#000' }}>
+                        <button onClick={handlePrint} className="glass-btn glass-btn-primary">
                             <Printer size={16} style={{ marginRight: '5px' }} /> Tabloyu Yazdır
                         </button>
                     </div>
@@ -494,7 +494,7 @@ const ProjectDetail = () => {
                         {team.map(member => (
                             <div key={member.id} className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#fff' }}>
+                                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--glass-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'var(--primary)', border: '1px solid var(--glass-border)' }}>
                                         {member.username.substring(0, 2).toUpperCase()}
                                     </div>
                                     <div>
@@ -519,7 +519,7 @@ const ProjectDetail = () => {
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(8px)' }}>
                     <div className="glass-panel" style={{ padding: '30px', width: '450px', border: '1px solid rgba(255,255,255,0.1)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                            <h3 style={{ margin: 0, color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}><Upload size={20} color="#3b82f6" /> Dosya Yükle (ZIP)</h3>
+                            <h3 style={{ margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px' }}><Upload size={20} color="var(--primary)" /> Dosya Yükle (ZIP)</h3>
                             <button onClick={() => setShowFileModal(false)} style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer' }}><X size={20} /></button>
                         </div>
 
@@ -591,8 +591,8 @@ const ProjectDetail = () => {
                             )}
 
                             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '15px' }}>
-                                <button type="button" onClick={() => setShowExpenseModal(false)} style={{ marginRight: '10px', padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#444', color: 'white' }}>İptal</button>
-                                <button type="submit" style={{ padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#f59e0b', color: 'white' }}>Kaydet</button>
+                                <button type="button" onClick={() => setShowExpenseModal(false)} className="glass-btn" style={{ marginRight: '10px' }}>İptal</button>
+                                <button type="submit" className="glass-btn glass-btn-primary">Kaydet</button>
                             </div>
                         </form>
                     </div>
@@ -631,8 +631,8 @@ const ProjectDetail = () => {
                             </div>
 
                             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '15px' }}>
-                                <button type="button" onClick={() => setShowEditProjectModal(false)} style={{ marginRight: '10px', padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#444', color: 'white' }}>İptal</button>
-                                <button type="submit" style={{ padding: '8px 15px', borderRadius: '5px', border: 'none', background: '#3b82f6', color: 'white' }}>Güncelle</button>
+                                <button type="button" onClick={() => setShowEditProjectModal(false)} className="glass-btn" style={{ marginRight: '10px' }}>İptal</button>
+                                <button type="submit" className="glass-btn glass-btn-primary">Güncelle</button>
                             </div>
                         </form>
                     </div>
@@ -696,10 +696,10 @@ const ProjectDetail = () => {
                                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', color: '#000' }}>
                                     <thead>
                                         <tr style={{ background: '#333', color: 'white' }}>
-                                            <th style={{ padding: '8px', textAlign: 'left', color: '#fff' }}>Tarih</th>
-                                            <th style={{ padding: '8px', textAlign: 'left', color: '#fff' }}>Kategori</th>
-                                            <th style={{ padding: '8px', textAlign: 'left', color: '#fff' }}>Açıklama</th>
-                                            <th style={{ padding: '8px', textAlign: 'right', color: '#fff' }}>Tutar</th>
+                                            <th style={{ padding: '8px', textAlign: 'left', color: 'var(--text-primary)' }}>Tarih</th>
+                                            <th style={{ padding: '8px', textAlign: 'left', color: 'var(--text-primary)' }}>Kategori</th>
+                                            <th style={{ padding: '8px', textAlign: 'left', color: 'var(--text-primary)' }}>Açıklama</th>
+                                            <th style={{ padding: '8px', textAlign: 'right', color: 'var(--text-primary)' }}>Tutar</th>
                                         </tr>
                                     </thead>
                                     <tbody>

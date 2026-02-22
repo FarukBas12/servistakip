@@ -65,7 +65,7 @@ const VersionManager = () => {
                     className="glass-btn"
                     style={{
                         background: '#ef4444', // Red
-                        color: 'white',
+                        color: 'var(--text-primary)',
                         border: 'none',
                         boxShadow: '0 4px 15px rgba(239, 68, 68, 0.4)',
                         padding: '10px 20px',
@@ -93,7 +93,7 @@ const VersionManager = () => {
     // If NO update: Small text (v1.3.8)
     return (
         <div style={{ ...containerStyle, pointerEvents: 'none', opacity: 0.3 }}>
-            <span style={{ fontSize: '0.7rem', color: '#fff', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>
                 v{APP_VERSION}
             </span>
         </div>

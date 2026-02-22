@@ -151,7 +151,7 @@ const TaskCreate = () => {
                 {error && <div style={{ background: '#ff5252', color: 'white', padding: '10px', borderRadius: '5px', marginBottom: '15px' }}>🚨 {error}</div>}
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-                    <div style={{ background: 'rgba(255,255,255,0.1)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', marginBottom: '10px' }}>
+                    <div style={{ background: 'var(--glass-surface)', padding: '10px', borderRadius: '8px', border: '1px solid var(--glass-border)', marginBottom: '10px' }}>
                         <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#90caf9' }}>📍 Bölge Seçimi</label>
                         <select
                             className="glass-input"
@@ -196,7 +196,7 @@ const TaskCreate = () => {
                             multiple
                             accept="image/*"
                             onChange={handleFileChange}
-                            style={{ padding: '10px', background: 'white', color: 'black', width: '100%', borderRadius: '4px' }}
+                            style={{ padding: '10px', background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--glass-border)', width: '100%', borderRadius: '4px' }}
                         />
                         <small style={{ display: 'block', marginTop: '5px', color: '#ddd' }}>Kroki, Arıza, Kapı Girişi vb. (Çoklu Seçim)</small>
                     </div>

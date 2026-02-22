@@ -116,7 +116,7 @@ const NotificationBell = ({ placement = 'bottom-right' }) => {
                         top: '4px',
                         right: '4px',
                         backgroundColor: '#ef4444',
-                        color: 'white',
+                        color: 'var(--text-primary)',
                         borderRadius: '50%',
                         width: '18px',
                         height: '18px',

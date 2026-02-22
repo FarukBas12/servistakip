@@ -65,7 +65,7 @@ const DailyPlanReport = () => {
         if (!reportRef.current) return;
 
         const canvas = await html2canvas(reportRef.current, {
-            backgroundColor: '#ffffff',
+            backgroundColor: isDarkMode ? '#111827' : '#ffffff',
             scale: 2 // High resolution
         });
 
@@ -77,7 +77,7 @@ const DailyPlanReport = () => {
     };
 
     return (
-        <div style={{ padding: '20px', minHeight: '100vh', background: '#121212', color: 'white' }}>
+        <div style={{ padding: '20px', minHeight: '100vh', color: 'var(--text-primary)' }}>
             {/* Control Bar */}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <button onClick={() => navigate('/admin')} className="glass-btn">
@@ -134,7 +134,7 @@ const DailyPlanReport = () => {
                                         <div style={{ padding: '8px 15px', background: 'rgba(255, 107, 107, 0.15)', color: '#ff6b6b', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 'bold', letterSpacing: '1px' }}>
                                             EKİP
                                         </div>
-                                        <span style={{ fontSize: '1.3rem', fontWeight: '600', color: '#fff' }}>{groupName}</span>
+                                        <span style={{ fontSize: '1.3rem', fontWeight: '600', color: 'var(--text-primary)' }}>{groupName}</span>
                                     </div>
 
                                     {/* DRIVER INPUT */}

@@ -410,7 +410,7 @@ const StockPage = () => {
             </div>
 
             <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <h2 style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <Package /> Stok Takibi <span style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'normal' }}>v1.3.8 (Inline History)</span>
                 </h2>
                 <div>
@@ -889,7 +889,7 @@ const StockPage = () => {
                             textAlign: 'center'
                         }}>
                             <div style={{ fontSize: '0.9rem', color: '#818cf8', marginBottom: '8px' }}>Toplam Stok Değeri</div>
-                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'white', textShadow: '0 0 20px rgba(99, 102, 241, 0.5)' }}>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--text-primary)', textShadow: isDarkMode ? '0 0 20px rgba(99, 102, 241, 0.5)' : 'none' }}>
                                 {formatCurrency(getTotalValue())}
                             </div>
                             <div style={{ fontSize: '0.85rem', color: '#aaa', marginTop: '8px' }}>

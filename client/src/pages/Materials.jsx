@@ -84,7 +84,7 @@ const Materials = () => {
 
                 {/* Materials List table */}
                 <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', color: 'white' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', color: 'var(--text-primary)' }}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
                                 <th style={{ padding: '10px', textAlign: 'left' }}>Malzeme</th>

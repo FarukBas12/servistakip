@@ -35,7 +35,7 @@ const Modal = ({ title, children, onClose, maxWidth = '500px' }) => {
                     <X size={18} />
                 </button>
 
-                {title && <h3 style={{ margin: '0 0 20px 0', fontSize: '1.25rem', color: '#fff' }}>{title}</h3>}
+                {title && <h3 style={{ margin: '0 0 20px 0', fontSize: '1.25rem', color: 'var(--text-primary)' }}>{title}</h3>}
 
                 <div style={{ maxHeight: '80vh', overflowY: 'auto', paddingRight: '5px' }}>
                     {children}
