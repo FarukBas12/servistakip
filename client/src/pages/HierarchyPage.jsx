@@ -150,13 +150,13 @@ const HierarchyPage = () => {
 
     if (loading) return <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: 'white' }}>Yükleniyor...</div>;
 
-    // Dynamic Filtering based on Job Titles
-    const owners = users.filter(u => u.job_title === 'Şirket Sahibi' || (u.username === 'admin' && !u.job_title));
-    const coordinators = users.filter(u => u.job_title === 'Şirket Koordinatörü');
-    const accounting = users.filter(u => u.job_title === 'Muhasebe');
-    const siteManagers = users.filter(u => u.job_title === 'Şantiye Şefleri' || u.job_title === 'Şantiye Şefi');
-    const warehouse = users.filter(u => u.job_title === 'Depo Sorumlusu' || (u.role === 'depocu' && !u.job_title));
-    const technicians = users.filter(u => u.job_title === 'Teknisyen' || (u.role === 'technician' && !u.job_title));
+    // Dynamic Filtering based on Job Titles (Excluding 'admin' user)
+    const owners = users.filter(u => u.username !== 'admin' && (u.job_title === 'Şirket Sahibi'));
+    const coordinators = users.filter(u => u.username !== 'admin' && (u.job_title === 'Şirket Koordinatörü'));
+    const accounting = users.filter(u => u.username !== 'admin' && (u.job_title === 'Muhasebe'));
+    const siteManagers = users.filter(u => u.username !== 'admin' && (u.job_title === 'Şantiye Şefleri' || u.job_title === 'Şantiye Şefi'));
+    const warehouse = users.filter(u => u.username !== 'admin' && (u.job_title === 'Depo Sorumlusu' || (u.role === 'depocu' && !u.job_title)));
+    const technicians = users.filter(u => u.username !== 'admin' && (u.job_title === 'Teknisyen' || (u.role === 'technician' && !u.job_title)));
 
     return (
         <div className="dashboard fade-in" style={{ padding: '20px', minHeight: '100vh', paddingBottom: '100px' }}>
