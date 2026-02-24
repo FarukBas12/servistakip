@@ -453,196 +453,289 @@ h4[style*="display: flex"] {
     color: var(--primary);
 }
 
-/* ══════════════════════════════════════════════════════
-   MOBILE BOTTOM TAB BAR  (≤ 768px)
-   Layout: [Panel | Servisler | Projeler | Stok] | [⚙ ☀ 🚪]
-══════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   MOBILE NAVIGATION SYSTEM  (≤ 768px)
+   - Desktop sidebar → hidden
+   - New: Bottom tab bar  (primary routes + ≡ Menü)
+   - New: Slide-in Left Drawer  (all routes + settings + theme + logout)
+══════════════════════════════════════════════════════════════ */
+
+/* Hide elements on desktop */
+.mobile-bottom-bar,
+.mobile-drawer,
+.mobile-drawer-overlay {
+    display: none;
+}
+
 @media (max-width: 768px) {
 
-    /* ── Container: fixed bottom bar ── */
+    /* ── Hide desktop sidebar on mobile ── */
     .sidebar-container {
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        top: auto !important;
-        width: 100% !important;
-        height: auto !important;
-        flex-direction: row !important;
-        align-items: stretch !important;
-        padding: 0 !important;
-        padding-bottom: env(safe-area-inset-bottom, 0px) !important;
-        /* iOS home indicator */
-        border-right: none !important;
-        border-top: 1px solid var(--glass-border) !important;
-        background: var(--sidebar-bg) !important;
-        backdrop-filter: blur(24px) !important;
-        -webkit-backdrop-filter: blur(24px) !important;
-        z-index: 9999 !important;
-        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15) !important;
-    }
-
-    /* ── Logo: hidden on mobile ── */
-    .sidebar-logo-area {
         display: none !important;
     }
 
-    /* ── Main nav: takes remaining space ── */
-    .sidebar-nav {
-        flex: 1 !important;
-        width: auto !important;
-        flex-direction: row !important;
-        align-items: stretch !important;
-        justify-content: space-around !important;
-        overflow: hidden !important;
-        /* no scroll — we hide secondary items */
-        gap: 0 !important;
-        padding: 0 !important;
+    /* ════════════════════════════════
+       BOTTOM TAB BAR
+    ════════════════════════════════ */
+    .mobile-bottom-bar {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: auto;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        background: var(--sidebar-bg);
+        border-top: 1px solid var(--glass-border);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        z-index: 9999;
+        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.18);
     }
 
-    /* ── Secondary items: hidden on mobile ── */
-    .sidebar-link.mobile-secondary {
-        display: none !important;
+    .mobile-tab {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 58px;
+        padding: 8px 2px 6px;
+        text-decoration: none;
+        color: var(--sidebar-link);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        position: relative;
+        transition: color 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        font-family: inherit;
     }
 
-    /* ── Each tab button ── */
-    .sidebar-link {
-        flex: 1 !important;
-        width: auto !important;
-        min-width: 0 !important;
-        height: 58px !important;
-        padding: 8px 2px 6px !important;
-        border-radius: 0 !important;
-        background: transparent !important;
-        flex-shrink: 1 !important;
-        flex-direction: column !important;
-        border: none !important;
-        position: relative !important;
-        transition: color 0.2s, background 0.15s !important;
+    /* Active: colored top pill */
+    .mobile-tab.active {
+        color: var(--primary);
     }
 
-    /* ── Active tab: colored top line + icon glow ── */
-    .sidebar-link.active {
-        color: var(--primary) !important;
-        background: transparent !important;
-        border: none !important;
-    }
-
-    .sidebar-link.active::before {
+    .mobile-tab.active::before {
         content: '';
         position: absolute;
         top: 0;
-        left: 20%;
-        right: 20%;
-        height: 2.5px;
+        left: 18%;
+        right: 18%;
+        height: 3px;
         background: var(--primary);
-        border-radius: 0 0 3px 3px;
+        border-radius: 0 0 4px 4px;
     }
 
-    .sidebar-link.active .sidebar-icon {
-        filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.6)) !important;
-        color: var(--primary) !important;
-        background: transparent !important;
+    .mobile-tab.active .mobile-tab-icon {
+        filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.55));
+        color: var(--primary);
     }
 
-    /* ── Icon ── */
-    .sidebar-link .sidebar-icon {
-        background: transparent !important;
-        filter: none !important;
+    .mobile-tab-icon {
         display: flex;
         align-items: center;
         justify-content: center;
+        margin-bottom: 3px;
+        transition: filter 0.2s;
     }
 
-    /* ── Label ── */
-    .sidebar-link .sidebar-label {
-        opacity: 1 !important;
-        transform: none !important;
-        font-size: 0.58rem !important;
-        font-weight: 500 !important;
-        letter-spacing: 0.01em !important;
-        margin-left: 0 !important;
-        margin-top: 3px !important;
-        text-align: center !important;
+    .mobile-tab-label {
+        font-size: 0.57rem;
+        font-weight: 500;
+        text-align: center;
+        white-space: nowrap;
+        letter-spacing: 0.01em;
     }
 
-    /* ── Sidebar actions: right-side compact group ── */
-    .sidebar-actions {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: stretch !important;
-        flex-shrink: 0 !important;
-        border-left: 1px solid var(--glass-border) !important;
-        padding-left: 2px !important;
-        gap: 0 !important;
-        margin-top: 0 !important;
+    .mobile-menu-btn {
+        color: var(--text-secondary);
     }
 
-    /* Actions reuse sidebar-link style */
-    .sidebar-actions .sidebar-link {
-        flex: none !important;
-        width: 44px !important;
-        min-width: 44px !important;
+    .mobile-tab:active {
+        background: rgba(99, 102, 241, 0.06);
     }
 
-    /* Hide text labels in action buttons on mobile */
-    .sidebar-actions .sidebar-label {
-        display: none !important;
+    /* ════════════════════════════════
+       DRAWER BACKDROP
+    ════════════════════════════════ */
+    .mobile-drawer-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0);
+        z-index: 10000;
+        pointer-events: none;
+        transition: background 0.3s ease;
     }
 
-    /* ── Logout button ── */
-    .sidebar-logout {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
-        background: transparent !important;
-        border: none !important;
-        width: 44px !important;
-        min-width: 44px !important;
-        height: 58px !important;
-        padding: 8px 2px 6px !important;
-        margin: 0 !important;
-        flex-shrink: 0 !important;
-        cursor: pointer !important;
-        color: #ef4444 !important;
-        opacity: 0.75 !important;
-        transition: opacity 0.2s !important;
+    .mobile-drawer-overlay.visible {
+        background: rgba(0, 0, 0, 0.52);
+        pointer-events: all;
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
     }
 
-    .sidebar-logout:active {
-        opacity: 1 !important;
+    /* ════════════════════════════════
+       SLIDE-IN DRAWER (Left)
+    ════════════════════════════════ */
+    .mobile-drawer {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 78vw;
+        max-width: 300px;
+        height: 100dvh;
+        /* dynamic viewport height, handles iOS address bar */
+        background: var(--sidebar-bg);
+        border-right: 1px solid var(--glass-border);
+        backdrop-filter: blur(28px);
+        -webkit-backdrop-filter: blur(28px);
+        z-index: 10001;
+        transform: translateX(-110%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 6px 0 40px rgba(0, 0, 0, 0.28);
+        overscroll-behavior: contain;
+        overflow: hidden;
     }
 
-    .sidebar-logout .sidebar-label {
-        display: none !important;
+    .mobile-drawer.open {
+        transform: translateX(0);
     }
 
-    .sidebar-logout svg {
-        min-width: auto !important;
+    /* ── Drawer Header ── */
+    .mobile-drawer-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px 14px 14px;
+        border-bottom: 1px solid var(--glass-border);
+        flex-shrink: 0;
     }
 
-    /* ── Main content: add bottom padding ── */
-    .dashboard,
-    .admin-content>* {
-        margin-left: 0 !important;
-        padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+    .mobile-drawer-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        flex: 1;
     }
 
-    .admin-content {
-        margin-left: 0 !important;
-    }
-
-    /* ── Tap highlight removal ── */
-    .sidebar-link,
-    .sidebar-logout {
+    .mobile-drawer-close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--glass-surface);
+        border: 1px solid var(--glass-border);
+        border-radius: 8px;
+        width: 32px;
+        height: 32px;
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: background 0.15s, color 0.15s;
         -webkit-tap-highlight-color: transparent;
     }
 
-    /* ── Hover ripple on mobile ── */
-    .sidebar-link:active,
-    .sidebar-logout:active {
-        background: rgba(99, 102, 241, 0.08) !important;
+    .mobile-drawer-close:active {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    /* ── Section Labels ── */
+    .mobile-drawer-section-label {
+        font-size: 0.68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-secondary);
+        opacity: 0.6;
+        margin: 8px 16px 4px;
+        padding: 0;
+    }
+
+    /* ── Scrollable Nav ── */
+    .mobile-drawer-nav {
+        flex: 1;
+        overflow-y: auto;
+        padding: 4px 8px 8px;
+        display: flex;
+        flex-direction: column;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .mobile-drawer-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* ── Nav Links ── */
+    .mobile-drawer-link {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 12px 14px;
+        border-radius: 11px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.93rem;
+        font-weight: 500;
+        background: transparent;
+        border: none;
+        width: 100%;
+        cursor: pointer;
+        text-align: left;
+        font-family: inherit;
+        transition: background 0.15s, color 0.15s;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .mobile-drawer-link:active,
+    .mobile-drawer-link:hover {
+        background: var(--glass-surface);
+        color: var(--text-primary);
+    }
+
+    .mobile-drawer-link.active {
+        background: rgba(99, 102, 241, 0.12);
+        color: var(--primary);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .mobile-drawer-link.danger {
+        color: #ef4444;
+    }
+
+    .mobile-drawer-link.danger:active {
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    .mobile-drawer-link-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 20px;
+    }
+
+    /* ── Footer ── */
+    .mobile-drawer-footer {
+        padding: 4px 8px;
+        padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+        border-top: 1px solid var(--glass-border);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        flex-shrink: 0;
+    }
+
+    /* ════════════════════════════════
+       MAIN CONTENT OFFSET
+    ════════════════════════════════ */
+    .admin-content {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+        padding-bottom: calc(66px + env(safe-area-inset-bottom, 0px)) !important;
     }
 }
 
