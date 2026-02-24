@@ -949,13 +949,15 @@ h4[style*="display: flex"] {
         border-radius: 16px !important;
     }
 
-    /* 3. Grid Stacking */
+    /* 3. Grid Stacking — NOT applied to .glass-panel children because
+       CalendarWidget uses repeat(7, 1fr) internally. Page grids use
+       minmax(min(X, 100%), 1fr) so they auto-stack on small screens. */
     .dashboard>div[style*="grid"],
-    .glass-panel>div[style*="grid"],
     form>div[style*="grid"] {
         grid-template-columns: 1fr !important;
-        gap: 15px !important;
+        gap: 12px !important;
     }
+
 
     /* 4. Flex Wrapping */
     .dashboard>div[style*="flex"],
