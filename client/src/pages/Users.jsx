@@ -10,7 +10,8 @@ const UsersPage = () => {
     const [editingUser, setEditingUser] = useState(null);
     const [formData, setFormData] = useState({
         username: '', password: '', role: 'technician',
-        full_name: '', phone: '', start_date: new Date().toISOString().split('T')[0], photo_url: ''
+        full_name: '', phone: '', start_date: new Date().toISOString().split('T')[0], photo_url: '',
+        job_title: ''
     });
     const [photoUploading, setPhotoUploading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -38,7 +39,8 @@ const UsersPage = () => {
             full_name: user.full_name || '',
             phone: user.phone || '',
             start_date: user.start_date ? user.start_date.split('T')[0] : '',
-            photo_url: user.photo_url || ''
+            photo_url: user.photo_url || '',
+            job_title: user.job_title || ''
         });
         setEditingUser(user);
         setShowUserForm(true);
@@ -47,7 +49,8 @@ const UsersPage = () => {
     const resetForm = () => {
         setFormData({
             username: '', password: '', role: 'technician',
-            full_name: '', phone: '', start_date: new Date().toISOString().split('T')[0], photo_url: ''
+            full_name: '', phone: '', start_date: new Date().toISOString().split('T')[0], photo_url: '',
+            job_title: ''
         });
         setEditingUser(null);
         setShowUserForm(true);
@@ -187,6 +190,11 @@ const UsersPage = () => {
 
                         {/* Info */}
                         <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem' }}>{user.full_name || user.username}</h3>
+                        {user.job_title && (
+                            <p style={{ margin: '0 0 10px 0', color: 'var(--accent-color)', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                {user.job_title}
+                            </p>
+                        )}
                         <p style={{ margin: 0, color: '#666', fontSize: '0.9rem', marginBottom: '15px' }}>@{user.username}</p>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem', color: '#aaa' }}>
@@ -249,10 +257,22 @@ const UsersPage = () => {
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                                 <select className="glass-input" name="role" value={formData.role} onChange={handleUserChange} style={{ background: '#2a2a2a', color: 'white' }}>
-                                    <option value="technician">Teknisyen</option>
-                                    <option value="depocu">Depocu</option>
-                                    <option value="admin">Admin</option>
+                                    <option value="technician">Panel Yetkisi: Teknisyen</option>
+                                    <option value="depocu">Panel Yetkisi: Depocu</option>
+                                    <option value="admin">Panel Yetkisi: Admin</option>
                                 </select>
+                                <select className="glass-input" name="job_title" value={formData.job_title} onChange={handleUserChange} style={{ background: '#2a2a2a', color: 'white' }}>
+                                    <option value="">Görev Ünvanı Seçin</option>
+                                    <option value="Şirket Sahibi">Şirket Sahibi</option>
+                                    <option value="Şirket Koordinatörü">Şirket Koordinatörü</option>
+                                    <option value="Muhasebe">Muhasebe</option>
+                                    <option value="Şantiye Şefi">Şantiye Şefi</option>
+                                    <option value="Depo Sorumlusu">Depo Sorumlusu</option>
+                                    <option value="Teknisyen">Teknisyen</option>
+                                </select>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}>
                                 <input type="date" className="glass-input" name="start_date" value={formData.start_date} onChange={handleUserChange} />
                             </div>
 

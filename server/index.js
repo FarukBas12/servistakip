@@ -162,6 +162,7 @@ app.get('/setup', async (req, res) => {
                 username VARCHAR(50) UNIQUE NOT NULL,
                 password_hash VARCHAR(255) NOT NULL,
                 role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'technician', 'depocu')),
+                job_title VARCHAR(100),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
 
@@ -661,6 +662,10 @@ async function runMigrations() {
         await fixConstraint('tasks', 'verified_by', 'tasks_verified_by_fkey');
         await fixConstraint('stock_transactions', 'user_id', 'stock_transactions_user_id_fkey');
         await fixConstraint('task_logs', 'user_id', 'task_logs_user_id_fkey');
+
+        // NEW: Add job_title to users
+        await db.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS job_title VARCHAR(100)");
+        console.log(' - Checked job_title in users');
 
         console.log('✅ Database Schema Verified & Updated!');
     } catch (e) {

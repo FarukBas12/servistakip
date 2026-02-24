@@ -83,12 +83,9 @@ const HierarchyPage = () => {
         }
     };
 
-    // Helper to get users by role
-    const getUsersByRole = (role) => users.filter(u => u.role === role);
-
     const PersonCard = ({ person, roleKey }) => {
         const isExpanded = expandedRoles[person.id];
-        const desc = jobDescriptions[roleKey] || { title: person.role, tasks: [] };
+        const desc = jobDescriptions[roleKey] || { title: person.job_title || person.role, tasks: [] };
 
         return (
             <div className="glass-panel hierarchy-card" style={{
@@ -119,7 +116,7 @@ const HierarchyPage = () => {
                     <div style={{ flex: 1 }}>
                         <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{person.full_name || person.username}</h4>
                         <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: '500' }}>
-                            {desc.title}
+                            {person.job_title || desc.title}
                         </p>
                     </div>
                     <button
@@ -153,14 +150,13 @@ const HierarchyPage = () => {
 
     if (loading) return <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: 'white' }}>Yükleniyor...</div>;
 
-    // Filter logic based on the user's specific request
-    const owner = users.find(u => u.username === 'admin'); // Assuming admin is the owner
-    const coordinators = users.filter(u => u.role === 'admin' && u.username !== 'admin');
-
-    // For demo purposes, we'll split some users into the requested categories
-    // In a real scenario, these would be based on 'job_title' or similar
-    const technicians = users.filter(u => u.role === 'technician');
-    const warehouse = users.filter(u => u.role === 'depocu');
+    // Dynamic Filtering based on Job Titles
+    const owners = users.filter(u => u.job_title === 'Şirket Sahibi' || (u.username === 'admin' && !u.job_title));
+    const coordinators = users.filter(u => u.job_title === 'Şirket Koordinatörü');
+    const accounting = users.filter(u => u.job_title === 'Muhasebe');
+    const siteManagers = users.filter(u => u.job_title === 'Şantiye Şefleri' || u.job_title === 'Şantiye Şefi');
+    const warehouse = users.filter(u => u.job_title === 'Depo Sorumlusu' || (u.role === 'depocu' && !u.job_title));
+    const technicians = users.filter(u => u.job_title === 'Teknisyen' || (u.role === 'technician' && !u.job_title));
 
     return (
         <div className="dashboard fade-in" style={{ padding: '20px', minHeight: '100vh', paddingBottom: '100px' }}>
@@ -177,7 +173,13 @@ const HierarchyPage = () => {
                 {/* Level 1: Şirket Sahibi */}
                 <div className="hierarchy-level" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <div className="level-badge">Şirket Sahibi</div>
-                    {owner ? <PersonCard person={owner} roleKey="owner" /> : <div className="glass-panel" style={{ padding: '15px', color: '#666' }}>Atanmamış</div>}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+                        {owners.length > 0 ? (
+                            owners.map(u => <PersonCard key={u.id} person={u} roleKey="owner" />)
+                        ) : (
+                            <div className="glass-panel" style={{ padding: '15px', color: '#666' }}>Atanmamış</div>
+                        )}
+                    </div>
                 </div>
 
                 <div className="connector-v"></div>
@@ -202,13 +204,24 @@ const HierarchyPage = () => {
 
                     <div className="hierarchy-column" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 10px' }}>
                         <div className="level-badge" style={{ background: '#ec4899' }}>Muhasebe</div>
-                        <div style={{ fontStyle: 'italic', color: '#555', fontSize: '0.8rem', marginTop: '10px' }}>Genel Muhasebe Bölümü</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+                            {accounting.length > 0 ? (
+                                accounting.map(u => <PersonCard key={u.id} person={u} roleKey="accounting" />)
+                            ) : (
+                                <div style={{ fontStyle: 'italic', color: '#555', fontSize: '0.8rem', marginTop: '10px' }}>Atama Bekleniyor</div>
+                            )}
+                        </div>
                     </div>
 
                     <div className="hierarchy-column" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 10px' }}>
                         <div className="level-badge" style={{ background: '#f59e0b' }}>Şantiye Şefleri</div>
-                        {/* Static mapping for demo until job_title is added */}
-                        {getUsersByRole('admin').slice(0, 1).map(u => <PersonCard key={u.id} person={u} roleKey="site_manager" />)}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+                            {siteManagers.length > 0 ? (
+                                siteManagers.map(u => <PersonCard key={u.id} person={u} roleKey="site_manager" />)
+                            ) : (
+                                <div style={{ fontStyle: 'italic', color: '#555', fontSize: '0.8rem', marginTop: '10px' }}>Atama Bekleniyor</div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -221,14 +234,22 @@ const HierarchyPage = () => {
                     <div className="hierarchy-column" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <div className="level-badge" style={{ background: '#10b981' }}>Depo Ekibi</div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
-                            {warehouse.map(u => <PersonCard key={u.id} person={u} roleKey="depocu" />)}
+                            {warehouse.length > 0 ? (
+                                warehouse.map(u => <PersonCard key={u.id} person={u} roleKey="depocu" />)
+                            ) : (
+                                <div style={{ color: '#555', fontSize: '0.8rem' }}>Bulunamadı</div>
+                            )}
                         </div>
                     </div>
 
                     <div className="hierarchy-column" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <div className="level-badge" style={{ background: '#3b82f6' }}>Teknik Ekip</div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
-                            {technicians.map(u => <PersonCard key={u.id} person={u} roleKey="technician" />)}
+                            {technicians.length > 0 ? (
+                                technicians.map(u => <PersonCard key={u.id} person={u} roleKey="technician" />)
+                            ) : (
+                                <div style={{ color: '#555', fontSize: '0.8rem' }}>Bulunamadı</div>
+                            )}
                         </div>
                     </div>
                 </div>
