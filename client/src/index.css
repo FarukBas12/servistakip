@@ -870,18 +870,58 @@ h4[style*="display: flex"] {
     margin-top: 0;
 }
 
+/* ADMIN LAYOUT WRAPPER */
+.admin-layout-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
 /* ADMIN CONTENT LAYOUT */
 .admin-content {
     padding-left: 80px;
     /* Desktop Sidebar width */
     transition: padding-left 0.3s ease;
+    flex: 1;
+    width: 0;
+    /* prevents flex child from overflowing */
+    min-width: 0;
+}
+
+/* NAVBAR MOBILE */
+@media (max-width: 768px) {
+    nav.glass-panel {
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        margin: 0.5rem !important;
+        padding: 0.75rem !important;
+        border-radius: 14px !important;
+    }
+
+    nav.glass-panel>div:first-child {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
+    nav.glass-panel strong {
+        font-size: 1rem !important;
+    }
+
+    nav.glass-panel>div:last-child {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
+    .admin-layout-wrapper {
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 768px) {
+
+    /* admin-content: padding-bottom is handled by the drawer CSS block above
+       (calc(66px + env(safe-area-inset-bottom))). Do NOT set a duplicate here. */
     .admin-content {
         padding-left: 0 !important;
-        padding-bottom: 80px !important;
-        /* Bottom Bar height space */
     }
 
     /* --- GLOBAL MOBILE FIXES --- */
@@ -899,17 +939,15 @@ h4[style*="display: flex"] {
         font-size: 1.1rem !important;
     }
 
-    p,
-    span,
-    div {
+    /* Only scale paragraph text — NOT span/div (too broad, breaks badges/buttons) */
+    p {
         font-size: 0.95rem;
     }
 
     /* 2. Layout & Padding */
     .dashboard {
-        padding: 15px !important;
-        margin-bottom: 80px !important;
-        /* Space for bottom nav */
+        padding: 16px !important;
+        /* Bottom padding handled by admin-content drawer offset */
     }
 
     .glass-panel {
@@ -917,7 +955,7 @@ h4[style*="display: flex"] {
         border-radius: 16px !important;
     }
 
-    /* 3. Grid Stacking (Force inputs to stack) */
+    /* 3. Grid Stacking */
     .dashboard>div[style*="grid"],
     .glass-panel>div[style*="grid"],
     form>div[style*="grid"] {
@@ -925,40 +963,42 @@ h4[style*="display: flex"] {
         gap: 15px !important;
     }
 
-    /* 4. Flex Wrapping (Force buttons/actions to wrap) */
+    /* 4. Flex Wrapping */
     .dashboard>div[style*="flex"],
     .glass-panel>div[style*="flex"] {
         flex-wrap: wrap !important;
     }
 
-    /* 5. Tables - Horizontal Scroll */
-    table {
-        display: block;
+    /* 5. Tables — scoped to .scrollable-table wrapper only.
+       Global table{ display:block } was breaking .responsive-table card view.
+       Tables that need horizontal scroll should be wrapped in .scrollable-table. */
+    .scrollable-table {
         overflow-x: auto;
-        white-space: nowrap;
         -webkit-overflow-scrolling: touch;
+        border-radius: 12px;
     }
 
-    /* Optional: Fix table width to prevent shrinking */
-    th,
-    td {
-        min-width: 100px;
-        /* Minimum width for readability */
+    .scrollable-table table {
+        min-width: 600px;
     }
 
-    /* 6. Inputs Full Width - EXCLUDE .icon-btn */
+    /* 6. Inputs Full Width */
     .glass-input,
-    select {
+    select:not(.inline-select) {
         width: 100% !important;
         max-width: 100% !important;
     }
-
 
     /* 7. Modal Fixes */
     div[style*="fixed"]>.glass-panel {
         width: 90% !important;
         max-height: 90vh;
         overflow-y: auto;
+    }
+
+    /* 8. Login form */
+    .login-form {
+        padding: 2rem 1.5rem;
     }
 }
 

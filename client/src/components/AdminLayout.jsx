@@ -29,7 +29,7 @@ const HierarchyPage = lazy(() => import('../pages/HierarchyPage'));
 
 const AdminLayout = () => {
     return (
-        <div style={{ display: 'flex' }}>
+        <div className="admin-layout-wrapper">
             <Sidebar />
             <div className="admin-content" style={{ flex: 1, minHeight: '100vh', background: 'var(--bg-color)' }}>
                 <Suspense fallback={<LoadingSpinner />}>

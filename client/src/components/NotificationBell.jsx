@@ -78,13 +78,13 @@ const NotificationBell = ({ placement = 'bottom-right' }) => {
     const getDropdownStyle = () => {
         const baseStyle = {
             position: 'absolute',
-            width: '350px',
+            width: 'min(350px, calc(100vw - 24px))',
             maxHeight: '450px',
-            backgroundColor: isDarkMode ? 'rgba(13, 19, 33, 0.95)' : 'rgba(255, 255, 255, 0.98)',
+            backgroundColor: isDarkMode ? 'rgba(13, 19, 33, 0.97)' : 'rgba(255, 255, 255, 0.98)',
             backdropFilter: 'blur(20px)',
             boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
             borderRadius: '16px',
-            zIndex: 1000,
+            zIndex: 11000,
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
@@ -95,6 +95,7 @@ const NotificationBell = ({ placement = 'bottom-right' }) => {
         if (placement === 'right-start') {
             return { ...baseStyle, top: '0', left: '100%', marginLeft: '10px' };
         }
+        // Default (bottom-right): anchor to right edge, clamp so it doesn't go off-screen left
         return { ...baseStyle, top: 'calc(100% + 10px)', right: '0' };
     };
 

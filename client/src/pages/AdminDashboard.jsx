@@ -213,7 +213,7 @@ const AdminDashboard = () => {
             />
 
             {/* KPI WIDGETS */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '20px', marginBottom: '30px' }}>
                 <StatCard
                     icon={Activity}
                     title="Sahadaki İşler"
@@ -238,7 +238,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* MAIN CONTENT GRID */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(350px, 100%), 1fr))', gap: '20px' }}>
                 <CalendarWidget
                     currentDate={currentDate}
                     prevMonth={prevMonth}
