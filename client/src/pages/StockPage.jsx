@@ -170,13 +170,23 @@ const StockPage = () => {
     };
 
     const getCategoryData = () => {
-        const catMap = {};
+        const catValueMap = {};
+        const catCountMap = {};
         stocks.forEach(item => {
-            const val = (parseFloat(item.quantity) || 0) * (parseFloat(item.purchase_price) || 0);
             const cat = item.category || 'Diğer';
-            catMap[cat] = (catMap[cat] || 0) + val;
+            const val = (parseFloat(item.quantity) || 0) * (parseFloat(item.purchase_price) || 0);
+            catValueMap[cat] = (catValueMap[cat] || 0) + val;
+            catCountMap[cat] = (catCountMap[cat] || 0) + (parseFloat(item.quantity) || 0);
         });
-        return Object.keys(catMap).map(key => ({ name: key, value: catMap[key] })).filter(i => i.value > 0);
+        const valueData = Object.keys(catValueMap)
+            .map(key => ({ name: key, value: catValueMap[key] }))
+            .filter(i => i.value > 0);
+        if (valueData.length > 0) return { data: valueData, mode: 'value' };
+        // Fallback: use quantity count per category
+        const countData = Object.keys(catCountMap)
+            .map(key => ({ name: key, value: catCountMap[key] }))
+            .filter(i => i.value > 0);
+        return { data: countData, mode: 'count' };
     };
 
     // ── Filtering & Sorting ───────────────────────────────────────
@@ -953,24 +963,41 @@ const StockPage = () => {
                         </div>
 
                         {/* Pie Chart */}
-                        {getCategoryData().length > 0 && (
-                            <div style={{ padding: '20px', background: 'var(--glass-surface)', borderRadius: '14px', border: '1px solid var(--glass-border)' }}>
-                                <h4 style={{ margin: '0 0 16px 0', color: 'var(--text-secondary)', textAlign: 'center', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.5px', background: 'none', WebkitTextFillColor: 'unset' }}>
-                                    Kategori Bazlı Değer Dağılımı
-                                </h4>
-                                <div style={{ height: '260px' }}>
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <PieChart>
-                                            <Pie data={getCategoryData()} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={4} dataKey="value">
-                                                {getCategoryData().map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                                            </Pie>
-                                            <Tooltip formatter={(v) => formatCurrency(v)} contentStyle={{ backgroundColor: isDarkMode ? '#1e293b' : '#f8fafc', borderColor: '#334155', color: 'var(--text-primary)', borderRadius: '10px' }} />
-                                            <Legend verticalAlign="bottom" height={36} formatter={(value) => <span style={{ color: 'var(--text-primary)', fontSize: '0.82rem' }}>{value}</span>} />
-                                        </PieChart>
-                                    </ResponsiveContainer>
+                        {(() => {
+                            const chartInfo = getCategoryData();
+                            if (chartInfo.data.length === 0) return (
+                                <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-secondary)', background: 'var(--glass-surface)', borderRadius: '14px', border: '1px solid var(--glass-border)', fontSize: '0.85rem' }}>
+                                    <PieChartIcon size={32} style={{ opacity: 0.3, marginBottom: '10px', display: 'block', margin: '0 auto 10px' }} />
+                                    Grafik için en az 1 kategori gerekli
                                 </div>
-                            </div>
-                        )}
+                            );
+                            return (
+                                <div style={{ padding: '20px', background: 'var(--glass-surface)', borderRadius: '14px', border: '1px solid var(--glass-border)' }}>
+                                    <h4 style={{ margin: '0 0 16px 0', color: 'var(--text-secondary)', textAlign: 'center', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.5px', background: 'none', WebkitTextFillColor: 'unset' }}>
+                                        {chartInfo.mode === 'value' ? 'Kategori Bazlı Değer Dağılımı' : 'Kategori Bazlı Stok Miktarı Dağılımı'}
+                                    </h4>
+                                    {chartInfo.mode === 'count' && (
+                                        <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '-10px 0 12px', opacity: 0.7 }}>
+                                            (Birim fiyat girilmediği için miktar bazlı gösteriliyor)
+                                        </p>
+                                    )}
+                                    <div style={{ height: '260px' }}>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <PieChart>
+                                                <Pie data={chartInfo.data} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={4} dataKey="value">
+                                                    {chartInfo.data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                                                </Pie>
+                                                <Tooltip
+                                                    formatter={(v) => chartInfo.mode === 'value' ? formatCurrency(v) : `${v} birim`}
+                                                    contentStyle={{ backgroundColor: isDarkMode ? '#1e293b' : '#f8fafc', borderColor: '#334155', color: isDarkMode ? '#f1f5f9' : '#0f172a', borderRadius: '10px', fontSize: '0.85rem' }}
+                                                />
+                                                <Legend verticalAlign="bottom" height={36} formatter={(value) => <span style={{ color: 'var(--text-primary)', fontSize: '0.82rem' }}>{value}</span>} />
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </div>
+                            );
+                        })()}
 
                         <button onClick={() => setSummaryModalOpen(false)} className="glass-btn glass-btn-secondary" style={{ width: '100%', justifyContent: 'center', marginTop: '16px' }}>
                             Kapat
