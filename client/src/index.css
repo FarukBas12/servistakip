@@ -870,21 +870,19 @@ h4[style*="display: flex"] {
     margin-top: 0;
 }
 
-/* ADMIN LAYOUT WRAPPER */
+/* ADMIN LAYOUT WRAPPER — sidebar is position:fixed so admin-content fills all space */
 .admin-layout-wrapper {
-    display: flex;
+    display: block;
     min-height: 100vh;
 }
 
 /* ADMIN CONTENT LAYOUT */
 .admin-content {
     padding-left: 80px;
-    /* Desktop Sidebar width */
+    /* Desktop Sidebar offset (sidebar is position:fixed) */
     transition: padding-left 0.3s ease;
-    flex: 1;
-    width: 0;
-    /* prevents flex child from overflowing */
-    min-width: 0;
+    min-height: 100vh;
+    box-sizing: border-box;
 }
 
 /* NAVBAR MOBILE */
@@ -909,10 +907,6 @@ h4[style*="display: flex"] {
     nav.glass-panel>div:last-child {
         flex-wrap: wrap !important;
         gap: 8px !important;
-    }
-
-    .admin-layout-wrapper {
-        flex-direction: column;
     }
 }
 
