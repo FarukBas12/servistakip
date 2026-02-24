@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { LayoutDashboard, Inbox, Users, LogOut, FolderOpen, Package, Truck, Settings, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, Inbox, Users, LogOut, FolderOpen, Package, Truck, Settings, Sun, Moon, Network } from 'lucide-react';
 
 const Sidebar = () => {
     const { user, logout } = useAuth();
@@ -13,6 +13,7 @@ const Sidebar = () => {
         { path: '/admin', icon: <LayoutDashboard size={22} />, label: 'Panel', exact: true },
         { path: '/admin/pool', icon: <Inbox size={22} />, label: 'Servisler' },
         { path: '/admin/users', icon: <Users size={22} />, label: 'Personeller' },
+        { path: '/admin/hierarchy', icon: <Network size={22} />, label: 'Hiyerarşi' },
         { path: '/admin/suppliers', icon: <Truck size={22} />, label: 'Tedarikçiler' },
         { path: '/admin/subs', icon: <Users size={22} />, label: 'Taşeronlar' },
         ...(!isTech ? [{ path: '/admin/projects', icon: <FolderOpen size={22} />, label: 'Projeler' }] : []),
