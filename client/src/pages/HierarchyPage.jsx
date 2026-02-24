@@ -87,59 +87,74 @@ const HierarchyPage = () => {
         const isExpanded = expandedRoles[person.id];
         const desc = jobDescriptions[roleKey] || { title: person.job_title || person.role, tasks: [] };
 
+        const levelColors = {
+            owner: 'rgba(99, 102, 241, 0.8)',
+            coordinator: 'rgba(168, 85, 247, 0.8)',
+            accounting: 'rgba(236, 72, 153, 0.8)',
+            site_manager: 'rgba(245, 158, 11, 0.8)',
+            depocu: 'rgba(16, 185, 129, 0.8)',
+            technician: 'rgba(59, 130, 246, 0.8)'
+        };
+
+        const accentColor = levelColors[roleKey] || 'var(--accent-color)';
+
         return (
-            <div className="glass-panel hierarchy-card" style={{
+            <div className={`glass-panel hierarchy-card card-level-${roleKey}`} style={{
                 width: '100%',
                 maxWidth: '350px',
-                margin: '10px',
-                padding: '15px',
+                margin: '15px',
+                padding: '20px',
                 border: '1px solid var(--glass-border)',
+                borderLeft: `4px solid ${accentColor}`,
                 borderRadius: '16px',
                 textAlign: 'left',
                 position: 'relative',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: `0 10px 30px -10px rgba(0,0,0,0.5)`,
+                background: `linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)`
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <div style={{
-                        width: '50px',
-                        height: '50px',
-                        borderRadius: '50%',
-                        background: person.photo_url ? `url(${person.photo_url}) center/cover` : 'rgba(255,255,255,0.1)',
+                        width: '55px',
+                        height: '55px',
+                        borderRadius: '14px',
+                        background: person.photo_url ? `url(${person.photo_url}) center/cover` : 'rgba(255,255,255,0.05)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        border: '2px solid var(--accent-color)',
-                        boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
+                        border: `2px solid ${accentColor}`,
+                        boxShadow: `0 0 15px ${accentColor}44`
                     }}>
-                        {!person.photo_url && <User size={24} color="var(--accent-color)" />}
+                        {!person.photo_url && <User size={26} color={accentColor} />}
                     </div>
                     <div style={{ flex: 1 }}>
-                        <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{person.full_name || person.username}</h4>
-                        <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: '500' }}>
+                        <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '700', color: '#fff' }}>{person.full_name || person.username}</h4>
+                        <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: accentColor, fontWeight: '600', letterSpacing: '0.5px' }}>
                             {person.job_title || desc.title}
                         </p>
                     </div>
                     <button
                         onClick={() => toggleRole(person.id)}
-                        style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                        className="expand-btn"
+                        style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '10px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', cursor: 'pointer' }}
                     >
-                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                     </button>
                 </div>
 
                 {isExpanded && (
-                    <div className="fade-in" style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px solid var(--glass-border)', fontSize: '0.85rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--accent-color)' }}>
-                            <Briefcase size={14} /> <strong>Görev Tanımı</strong>
+                    <div className="fade-in" style={{ marginTop: '18px', paddingTop: '18px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: accentColor }}>
+                            <Briefcase size={14} /> <strong style={{ letterSpacing: '0.5px' }}>GÖREV TANIMI</strong>
                         </div>
-                        <ul style={{ paddingLeft: '18px', margin: '0 0 15px 0', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                        <ul style={{ paddingLeft: '18px', margin: '0 0 18px 0', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                             {desc.tasks.map((task, idx) => (
-                                <li key={idx} style={{ marginBottom: '4px' }}>{task}</li>
+                                <li key={idx} style={{ marginBottom: '6px' }}>{task}</li>
                             ))}
                         </ul>
                         {person.phone && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.8rem', padding: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
-                                <Phone size={14} /> {person.phone}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#fff', fontSize: '0.85rem', padding: '10px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <Phone size={14} style={{ opacity: 0.7 }} /> {person.phone}
                             </div>
                         )}
                     </div>
@@ -256,41 +271,84 @@ const HierarchyPage = () => {
             </div>
 
             <style>{`
-                .level-badge {
-                    background: var(--accent-color);
-                    color: white;
-                    padding: 8px 25px;
-                    border-radius: 30px;
-                    font-weight: 700;
-                    font-size: 0.85rem;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
+                .hierarchy-container {
+                    padding: 40px 0;
+                    position: relative;
+                }
+                .hierarchy-level {
                     margin-bottom: 20px;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                }
+                .level-badge {
+                    background: #312e81;
+                    color: #fff;
+                    padding: 10px 30px;
+                    border-radius: 12px;
+                    font-weight: 800;
+                    font-size: 0.9rem;
+                    text-transform: uppercase;
+                    letter-spacing: 2px;
+                    margin-bottom: 30px;
+                    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4), 0 0 15px rgba(99, 102, 241, 0.3);
+                    border: 1px solid rgba(165, 180, 252, 0.2);
                     z-index: 2;
+                    position: relative;
                 }
                 .connector-v {
-                    width: 2px;
-                    height: 40px;
-                    background: linear-gradient(to bottom, var(--accent-color), transparent);
-                    opacity: 0.4;
-                    margin-bottom: 10px;
+                    width: 3px;
+                    height: 60px;
+                    background: linear-gradient(to bottom, #6366f1, #4338ca);
+                    opacity: 0.6;
+                    margin: 0 auto 15px;
+                    position: relative;
+                    border-radius: 2px;
+                }
+                .connector-v::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -6px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 10px;
+                    height: 10px;
+                    background: #6366f1;
+                    border-radius: 50%;
+                    box-shadow: 0 0 10px #6366f1;
+                }
+                .connector-horizontal {
+                    position: absolute;
+                    top: -40px;
+                    left: 20%;
+                    right: 20%;
+                    height: 3px;
+                    background: linear-gradient(to right, transparent, #6366f1, transparent);
+                    opacity: 0.6;
                 }
                 .hierarchy-card:hover {
-                    border-color: var(--accent-color);
-                    box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
-                    transform: translateY(-5px);
+                    transform: translateY(-8px) scale(1.02);
+                    border-color: rgba(255,255,255,0.2) !important;
+                    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.7);
                 }
+                .card-level-owner:hover { box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.2); }
+                .card-level-coordinator:hover { box-shadow: 0 20px 40px -10px rgba(168, 85, 247, 0.2); }
+                .card-level-accounting:hover { box-shadow: 0 20px 40px -10px rgba(236, 72, 153, 0.2); }
+                .card-level-site_manager:hover { box-shadow: 0 20px 40px -10px rgba(245, 158, 11, 0.2); }
+                .card-level-depocu:hover { box-shadow: 0 20px 40px -10px rgba(16, 185, 129, 0.2); }
+                .card-level-technician:hover { box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.2); }
+
                 .hierarchy-row {
-                    margin-top: 20px;
+                    margin-top: 40px;
+                    gap: 20px;
                 }
                 @media (max-width: 768px) {
                     .hierarchy-row {
                         flex-direction: column;
-                        gap: 40px;
+                        align-items: center;
                     }
                     .connector-horizontal {
                         display: none;
+                    }
+                    .connector-v {
+                        height: 40px;
                     }
                 }
             `}</style>
