@@ -453,154 +453,199 @@ h4[style*="display: flex"] {
     color: var(--primary);
 }
 
-/* --- MOBILE LAYOUT (PWA) --- */
+/* ══════════════════════════════════════════════════════
+   MOBILE BOTTOM TAB BAR  (≤ 768px)
+   Layout: [Panel | Servisler | Projeler | Stok] | [⚙ ☀ 🚪]
+══════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-    /* Turn Sidebar into Bottom Tab Bar */
+    /* ── Container: fixed bottom bar ── */
     .sidebar-container {
-        width: 100% !important;
-        height: 70px !important;
+        position: fixed !important;
         bottom: 0 !important;
-        top: auto !important;
         left: 0 !important;
-        border-right: none !important;
-        border-top: 1px solid var(--sidebar-border) !important;
-        flex-direction: row !important;
-        padding-top: 0 !important;
-        justify-content: space-between !important;
-        padding: 0 10px !important;
-        z-index: 9999 !important;
-        background: var(--bg-dark) !important;
-        backdrop-filter: blur(20px) !important;
-    }
-
-    /* Hide Top Logo/Bell area on Mobile Sidebar */
-    .sidebar-header {
-        display: none !important;
-    }
-
-    .sidebar-gradient {
-        display: none !important;
-    }
-
-    /* Adjust Navigation Layout */
-    /* Scrollable Horizontal Nav */
-    .sidebar-nav {
+        right: 0 !important;
+        top: auto !important;
         width: 100% !important;
+        height: auto !important;
         flex-direction: row !important;
-        justify-content: flex-start !important;
-        /* Start from left */
-        align-items: center !important;
-        gap: 10px !important;
-        overflow-x: auto !important;
-        /* Enable Scroll */
-        padding: 0 10px !important;
-        -webkit-overflow-scrolling: touch;
+        align-items: stretch !important;
+        padding: 0 !important;
+        padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+        /* iOS home indicator */
+        border-right: none !important;
+        border-top: 1px solid var(--glass-border) !important;
+        background: var(--sidebar-bg) !important;
+        backdrop-filter: blur(24px) !important;
+        -webkit-backdrop-filter: blur(24px) !important;
+        z-index: 9999 !important;
+        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15) !important;
     }
 
-    /* Hide Scrollbar */
-    .sidebar-nav::-webkit-scrollbar {
-        display: none;
+    /* ── Logo: hidden on mobile ── */
+    .sidebar-logo-area {
+        display: none !important;
     }
 
-    .sidebar-link {
+    /* ── Main nav: takes remaining space ── */
+    .sidebar-nav {
+        flex: 1 !important;
         width: auto !important;
-        min-width: 64px !important;
-        /* Minimum touch target width */
-        height: 100% !important;
-        padding: 5px 0 !important;
+        flex-direction: row !important;
+        align-items: stretch !important;
+        justify-content: space-around !important;
+        overflow: hidden !important;
+        /* no scroll — we hide secondary items */
+        gap: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* ── Secondary items: hidden on mobile ── */
+    .sidebar-link.mobile-secondary {
+        display: none !important;
+    }
+
+    /* ── Each tab button ── */
+    .sidebar-link {
+        flex: 1 !important;
+        width: auto !important;
+        min-width: 0 !important;
+        height: 58px !important;
+        padding: 8px 2px 6px !important;
         border-radius: 0 !important;
         background: transparent !important;
-        flex-shrink: 0 !important;
+        flex-shrink: 1 !important;
         flex-direction: column !important;
-        /* Prevent shrinking */
+        border: none !important;
+        position: relative !important;
+        transition: color 0.2s, background 0.15s !important;
     }
 
+    /* ── Active tab: colored top line + icon glow ── */
     .sidebar-link.active {
         color: var(--primary) !important;
-        border-top: 2px solid var(--primary);
+        background: transparent !important;
+        border: none !important;
+    }
+
+    .sidebar-link.active::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 20%;
+        right: 20%;
+        height: 2.5px;
+        background: var(--primary);
+        border-radius: 0 0 3px 3px;
+    }
+
+    .sidebar-link.active .sidebar-icon {
+        filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.6)) !important;
+        color: var(--primary) !important;
         background: transparent !important;
     }
 
-    .sidebar-link.active .sidebar-indicator {
-        display: none !important;
-    }
-
+    /* ── Icon ── */
     .sidebar-link .sidebar-icon {
         background: transparent !important;
         filter: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
+    /* ── Label ── */
     .sidebar-link .sidebar-label {
         opacity: 1 !important;
         transform: none !important;
-        font-size: 0.6rem !important;
+        font-size: 0.58rem !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.01em !important;
         margin-left: 0 !important;
-        margin-top: 4px !important;
+        margin-top: 3px !important;
+        text-align: center !important;
     }
 
-    /* Logout button in mobile */
+    /* ── Sidebar actions: right-side compact group ── */
+    .sidebar-actions {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: stretch !important;
+        flex-shrink: 0 !important;
+        border-left: 1px solid var(--glass-border) !important;
+        padding-left: 2px !important;
+        gap: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* Actions reuse sidebar-link style */
+    .sidebar-actions .sidebar-link {
+        flex: none !important;
+        width: 44px !important;
+        min-width: 44px !important;
+    }
+
+    /* Hide text labels in action buttons on mobile */
+    .sidebar-actions .sidebar-label {
+        display: none !important;
+    }
+
+    /* ── Logout button ── */
     .sidebar-logout {
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
         background: transparent !important;
-        width: auto !important;
-        min-width: 64px !important;
-        height: 100% !important;
-        padding: 5px 0 !important;
         border: none !important;
+        width: 44px !important;
+        min-width: 44px !important;
+        height: 58px !important;
+        padding: 8px 2px 6px !important;
         margin: 0 !important;
         flex-shrink: 0 !important;
+        cursor: pointer !important;
+        color: #ef4444 !important;
+        opacity: 0.75 !important;
+        transition: opacity 0.2s !important;
+    }
+
+    .sidebar-logout:active {
+        opacity: 1 !important;
+    }
+
+    .sidebar-logout .sidebar-label {
+        display: none !important;
     }
 
     .sidebar-logout svg {
         min-width: auto !important;
     }
 
-    .sidebar-logout .sidebar-label {
-        font-size: 0.6rem !important;
-        margin-top: 4px !important;
-        margin-left: 0 !important;
-    }
-
-    /* Show Update/Logout buttons in scroll list */
-    .sidebar-update-btn {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
-        background: transparent !important;
-        width: auto !important;
-        min-width: 50px !important;
-        height: 100% !important;
-        padding: 0 10px !important;
-        border: none !important;
-        margin: 0 !important;
-        flex-shrink: 0 !important;
-    }
-
-    .sidebar-update-btn svg {
-        margin-bottom: 2px !important;
-    }
-
-    .sidebar-update-btn span {
-        display: none !important;
-        /* Hide text to save space if needed, or keep it */
-    }
-
-
-    /* Fix Main Content Margin */
+    /* ── Main content: add bottom padding ── */
     .dashboard,
-    div[style*="max-width: 1200px"] {
-        /* StockPage wrapper */
+    .admin-content>* {
         margin-left: 0 !important;
-        margin-bottom: 80px !important;
-        /* Space for bottom bar */
-        padding: 15px !important;
+        padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    .admin-content {
+        margin-left: 0 !important;
+    }
+
+    /* ── Tap highlight removal ── */
+    .sidebar-link,
+    .sidebar-logout {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── Hover ripple on mobile ── */
+    .sidebar-link:active,
+    .sidebar-logout:active {
+        background: rgba(99, 102, 241, 0.08) !important;
     }
 }
+
 
 /* --- DESKTOP SIDEBAR --- */
 .sidebar-container {
@@ -715,6 +760,21 @@ h4[style*="display: flex"] {
     background: rgba(239, 68, 68, 0.15);
     border-color: var(--danger);
     color: var(--danger);
+}
+
+/* Bottom action group (Desktop: vertical column at bottom) */
+.sidebar-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-top: auto;
+    padding-bottom: 4px;
+}
+
+/* Undo the marginTop:auto on individual items inside actions */
+.sidebar-actions .sidebar-link {
+    margin-top: 0;
 }
 
 /* ADMIN CONTENT LAYOUT */

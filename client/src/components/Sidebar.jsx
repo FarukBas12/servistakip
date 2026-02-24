@@ -9,15 +9,16 @@ const Sidebar = () => {
     const { isDarkMode, toggleTheme } = useTheme();
     const isTech = user?.role === 'technician';
 
+    // mobile: true → Tab barında gösterilir | false → sadece masaüstünde
     const menuItems = [
-        { path: '/admin', icon: <LayoutDashboard size={22} />, label: 'Panel', exact: true },
-        { path: '/admin/pool', icon: <Inbox size={22} />, label: 'Servisler' },
-        { path: '/admin/users', icon: <Users size={22} />, label: 'Personeller' },
-        { path: '/admin/hierarchy', icon: <Network size={22} />, label: 'Hiyerarşi' },
-        { path: '/admin/suppliers', icon: <Truck size={22} />, label: 'Tedarikçiler' },
-        { path: '/admin/subs', icon: <Users size={22} />, label: 'Taşeronlar' },
-        ...(!isTech ? [{ path: '/admin/projects', icon: <FolderOpen size={22} />, label: 'Projeler' }] : []),
-        { path: '/admin/stocks', icon: <Package size={22} />, label: 'Stok' },
+        { path: '/admin', icon: <LayoutDashboard size={22} />, label: 'Panel', exact: true, mobile: true },
+        { path: '/admin/pool', icon: <Inbox size={22} />, label: 'Servisler', mobile: true },
+        { path: '/admin/users', icon: <Users size={22} />, label: 'Personeller', mobile: false },
+        { path: '/admin/hierarchy', icon: <Network size={22} />, label: 'Hiyerarşi', mobile: false },
+        { path: '/admin/suppliers', icon: <Truck size={22} />, label: 'Tedarikçiler', mobile: false },
+        { path: '/admin/subs', icon: <Users size={22} />, label: 'Taşeronlar', mobile: false },
+        ...(!isTech ? [{ path: '/admin/projects', icon: <FolderOpen size={22} />, label: 'Projeler', mobile: true }] : []),
+        { path: '/admin/stocks', icon: <Package size={22} />, label: 'Stok', mobile: true },
     ].filter(item => {
         if (user?.role === 'depocu') {
             return item.path === '/admin/stocks';
@@ -39,7 +40,9 @@ const Sidebar = () => {
                         key={item.path}
                         to={item.path}
                         end={item.exact}
-                        className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                        className={({ isActive }) =>
+                            `sidebar-link ${isActive ? 'active' : ''} ${!item.mobile ? 'mobile-secondary' : ''}`
+                        }
                         title={item.label}
                     >
                         <span className="sidebar-icon">{item.icon}</span>
@@ -48,34 +51,34 @@ const Sidebar = () => {
                 ))}
             </nav>
 
-            {/* Settings */}
-            <NavLink
-                to="/admin/settings"
-                className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                title="Ayarlar"
-                style={{ marginTop: 'auto', marginBottom: '5px' }}
-            >
-                <span className="sidebar-icon"><Settings size={22} /></span>
-                <span className="sidebar-label">Ayarlar</span>
-            </NavLink>
+            {/* Bottom Actions: Settings + Theme + Logout */}
+            <div className="sidebar-actions">
+                <NavLink
+                    to="/admin/settings"
+                    className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                    title="Ayarlar"
+                >
+                    <span className="sidebar-icon"><Settings size={22} /></span>
+                    <span className="sidebar-label">Ayarlar</span>
+                </NavLink>
 
-            {/* Theme Toggle */}
-            <button
-                className="sidebar-link"
-                onClick={toggleTheme}
-                title={isDarkMode ? 'Aydınlık Mod' : 'Karanlık Mod'}
-                style={{ cursor: 'pointer', background: 'transparent', border: 'none' }}
-            >
-                <span className="sidebar-icon">
-                    {isDarkMode ? <Sun size={22} color="#fbbf24" /> : <Moon size={22} color="#6366f1" />}
-                </span>
-                <span className="sidebar-label">{isDarkMode ? 'Aydınlık' : 'Karanlık'}</span>
-            </button>
+                <button
+                    className="sidebar-link"
+                    onClick={toggleTheme}
+                    title={isDarkMode ? 'Aydınlık Mod' : 'Karanlık Mod'}
+                    style={{ cursor: 'pointer', background: 'transparent', border: 'none' }}
+                >
+                    <span className="sidebar-icon">
+                        {isDarkMode ? <Sun size={22} color="#fbbf24" /> : <Moon size={22} color="#6366f1" />}
+                    </span>
+                    <span className="sidebar-label">{isDarkMode ? 'Aydınlık' : 'Karanlık'}</span>
+                </button>
 
-            {/* Logout */}
-            <button className="sidebar-logout" onClick={logout} title="Çıkış Yap">
-                <LogOut size={22} />
-            </button>
+                <button className="sidebar-logout" onClick={logout} title="Çıkış Yap">
+                    <LogOut size={22} />
+                    <span className="sidebar-label">Çıkış</span>
+                </button>
+            </div>
         </div>
     );
 };
