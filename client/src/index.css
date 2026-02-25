@@ -230,7 +230,17 @@ body {
     background-attachment: fixed;
     overflow-x: hidden;
     transition: background-color 0.3s ease, color 0.3s ease;
+    /* SAFE AREA: body fills behind status bar but padding protects content */
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
 }
+
+/* #root must not add extra padding (body already handles it) */
+#root {
+    min-height: 100%;
+}
+
 
 /* Subtle ambient animation */
 @keyframes ambient-pulse {
