@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Activity, ClipboardList, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { Users, Activity, ClipboardList, ChevronLeft, ChevronRight, Trash2, LayoutDashboard, Eye, EyeOff } from 'lucide-react';
+
 import api from '../utils/api';
 import StatCard from '../components/Dashboard/StatCard';
 import WeatherWidget from '../components/Dashboard/WeatherWidget';
@@ -22,6 +23,19 @@ const AdminDashboard = () => {
     const [cityName, setCityName] = useState('..');
     const [notes, setNotes] = useState([]);
     const [todayNotes, setTodayNotes] = useState([]);
+
+    // Widget visibility
+    const [widgets, setWidgets] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('dashWidgets')) || { calendar: true, notes: true, weather: true }; }
+        catch { return { calendar: true, notes: true, weather: true }; }
+    });
+    const [showWidgetMenu, setShowWidgetMenu] = useState(false);
+
+    const toggleWidget = (key) => {
+        const next = { ...widgets, [key]: !widgets[key] };
+        setWidgets(next);
+        localStorage.setItem('dashWidgets', JSON.stringify(next));
+    };
 
     // Calendar State
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -204,6 +218,28 @@ const AdminDashboard = () => {
                     </h1>
                     <p style={{ color: 'var(--text-secondary)' }}>Sistem durumu ve özet raporlar</p>
                 </div>
+                {/* Widget Visibility Control */}
+                <div style={{ position: 'relative' }}>
+                    <button
+                        onClick={() => setShowWidgetMenu(v => !v)}
+                        className="glass-btn"
+                        style={{ padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}
+                        title="Widget görünürlüğü"
+                    >
+                        <LayoutDashboard size={16} /> Widget'lar
+                    </button>
+                    {showWidgetMenu && (
+                        <div className="glass-panel" style={{ position: 'absolute', right: 0, top: '44px', zIndex: 100, padding: '12px', minWidth: '180px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {[{ key: 'calendar', label: 'Takvim' }, { key: 'notes', label: 'Notlar' }, { key: 'weather', label: 'Hava Durumu' }].map(w => (
+                                <button key={w.key} onClick={() => toggleWidget(w.key)}
+                                    style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', padding: '6px 8px', borderRadius: '8px', fontSize: '0.88rem', width: '100%', textAlign: 'left' }}>
+                                    {widgets[w.key] ? <Eye size={16} color="var(--primary)" /> : <EyeOff size={16} color="var(--text-secondary)" />}
+                                    {w.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
             <NoteAlert
@@ -239,23 +275,9 @@ const AdminDashboard = () => {
 
             {/* MAIN CONTENT GRID */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(350px, 100%), 1fr))', gap: '20px' }}>
-                <CalendarWidget
-                    currentDate={currentDate}
-                    prevMonth={prevMonth}
-                    nextMonth={nextMonth}
-                    renderCalendar={renderCalendar}
-                />
-
-                <NotesWidget
-                    sortedNotes={sortedNotes}
-                    getNoteColor={getNoteColor}
-                    handleDeleteNote={handleDeleteNote}
-                />
-
-                <WeatherWidget
-                    weather={weather}
-                    cityName={cityName}
-                />
+                {widgets.calendar && <CalendarWidget currentDate={currentDate} prevMonth={prevMonth} nextMonth={nextMonth} renderCalendar={renderCalendar} />}
+                {widgets.notes && <NotesWidget sortedNotes={sortedNotes} getNoteColor={getNoteColor} handleDeleteNote={handleDeleteNote} />}
+                {widgets.weather && <WeatherWidget weather={weather} cityName={cityName} />}
             </div>
 
             {/* NEW NOTE MODAL */}

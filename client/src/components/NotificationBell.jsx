@@ -1,8 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Check, BellOff } from 'lucide-react';
+import { Bell, Check, BellOff, BellRing } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const NOTIFICATION_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
+
+// Request desktop notification permission once
+const requestDesktopPermission = () => {
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+};
+
+const showDesktopNotification = (title, body) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+        const n = new Notification(title, {
+            body,
+            icon: '/logo.svg',
+            badge: '/pwa-192x192.png',
+            tag: 'mtech-notification',
+        });
+        n.onclick = () => { window.focus(); n.close(); };
+    }
+};
+
 
 const NotificationBell = ({ placement = 'bottom-right' }) => {
     const { isDarkMode } = useTheme();
@@ -27,9 +47,13 @@ const NotificationBell = ({ placement = 'bottom-right' }) => {
                 setUnreadCount(prevCount => {
                     if (newUnreadCount > prevCount) {
                         playSound();
+                        // Show desktop notification for each new item
+                        const newItems = data.filter(n => !n.is_read).slice(0, newUnreadCount - prevCount);
+                        newItems.forEach(n => showDesktopNotification('M-Tech Bildirim', n.message || n.title || 'Yeni bildiriminiz var'));
                     }
                     return newUnreadCount;
                 });
+
 
                 setNotifications(data);
             }
@@ -39,10 +63,12 @@ const NotificationBell = ({ placement = 'bottom-right' }) => {
     };
 
     useEffect(() => {
+        requestDesktopPermission();
         fetchNotifications();
-        const interval = setInterval(fetchNotifications, 10000); // 10s polling
+        const interval = setInterval(fetchNotifications, 10000);
         return () => clearInterval(interval);
     }, []);
+
 
     useEffect(() => {
         const handleClickOutside = (event) => {

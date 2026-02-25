@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { MapPin, Camera, Image as ImageIcon, Upload, ArrowLeft, Play, XCircle, CheckSquare, FileText } from 'lucide-react';
+import TaskTimer from '../components/TaskTimer';
+
 
 const TechTaskDetail = () => {
     const { id } = useParams();
@@ -260,18 +262,25 @@ const TechTaskDetail = () => {
                     position: 'fixed', bottom: 0, left: 0, width: '100%',
                     background: 'rgba(20,20,20,0.95)', backdropFilter: 'blur(10px)',
                     borderTop: '1px solid rgba(255,255,255,0.1)',
-                    padding: '15px',
-                    display: 'flex', gap: '10px',
+                    padding: '10px 15px',
+                    display: 'flex', flexDirection: 'column', gap: '10px',
                     zIndex: 90
                 }}>
-                    <button onClick={() => setShowReturnModal(true)} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid #ff5252', background: 'rgba(255, 82, 82, 0.1)', color: '#ff5252', fontWeight: 'bold' }}>
-                        İade Et
-                    </button>
-                    <button onClick={handleComplete} style={{ flex: 2, padding: '12px', borderRadius: '12px', border: 'none', background: '#4caf50', color: 'white', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '5px' }}>
-                        <CheckSquare size={20} /> İşi Tamamla
-                    </button>
+                    {/* Task Timer */}
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <TaskTimer taskId={task.id || id} taskTitle={task.title} />
+                    </div>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <button onClick={() => setShowReturnModal(true)} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid #ff5252', background: 'rgba(255, 82, 82, 0.1)', color: '#ff5252', fontWeight: 'bold' }}>
+                            İade Et
+                        </button>
+                        <button onClick={handleComplete} style={{ flex: 2, padding: '12px', borderRadius: '12px', border: 'none', background: '#4caf50', color: 'white', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '5px' }}>
+                            <CheckSquare size={20} /> İşi Tamamla
+                        </button>
+                    </div>
                 </div>
             )}
+
 
             {/* RETURN MODAL */}
             {showReturnModal && (
