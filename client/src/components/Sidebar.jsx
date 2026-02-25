@@ -9,7 +9,7 @@ import {
 
 const Sidebar = () => {
     const { user, logout } = useAuth();
-    const { isDarkMode, toggleTheme } = useTheme();
+    const { isDarkMode, toggleTheme, companyLogo, companyName } = useTheme();
     const isTech = user?.role === 'technician';
     const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -37,8 +37,11 @@ const Sidebar = () => {
                 DESKTOP SIDEBAR (hidden on mobile)
             ═══════════════════════════════════════ */}
             <div className="sidebar sidebar-container">
-                <div className="sidebar-logo-area">
-                    <img src="/logo.svg" alt="M-Tech" className="sidebar-logo" />
+                <div className="sidebar-logo-area" title={companyName}>
+                    {companyLogo
+                        ? <img src={companyLogo} alt={companyName} className="sidebar-logo" style={{ borderRadius: '8px', objectFit: 'contain' }} />
+                        : <img src="/logo.svg" alt="M-Tech" className="sidebar-logo" />
+                    }
                 </div>
                 <nav className="sidebar-nav">
                     {allMenuItems.map((item) => (
