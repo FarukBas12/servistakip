@@ -1686,3 +1686,48 @@ h4[style*="display: flex"] {
     border: 1px solid rgba(239, 68, 68, 0.2);
     animation: blink 2s infinite;
 }
+
+/* ════════════════════════════════════════════════════
+   MOBILE SAFE AREA INSETS (notch / status bar / home bar)
+   viewport-fit=cover is set on the <meta> tag,
+   so we must manually push content away from the edges.
+════════════════════════════════════════════════════ */
+
+/* iOS/Android: drawer header must be below status bar */
+.mobile-drawer-header {
+    padding-top: calc(16px + env(safe-area-inset-top, 0px)) !important;
+}
+
+/* Drawer itself spans full height — ensure inner scroll doesn't go behind home bar */
+.mobile-drawer {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Mobile bottom nav bar */
+.mobile-bottom-bar,
+.bottom-nav,
+[class*="bottom-bar"] {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Main content area: push below status bar on iOS standalone / PWA */
+@supports (padding-top: env(safe-area-inset-top)) {
+    body {
+        /* background fills the notch area with the app color */
+        background-color: var(--bg-darker);
+    }
+
+    /* When running as installed PWA (standalone) */
+    @media (display-mode: standalone) {
+
+        .admin-layout-wrapper,
+        #root>div:first-child {
+            padding-top: env(safe-area-inset-top, 0px);
+        }
+
+        /* Navbar margin already handles spacing but in standalone we need extra */
+        nav.glass-panel:first-of-type {
+            margin-top: calc(0.25rem + env(safe-area-inset-top, 0px));
+        }
+    }
+}
