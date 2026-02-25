@@ -363,27 +363,16 @@ h2,
 h3 {
     font-weight: 600;
     letter-spacing: -0.5px;
-    background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
     margin-bottom: 1.5rem;
 }
 
-/* Override gradient-text for headings inside modals and flex containers
-   (gradient clip breaks icon children and inline color overrides) */
-.modal-content h1,
-.modal-content h2,
-.modal-content h3,
-.modal-content h4,
+/* Flex-children inside headings need explicit color (no clip needed anymore) */
 h3[style*="display: flex"],
 h4[style*="display: flex"] {
-    background: none !important;
-    -webkit-text-fill-color: unset !important;
-    background-clip: unset !important;
-    -webkit-background-clip: unset !important;
     color: var(--text-primary);
 }
+
 
 /* MODAL STYLES (Added Fix) */
 .modal-overlay {
