@@ -212,6 +212,12 @@
     color: var(--primary);
 }
 
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 body {
     margin: 0;
     font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
