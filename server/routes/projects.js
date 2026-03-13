@@ -261,13 +261,21 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// DELETE Project / File / Expense (Optional, but good to have)
+// DELETE Project
 router.delete('/:id', async (req, res) => {
-    // Delete project
     try {
-        await db.query('DELETE FROM projects WHERE id = $1', [req.params.id]);
-        res.json({ message: 'Project deleted' });
+        const { id } = req.params;
+        // Check if project exists
+        const check = await db.query('SELECT name FROM projects WHERE id = $1', [id]);
+        if (check.rows.length === 0) return res.status(404).json({ message: 'Proje bulunamadı' });
+
+        // Note: project_expenses, project_files, and project_teams should have ON DELETE CASCADE in DB.
+        // If not, we'd need to delete them manually here.
+        await db.query('DELETE FROM projects WHERE id = $1', [id]);
+        res.json({ message: 'Proje ve tüm ilişkili veriler silindi' });
     } catch (err) {
+        console.error(err);
+        res.status(500).send('Silme işlemi başarısız: ' + err.message);
     }
 });
 

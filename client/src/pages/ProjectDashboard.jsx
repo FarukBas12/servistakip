@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Calendar, FolderOpen, ArrowRight, CheckCircle, Clock } from 'lucide-react';
+import { Plus, Calendar, FolderOpen, ArrowRight, CheckCircle, Clock, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const ProjectDashboard = () => {
@@ -57,6 +57,18 @@ const ProjectDashboard = () => {
         } catch (err) {
             console.error(err);
             alert('Güncelleme başarısız');
+        }
+    };
+
+    const handleDelete = async (id, name) => {
+        if (!window.confirm(`"${name}" projesini SİLMEK istediğinize emin misiniz? Bu işlem geri alınamaz ve projeye ait tüm giderler, dosyalar silinecektir.`)) return;
+
+        try {
+            await api.delete(`/projects/${id}`);
+            fetchProjects();
+        } catch (err) {
+            console.error(err);
+            alert('Silme işlemi başarısız: ' + (err.response?.data?.message || err.message));
         }
     };
 
@@ -234,29 +246,53 @@ const ProjectDashboard = () => {
                                                 )}
                                             </div>
 
-                                            {/* Tamamla Button */}
-                                            {activeTab === 'active' && !isTech && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleComplete(project.id, project.name);
-                                                    }}
-                                                    className="glass-btn"
-                                                    style={{
-                                                        padding: '4px 10px',
-                                                        fontSize: '0.72rem',
-                                                        background: 'rgba(16, 185, 129, 0.1)',
-                                                        color: '#10b981',
-                                                        borderColor: 'rgba(16, 185, 129, 0.25)',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '4px'
-                                                    }}
-                                                >
-                                                    <CheckCircle size={13} />
-                                                    Tamamla
-                                                </button>
-                                            )}
+                                            {/* Action Buttons */}
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                {!isTech && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDelete(project.id, project.name);
+                                                        }}
+                                                        className="glass-btn"
+                                                        style={{
+                                                            padding: '4px 8px',
+                                                            fontSize: '0.72rem',
+                                                            background: 'rgba(239, 68, 68, 0.1)',
+                                                            color: '#f87171',
+                                                            borderColor: 'rgba(239, 68, 68, 0.25)',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '4px'
+                                                        }}
+                                                        title="Projeyi Sil"
+                                                    >
+                                                        <Trash2 size={13} />
+                                                    </button>
+                                                )}
+                                                {activeTab === 'active' && !isTech && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleComplete(project.id, project.name);
+                                                        }}
+                                                        className="glass-btn"
+                                                        style={{
+                                                            padding: '4px 10px',
+                                                            fontSize: '0.72rem',
+                                                            background: 'rgba(16, 185, 129, 0.1)',
+                                                            color: '#10b981',
+                                                            borderColor: 'rgba(16, 185, 129, 0.25)',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '4px'
+                                                        }}
+                                                    >
+                                                        <CheckCircle size={13} />
+                                                        Tamamla
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
