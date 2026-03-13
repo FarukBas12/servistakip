@@ -263,21 +263,38 @@ const SubPaymentPage = () => {
                             </span>
                         </div>
 
-                        {/* KDV */}
+                        {/* KDV Row */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span style={{ color: '#94a3b8', fontSize: '0.95rem' }}>KDV</span>
-                                <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '6px', padding: '2px 6px', display: 'flex', alignItems: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <span style={{ fontSize: '0.8rem', color: '#fbbf24', marginRight: '2px' }}>%</span>
+                                <span style={{ color: '#94a3b8', fontSize: '0.95rem' }}>KDV Oranı</span>
+                                <div style={{ 
+                                    background: 'rgba(251, 191, 36, 0.1)', 
+                                    borderRadius: '8px', 
+                                    padding: '4px 10px', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    border: '1px solid rgba(251, 191, 36, 0.2)' 
+                                }}>
                                     <input
                                         type="number"
                                         value={header.kdv_rate || 20}
                                         onChange={e => setHeader({ ...header, kdv_rate: e.target.value })}
-                                        style={{ width: '24px', background: 'transparent', border: 'none', color: '#fbbf24', fontWeight: 'bold', fontSize: '0.9rem', textAlign: 'center', padding: 0 }}
+                                        style={{ 
+                                            width: '35px', 
+                                            background: 'transparent', 
+                                            border: 'none', 
+                                            color: '#fbbf24', 
+                                            fontWeight: '700', 
+                                            fontSize: '1rem', 
+                                            textAlign: 'center', 
+                                            padding: 0,
+                                            outline: 'none'
+                                        }}
                                     />
+                                    <span style={{ fontSize: '0.9rem', color: '#fbbf24', fontWeight: 'bold' }}>%</span>
                                 </div>
                             </div>
-                            <span style={{ color: '#fbbf24', fontWeight: '500', fontSize: '1rem' }}>
+                            <span style={{ color: '#fbbf24', fontWeight: '600', fontSize: '1.1rem' }}>
                                 {(prices.filter(p => !deletedItemIds.has(p.id)).reduce((acc, p) => {
                                     const qty = parseFloat(quantities[p.id]) || 0;
                                     const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);

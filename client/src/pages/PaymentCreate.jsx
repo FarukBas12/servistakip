@@ -199,34 +199,59 @@ const PaymentCreate = () => {
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colSpan="6" style={{ padding: '20px', textAlign: 'right' }}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+                                <td colSpan="6" style={{ padding: '0' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '30px 0' }}>
+                                        <div className="glass-panel" style={{ 
+                                            width: '100%', 
+                                            maxWidth: '350px', 
+                                            padding: '20px', 
+                                            borderRadius: '12px', 
+                                            background: 'rgba(255,255,255,0.03)',
+                                            border: '1px solid rgba(255,255,255,0.08)'
+                                        }}>
+                                            {/* Subtotal */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', opacity: 0.8 }}>
+                                                <span>Ara Toplam</span>
+                                                <span style={{ fontWeight: '600' }}>{calculateTotal().toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</span>
+                                            </div>
 
-                                        {/* Subtotal */}
-                                        <div style={{ fontSize: '1rem', opacity: 0.7 }}>
-                                            Ara Toplam: <span style={{ fontWeight: '600' }}>{calculateTotal().toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</span>
-                                        </div>
+                                            {/* KDV Row */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <span style={{ opacity: 0.8 }}>KDV Oranı</span>
+                                                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                                        <input
+                                                            type="number"
+                                                            className="glass-input"
+                                                            style={{ 
+                                                                width: '60px', 
+                                                                padding: '4px 8px', 
+                                                                textAlign: 'center', 
+                                                                fontSize: '0.9rem',
+                                                                background: 'rgba(255,160,0,0.1)',
+                                                                borderColor: 'rgba(255,160,0,0.3)',
+                                                                color: '#ffb300'
+                                                            }}
+                                                            value={header.kdv_rate || 20}
+                                                            onChange={e => setHeader({ ...header, kdv_rate: e.target.value })}
+                                                        />
+                                                        <span style={{ marginLeft: '4px', color: '#ffb300', fontWeight: 'bold' }}>%</span>
+                                                    </div>
+                                                </div>
+                                                <span style={{ color: '#ffb300', fontWeight: '600' }}>
+                                                    {(calculateTotal() * ((header.kdv_rate || 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
+                                                </span>
+                                            </div>
 
-                                        {/* KDV Input */}
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <label>KDV Oranı (%):</label>
-                                            <input
-                                                type="number"
-                                                className="glass-input"
-                                                style={{ width: '60px', textAlign: 'center' }}
-                                                value={header.kdv_rate || 20}
-                                                onChange={e => setHeader({ ...header, kdv_rate: e.target.value })}
-                                            />
-                                        </div>
+                                            <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '15px 0' }} />
 
-                                        {/* KDV Amount */}
-                                        <div style={{ fontSize: '1rem', opacity: 0.7 }}>
-                                            KDV Tutarı: <span style={{ fontWeight: '600' }}>{(calculateTotal() * ((header.kdv_rate || 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</span>
-                                        </div>
-
-                                        {/* Grand Total */}
-                                        <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#4caf50', marginTop: '10px' }}>
-                                            GENEL TOPLAM: {(calculateTotal() * (1 + ((header.kdv_rate || 20) / 100))).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
+                                            {/* Grand Total */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span style={{ fontSize: '1.1rem', fontWeight: '700' }}>GENEL TOPLAM</span>
+                                                <span style={{ fontSize: '1.5rem', fontWeight: '800', color: '#4caf50' }}>
+                                                    {(calculateTotal() * (1 + ((header.kdv_rate || 20) / 100))).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
