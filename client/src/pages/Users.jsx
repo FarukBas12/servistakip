@@ -10,7 +10,7 @@ const UsersPage = () => {
     const [editingUser, setEditingUser] = useState(null);
     const [formData, setFormData] = useState({
         username: '', password: '', role: 'technician',
-        full_name: '', phone: '', start_date: new Date().toISOString().split('T')[0], photo_url: '',
+        full_name: '', phone: '', start_date: new Date().toLocaleDateString('en-CA'), photo_url: '',
         job_title: ''
     });
     const [photoUploading, setPhotoUploading] = useState(false);
@@ -49,7 +49,7 @@ const UsersPage = () => {
     const resetForm = () => {
         setFormData({
             username: '', password: '', role: 'technician',
-            full_name: '', phone: '', start_date: new Date().toISOString().split('T')[0], photo_url: '',
+            full_name: '', phone: '', start_date: new Date().toLocaleDateString('en-CA'), photo_url: '',
             job_title: ''
         });
         setEditingUser(null);

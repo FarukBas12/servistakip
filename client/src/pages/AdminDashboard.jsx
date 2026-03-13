@@ -103,14 +103,16 @@ const AdminDashboard = () => {
             setNotes(allNotes);
 
             // Filter for today's notes that haven't been dismissed in this session
-            const todayStr = new Date().toISOString().split('T')[0];
-            const alerts = allNotes.filter(n => n.date.startsWith(todayStr));
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const alerts = allNotes.filter(n => n.date && n.date.startsWith(todayStr));
             setTodayNotes(alerts);
         } catch (e) { }
     };
 
     const handleDayClick = (day) => {
-        const dateStr = new Date(currentDate.getFullYear(), currentDate.getMonth(), day).toISOString().split('T')[0];
+        const d = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+        const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         setSelectedDate(dateStr);
         setNewNote({ title: '', description: '' });
         setShowNoteModal(true);
@@ -177,11 +179,14 @@ const AdminDashboard = () => {
         for (let i = 0; i < startDay; i++) {
             days.push(<div key={`empty-${i}`} style={{ height: '40px' }}></div>);
         }
-        // Days
         for (let i = 1; i <= daysInMonth; i++) {
-            const dateStr = new Date(currentDate.getFullYear(), currentDate.getMonth(), i).toISOString().split('T')[0];
+            const d = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+            const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
             const hasNote = notes.some(n => n.date && n.date.startsWith(dateStr));
-            const isToday = new Date().toISOString().split('T')[0] === dateStr;
+            
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const isToday = todayStr === dateStr;
 
             days.push(
                 <div key={i} onClick={() => handleDayClick(i)} style={{

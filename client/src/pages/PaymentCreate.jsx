@@ -11,7 +11,7 @@ const PaymentCreate = () => {
     // Header Data
     const [header, setHeader] = useState({
         title: '',
-        payment_date: new Date().toISOString().split('T')[0],
+        payment_date: new Date().toLocaleDateString('en-CA'), // YYYY-MM-DD in local time
         subcontractor_id: searchParams.get('subId') || '',
         kdv_rate: 20
     });

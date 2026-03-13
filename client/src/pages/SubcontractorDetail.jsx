@@ -12,7 +12,7 @@ const SubcontractorDetail = () => {
     const [quantities, setQuantities] = useState({});
     const [paymentHeader, setPaymentHeader] = useState({
         title: '',
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toLocaleDateString('en-CA'),
         kdv_rate: 20
     });
 
@@ -75,7 +75,7 @@ const SubcontractorDetail = () => {
             });
             alert('Hakediş oluşturuldu!');
             setQuantities({});
-            setPaymentHeader({ title: '', date: new Date().toISOString().split('T')[0], kdv_rate: 20 });
+            setPaymentHeader({ title: '', date: new Date().toLocaleDateString('en-CA'), kdv_rate: 20 });
         } catch (err) {
             alert('Hata');
         }

@@ -106,7 +106,7 @@ const SubLedger = () => {
                 id: trans.id,
                 amount: trans.amount,
                 description: trans.description,
-                transaction_date: new Date(trans.date).toISOString().split('T')[0]
+                transaction_date: new Date(trans.date).toLocaleDateString('en-CA')
             });
             setShowEditCashModal(true);
         } else {

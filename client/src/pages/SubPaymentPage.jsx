@@ -11,7 +11,7 @@ const SubPaymentPage = () => {
     const [header, setHeader] = useState({
         store_name: '',
         title: '',
-        date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
+        date: new Date().toLocaleDateString('en-CA'),
         waybill_info: '',
         kdv_rate: 20
     });
@@ -93,7 +93,7 @@ const SubPaymentPage = () => {
         formData.append('title', header.title);
         formData.append('store_name', header.store_name);
         // Date Validation: Ensure valid date or default to today
-        const validDate = header.date ? header.date : new Date().toISOString().split('T')[0];
+        const validDate = header.date ? header.date : new Date().toLocaleDateString('en-CA');
         formData.append('payment_date', validDate);
         formData.append('waybill_info', header.waybill_info);
         formData.append('kdv_rate', header.kdv_rate || 20);

@@ -25,7 +25,7 @@ const ModalOverlay = ({ children, onClose }) => (
 
 
 const CashPaymentModal = ({ sub, onClose, onSuccess }) => {
-    const [data, setData] = useState({ amount: '', description: '', transaction_date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] });
+    const [data, setData] = useState({ amount: '', description: '', transaction_date: new Date().toLocaleDateString('en-CA') });
 
     const handleSubmit = async () => {
         if (!data.amount) return alert('Tutar giriniz');
