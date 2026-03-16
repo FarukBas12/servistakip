@@ -160,12 +160,12 @@ const TaskCreate = () => {
                             onChange={handleChange}
                             style={{ background: 'rgba(0,0,0,0.3)', color: 'white' }}
                         >
-                            <option value="Diğer" style={{ color: 'black' }}>Bölge Seçiniz (Varsayılan: Diğer)</option>
-                            <option value="Kemalpaşa" style={{ color: 'black' }}>Kemalpaşa</option>
-                            <option value="Manisa" style={{ color: 'black' }}>Manisa</option>
-                            <option value="Güzelbahçe" style={{ color: 'black' }}>Güzelbahçe</option>
-                            <option value="Torbalı" style={{ color: 'black' }}>Torbalı</option>
-                            <option value="Menemen" style={{ color: 'black' }}>Menemen</option>
+                            <option value="Diğer">Bölge Seçiniz (Varsayılan: Diğer)</option>
+                            <option value="Kemalpaşa">Kemalpaşa</option>
+                            <option value="Manisa">Manisa</option>
+                            <option value="Güzelbahçe">Güzelbahçe</option>
+                            <option value="Torbalı">Torbalı</option>
+                            <option value="Menemen">Menemen</option>
                         </select>
                     </div>
 
@@ -206,10 +206,10 @@ const TaskCreate = () => {
                     <input className="glass-input" name="due_date" type="datetime-local" onChange={handleChange} />
 
                     <label>Personel Ata (Opsiyonel)</label>
-                    <select className="glass-input" name="assigned_to" onChange={handleChange} style={{ background: 'rgba(255,255,255,0.05)', color: 'white' }}>
-                        <option value="" style={{ color: 'black' }}>-- Havuza Bırak --</option>
+                    <select className="glass-input" name="assigned_to" onChange={handleChange} style={{ background: 'rgba(255,255,255,0.05)' }}>
+                        <option value="">-- Havuza Bırak --</option>
                         {users.map(u => (
-                            <option key={u.id} value={u.id} style={{ color: 'black' }}>{u.username}</option>
+                            <option key={u.id} value={u.id}>{u.username}</option>
                         ))}
                     </select>
 
