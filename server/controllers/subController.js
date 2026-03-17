@@ -28,7 +28,7 @@ exports.updateSub = async (req, res) => {
         const { id } = req.params;
         const { name, phone, photoBase64 } = req.body;
 
-        // Base64 Fallback (Priority)
+        let photo = null;
         let uploadDebug = 'Skipped';
         let base64Len = 0;
 
