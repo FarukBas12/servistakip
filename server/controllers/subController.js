@@ -12,7 +12,10 @@ exports.listSubs = async (req, res) => {
             FROM subcontractors s ORDER BY s.name
         `);
         res.json(rows);
-    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+    } catch (err) {
+        console.error('listSubs error:', err);
+        res.status(500).json({ message: 'Taşeron listesi alınamadı.', error: err.message });
+    }
 };
 
 exports.createSub = async (req, res) => {
@@ -20,7 +23,10 @@ exports.createSub = async (req, res) => {
         const { name, phone } = req.body;
         const { rows } = await db.query('INSERT INTO subcontractors (name, phone) VALUES ($1, $2) RETURNING *', [name, phone]);
         res.json(rows[0]);
-    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+    } catch (err) {
+        console.error('createSub error:', err);
+        res.status(500).json({ message: 'Taşeron oluşturulamadı.', error: err.message });
+    }
 };
 
 exports.updateSub = async (req, res) => {
@@ -78,14 +84,20 @@ exports.deleteSub = async (req, res) => {
 
         await db.query('DELETE FROM subcontractors WHERE id = $1', [id]);
         res.json({ message: 'Deleted' });
-    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+    } catch (err) {
+        console.error('deleteSub error:', err);
+        res.status(500).json({ message: 'Taşeron silinirken bir hata oluştu.', error: err.message });
+    }
 };
 
 exports.getSettings = async (req, res) => {
     try {
         const { rows } = await db.query('SELECT delete_password, email_host, email_port, email_user, email_pass, email_active FROM app_settings WHERE id = 1');
         res.json(rows[0] || { delete_password: '123456' });
-    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+    } catch (err) {
+        console.error('getSettings error:', err);
+        res.status(500).json({ message: 'Ayarlar yüklenemedi.', error: err.message });
+    }
 };
 
 const emailService = require('../services/EmailService');
@@ -109,7 +121,10 @@ exports.updateSettings = async (req, res) => {
         }
 
         res.json({ message: 'Settings Updated' });
-    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+    } catch (err) {
+        console.error('updateSettings error:', err);
+        res.status(500).json({ message: 'Ayarlar güncellenemedi.', error: err.message });
+    }
 };
 
 exports.testEmailConnection = async (req, res) => {
@@ -133,7 +148,10 @@ exports.addCash = async (req, res) => {
         await db.query('INSERT INTO cash_transactions (subcontractor_id, amount, description, transaction_date) VALUES ($1, $2, $3, $4)',
             [subcontractor_id, amount, description, transaction_date]);
         res.json({ message: 'Saved' });
-    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+    } catch (err) {
+        console.error('addCash error:', err);
+        res.status(500).json({ message: 'Ödeme eklenemedi.', error: err.message });
+    }
 };
 
 // --- PRICE DEFINITIONS ---
@@ -142,7 +160,10 @@ exports.listPrices = async (req, res) => {
         const { subId } = req.query;
         const { rows } = await db.query('SELECT * FROM price_definitions WHERE subcontractor_id = $1 ORDER BY work_item', [subId]);
         res.json(rows);
-    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+    } catch (err) {
+        console.error('listPrices error:', err);
+        res.status(500).json({ message: 'Fiyat listesi alınamadı.', error: err.message });
+    }
 };
 
 exports.importPrices = async (req, res) => {
@@ -181,7 +202,7 @@ exports.importPrices = async (req, res) => {
         res.json({ message: `${count} kalem başarıyla yüklendi.` });
     } catch (err) {
         console.error('Import Error:', err);
-        res.status(500).send('Sunucu Hatası: Excel okunamadı. ' + err.message);
+        res.status(500).json({ message: 'Excel aktarımı başarısız oldu.', error: err.message });
     }
 };
 
@@ -190,7 +211,10 @@ exports.addPrice = async (req, res) => {
         const { subId, work_item, unit_price } = req.body;
         await db.query('INSERT INTO price_definitions (subcontractor_id, work_item, unit_price) VALUES ($1, $2, $3)', [subId, work_item, unit_price]);
         res.json({ message: 'Added' });
-    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+    } catch (err) {
+        console.error('addPrice error:', err);
+        res.status(500).json({ message: 'Fiyat eklenemedi.', error: err.message });
+    }
 };
 
 exports.deletePrice = async (req, res) => {
@@ -198,7 +222,10 @@ exports.deletePrice = async (req, res) => {
         const { id } = req.params;
         await db.query('DELETE FROM price_definitions WHERE id = $1', [id]);
         res.json({ message: 'Deleted' });
-    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+    } catch (err) {
+        console.error('deletePrice error:', err);
+        res.status(500).json({ message: 'Fiyat silinemedi.', error: err.message });
+    }
 };
 
 // --- PAYMENTS (HAKEDİŞ) ---
@@ -245,8 +272,8 @@ exports.createPayment = async (req, res) => {
         res.json({ message: 'Payment Created' });
     } catch (err) {
         await client.query('ROLLBACK');
-        console.error(err);
-        res.status(500).send('Server Error');
+        console.error('createPayment error:', err);
+        res.status(500).json({ message: 'Hakediş oluşturulamadı.', error: err.message });
     } finally {
         client.release();
     }
@@ -261,7 +288,10 @@ exports.getPaymentDetails = async (req, res) => {
         const itemsRes = await db.query('SELECT * FROM payment_items WHERE payment_id = $1', [id]);
 
         res.json({ ...headerRes.rows[0], items: itemsRes.rows });
-    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+    } catch (err) {
+        console.error('getPaymentDetails error:', err);
+        res.status(500).json({ message: 'Hakediş detayları alınamadı.', error: err.message });
+    }
 };
 
 exports.getLedger = async (req, res) => {
@@ -283,7 +313,10 @@ exports.getLedger = async (req, res) => {
         const all = [...paymentsRes.rows, ...cashRes.rows].sort((a, b) => new Date(b.date) - new Date(a.date));
 
         res.json(all);
-    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+    } catch (err) {
+        console.error('getLedger error:', err);
+        res.status(500).json({ message: 'Ekstre verileri alınamadı.', error: err.message });
+    }
 };
 
 exports.deleteTransaction = async (req, res) => {
@@ -295,7 +328,10 @@ exports.deleteTransaction = async (req, res) => {
             await db.query('DELETE FROM cash_transactions WHERE id = $1', [id]);
         }
         res.json({ message: 'Deleted' });
-    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+    } catch (err) {
+        console.error('deleteTransaction error:', err);
+        res.status(500).json({ message: 'İşlem silinemedi.', error: err.message });
+    }
 };
 
 exports.updateCashTransaction = async (req, res) => {
@@ -313,7 +349,10 @@ exports.updateCashTransaction = async (req, res) => {
             WHERE id = $4`,
             [amount, description, transaction_date, id]);
         res.json({ message: 'Updated' });
-    } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+    } catch (err) {
+        console.error('updateCashTransaction error:', err);
+        res.status(500).json({ message: 'Ödeme güncellenemedi.', error: err.message });
+    }
 };
 
 exports.updatePayment = async (req, res) => {
@@ -373,8 +412,8 @@ exports.updatePayment = async (req, res) => {
         res.json({ message: 'Payment Updated' });
     } catch (err) {
         await client.query('ROLLBACK');
-        console.error(err);
-        res.status(500).send('Server Error');
+        console.error('updatePayment error:', err);
+        res.status(500).json({ message: 'Hakediş güncellenemedi.', error: err.message });
     } finally {
         client.release();
     }

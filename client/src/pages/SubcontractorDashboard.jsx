@@ -3,6 +3,7 @@ import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Edit2, FileText, DollarSign, Trash2, ScrollText } from 'lucide-react';
 import { getInitials, stringToColor } from '../utils/helpers';
+import toast from 'react-hot-toast';
 
 // Reusable modal overlay moved outside
 const ModalOverlay = ({ children, onClose }) => (
@@ -28,12 +29,13 @@ const CashPaymentModal = ({ sub, onClose, onSuccess }) => {
     const [data, setData] = useState({ amount: '', description: '', transaction_date: new Date().toLocaleDateString('en-CA') });
 
     const handleSubmit = async () => {
-        if (!data.amount) return alert('Tutar giriniz');
         try {
             await api.post('/subs/cash', { subcontractor_id: sub.id, ...data });
-            alert('Ödeme Kaydedildi');
+            toast.success('Ödeme kaydedildi');
             onSuccess();
-        } catch (err) { alert('Hata'); }
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Ödeme kaydedilemedi');
+        }
     };
 
     return (
@@ -80,47 +82,53 @@ const SubcontractorDashboard = () => {
             const res = await api.get('/subs');
             setSubs(res.data);
             setLoading(false);
-        } catch (err) { console.error(err); setLoading(false); }
+        } catch (err) {
+            console.error(err);
+            setLoading(false);
+            toast.error('Taşeron listesi yüklenemedi');
+        }
     };
 
 
 
     const handleCreateSub = async () => {
-        if (!newSub.name) return alert('İsim Giriniz');
+        if (!newSub.name) return toast.error('Lütfen taşeron ismi giriniz');
         try {
             await api.post('/subs', newSub);
-            alert('Taşeron Eklendi');
+            toast.success('Taşeron başarıyla eklendi');
             setShowCreateModal(false);
             setNewSub({ name: '', phone: '' });
             fetchSubs();
-        } catch (err) { alert('Hata'); }
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Ekleme işlemi başarısız');
+        }
     };
 
     const handleEditSub = async () => {
-        if (!newSub.name) return alert('İsim Giriniz');
+        if (!newSub.name) return toast.error('İsim boş olamaz');
         try {
             await api.put(`/subs/${selectedSub.id}`, { name: newSub.name, phone: newSub.phone || '' });
-            alert('Güncellendi');
+            toast.success('Bilgiler güncellendi');
             setShowEditModal(false);
             fetchSubs();
-        } catch (err) { console.error(err); alert('Hata Oluştu'); }
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.message || 'Güncelleme hatası');
+        }
     };
 
     const handleDeleteSub = async () => {
-        if (!deletePassword) return alert('Şifre Giriniz');
+        if (!deletePassword) return toast.error('Lütfen silme şifresini giriniz');
         try {
             await api.post(`/subs/${selectedSub.id}/delete`, { password: deletePassword });
-            alert('Taşeron Silindi');
+            toast.success('Taşeron ve bağlı tüm veriler silindi');
             setShowDeleteModal(false);
             setDeletePassword('');
             fetchSubs();
         } catch (err) {
             console.error(err);
-            if (err.response && err.response.status === 403) {
-                alert('Hatalı Şifre!');
-            } else {
-                alert('Silme İşlemi Başarısız');
-            }
+            const msg = err.response?.data?.message || 'Silme işlemi başarısız';
+            toast.error(msg);
         }
     };
 

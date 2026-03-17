@@ -2,7 +2,7 @@ const db = require('../db');
 const XLSX = require('xlsx');
 
 exports.list = async (req, res) => {
-    const { q, subId } = req.query; // Added subId support
+    const { q, subId } = req.query;
     try {
         let query = 'SELECT * FROM price_definitions WHERE 1=1';
         const params = [];
@@ -22,24 +22,22 @@ exports.list = async (req, res) => {
         const { rows } = await db.query(query, params);
         res.json(rows);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
+        console.error('listPrices error:', err);
+        res.status(500).json({ message: 'Fiyat listesi yüklenemedi.', error: err.message });
     }
 };
 
 exports.create = async (req, res) => {
     const { work_item, detail, unit_price, subcontractor_id } = req.body;
     try {
-        // Upsert based on (work_item, subcontractor_id) ideally, but for now simple insert/update
-        // If subId is present, we scope it.
         const { rows } = await db.query(
             'INSERT INTO price_definitions (work_item, detail, unit_price, subcontractor_id) VALUES ($1, $2, $3, $4) RETURNING *',
             [work_item, detail, unit_price || 0, subcontractor_id]
         );
         res.json(rows[0]);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Creation failed' });
+        console.error('createPrice error:', err);
+        res.status(500).json({ message: 'Fiyat kaydı oluşturulamadı.', error: err.message });
     }
 };
 
@@ -49,15 +47,15 @@ exports.delete = async (req, res) => {
         await db.query('DELETE FROM price_definitions WHERE id = $1', [id]);
         res.json({ message: 'Deleted' });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Deletion failed' });
+        console.error('deletePrice error:', err);
+        res.status(500).json({ message: 'Fiyat kaydı silinemedi.', error: err.message });
     }
 };
 
 exports.importPrices = async (req, res) => {
     try {
-        if (!req.file) return res.status(400).send('No file uploaded');
-        const { subId } = req.body; // Target Subcontractor
+        if (!req.file) return res.status(400).json({ message: 'Dosya yüklenmedi.' });
+        const { subId } = req.body;
 
         const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
@@ -70,20 +68,16 @@ exports.importPrices = async (req, res) => {
             const price = row['Birim Fiyat'] || row['Fiyat'] || 0;
 
             if (workItem) {
-                // If subId provided, insert specifically for them
                 if (subId) {
                     await db.query(
                         `INSERT INTO price_definitions (work_item, detail, unit_price, subcontractor_id)
-                         VALUES ($1, $2, $3, $4)
-                         ON CONFLICT (id) DO NOTHING`, // TODO: Better conflict handling? For now, just insert.
+                         VALUES ($1, $2, $3, $4)`,
                         [workItem, detail, price, subId]
                     );
                 } else {
-                    // Global (Old behavior - keep for compatibility if needed, or disable)
                     await db.query(
                         `INSERT INTO price_definitions (work_item, detail, unit_price)
-                         VALUES ($1, $2, $3)
-                         ON CONFLICT (id) DO NOTHING`,
+                         VALUES ($1, $2, $3)`,
                         [workItem, detail, price]
                     );
                 }
@@ -92,7 +86,7 @@ exports.importPrices = async (req, res) => {
 
         res.json({ message: 'Import successful' });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Import failed' });
+        console.error('importPrices error:', err);
+        res.status(500).json({ message: 'Fiyat aktarımı başarısız oldu.', error: err.message });
     }
 };

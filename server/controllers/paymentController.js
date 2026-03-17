@@ -3,12 +3,11 @@ const db = require('../db');
 // Get all payments (Pool)
 exports.getPayments = async (req, res) => {
     try {
-        // Enriched query to be added later if needed
         const { rows } = await db.query('SELECT * FROM payments ORDER BY created_at DESC');
         res.json(rows);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
+        console.error('getPayments error:', err);
+        res.status(500).json({ message: 'Hakediş listesi yüklenemedi.', error: err.message });
     }
 };
 
@@ -17,7 +16,7 @@ exports.getPaymentById = async (req, res) => {
     const { id } = req.params;
     try {
         const paymentRes = await db.query('SELECT * FROM payments WHERE id = $1', [id]);
-        if (paymentRes.rows.length === 0) return res.status(404).json({ message: 'Payment not found' });
+        if (paymentRes.rows.length === 0) return res.status(404).json({ message: 'Hakediş bulunamadı.' });
 
         const itemsRes = await db.query('SELECT * FROM payment_items WHERE payment_id = $1 ORDER BY id ASC', [id]);
 
@@ -26,8 +25,8 @@ exports.getPaymentById = async (req, res) => {
 
         res.json(payment);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
+        console.error('getPaymentById error:', err);
+        res.status(500).json({ message: 'Hakediş detayları alınırken hata oluştu.', error: err.message });
     }
 };
 
@@ -36,11 +35,8 @@ exports.createPayment = async (req, res) => {
     const client = await db.pool.connect();
     try {
         const { title, payment_date, items, kdv_rate } = req.body;
-        // Items: [{ work_item, detail, quantity, unit_price }]
-
         await client.query('BEGIN');
 
-        // 1. Create Header
         const paymentRes = await client.query(
             'INSERT INTO payments (title, payment_date, total_amount, status, kdv_rate) VALUES ($1, $2, $3, $4, $5) RETURNING *',
             [title, payment_date, 0, 'pending', kdv_rate || 0]
@@ -48,7 +44,6 @@ exports.createPayment = async (req, res) => {
         const paymentId = paymentRes.rows[0].id;
         let subTotal = 0;
 
-        // 2. Insert Items
         if (items && Array.isArray(items)) {
             for (const item of items) {
                 const qty = parseFloat(item.quantity) || 0;
@@ -63,19 +58,18 @@ exports.createPayment = async (req, res) => {
             }
         }
 
-        // 3. Update Grand Total (Subtotal + VAT)
         const vatRate = parseFloat(kdv_rate) || 0;
         const grandTotal = subTotal + (subTotal * vatRate / 100);
 
         await client.query('UPDATE payments SET total_amount = $1 WHERE id = $2', [grandTotal, paymentId]);
 
         await client.query('COMMIT');
-        res.status(201).json({ message: 'Payment created', id: paymentId });
+        res.status(201).json({ message: 'Hakediş oluşturuldu.', id: paymentId });
 
     } catch (err) {
         await client.query('ROLLBACK');
-        console.error(err);
-        res.status(500).json({ message: 'Creation failed' });
+        console.error('createPayment error:', err);
+        res.status(500).json({ message: 'Hakediş oluşturulamadı.', error: err.message });
     } finally {
         client.release();
     }
@@ -86,15 +80,15 @@ exports.toggleStatus = async (req, res) => {
     const { id } = req.params;
     try {
         const { rows } = await db.query('SELECT status FROM payments WHERE id = $1', [id]);
-        if (rows.length === 0) return res.status(404).json({ message: 'Not found' });
+        if (rows.length === 0) return res.status(404).json({ message: 'Hakediş bulunamadı.' });
 
         const newStatus = rows[0].status === 'paid' ? 'pending' : 'paid';
         await db.query('UPDATE payments SET status = $1 WHERE id = $2', [newStatus, id]);
 
-        res.json({ message: 'Status updated', status: newStatus });
+        res.json({ message: 'Durum güncellendi.', status: newStatus });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
+        console.error('toggleStatus error:', err);
+        res.status(500).json({ message: 'Durum güncellenirken hata oluştu.', error: err.message });
     }
 };
 
@@ -103,9 +97,9 @@ exports.deletePayment = async (req, res) => {
     const { id } = req.params;
     try {
         await db.query('DELETE FROM payments WHERE id = $1', [id]);
-        res.json({ message: 'Deleted' });
+        res.json({ message: 'Hakediş silindi.' });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
+        console.error('deletePayment error:', err);
+        res.status(500).json({ message: 'Hakediş silinemedi.', error: err.message });
     }
 };

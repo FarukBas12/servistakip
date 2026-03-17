@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const TaskCreate = () => {
     const navigate = useNavigate();
@@ -75,12 +76,13 @@ const TaskCreate = () => {
                 });
             }
 
+            toast.success('Görev başarıyla oluşturuldu');
             navigate('/admin');
         } catch (err) {
             console.error(err);
-            const msg = err.response?.data?.message || err.message || 'Failed to create task';
+            const msg = err.response?.data?.message || 'Görev oluşturulamadı';
             setError(msg);
-            alert(`Hata: ${msg}`); // Also alert for immediate feedback
+            toast.error(msg);
         }
     };
 
@@ -89,7 +91,7 @@ const TaskCreate = () => {
         // Keeping it simple: Maybe just find maps link?
         // Actually user said "address text and link part stay".
         // Let's keep a simple "Find Link" feature if they want
-        if (!addressToSearch) return alert('Lütfen önce bir adres girin.');
+        if (!addressToSearch) return toast.error('Lütfen önce bir adres girin.');
 
         // ... (Same logic but just set maps_link if empty)
         try {
@@ -111,8 +113,9 @@ const TaskCreate = () => {
                     ...prev,
                     maps_link: `https://www.google.com/maps?q=${geoData[0].lat},${geoData[0].lon}`
                 }));
+                toast.success('Konum linki otomatik oluşturuldu');
             } else {
-                alert('Otomatik link bulunamadı, lütfen elle girin.');
+                toast.error('Girdiğiniz adrese uygun bir konum bulunamadı.');
             }
         } catch (e) { console.log(e); }
     };

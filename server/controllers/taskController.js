@@ -3,7 +3,6 @@ const notificationController = require('./notificationController');
 
 exports.getTasks = async (req, res) => {
     try {
-        // Enlanced Query: Get Task + Assigned Users + Last Cancellation + Verifier
         let query = `
             SELECT t.*, 
             COALESCE(
@@ -23,7 +22,6 @@ exports.getTasks = async (req, res) => {
         `;
         const params = [];
 
-        // If technician, only show assigned tasks
         if (req.user.role === 'technician') {
             query += ` 
                 JOIN task_assignments ta_filter ON t.id = ta_filter.task_id 
@@ -37,8 +35,8 @@ exports.getTasks = async (req, res) => {
         const { rows } = await db.query(query, params);
         res.json(rows);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: err.message });
+        console.error('getTasks error:', err);
+        res.status(500).json({ message: 'Görev listesi alınamadı.', error: err.message });
     }
 };
 
@@ -47,28 +45,24 @@ exports.createTask = async (req, res) => {
 
     try {
         if (!title || !address) {
-            return res.status(400).json({ message: 'Title and Address are required' });
+            return res.status(400).json({ message: 'Başlık ve Adres zorunludur.' });
         }
 
-        // 1. Create Task
         const { rows } = await db.query(
             'INSERT INTO tasks (title, description, address, maps_link, due_date, lat, lng, region) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-            [title, description, address, maps_link, due_date || null, req.body.lat || null, req.body.lng || null, req.body.region || 'Diğer']
+            [title, description, address, maps_link, due_date || null, lat || null, lng || null, req.body.region || 'Diğer']
         );
         const task = rows[0];
 
-        // 2. Handle Assignments (Expect Array of IDs)
         if (assigned_to && Array.isArray(assigned_to) && assigned_to.length > 0) {
             for (const userId of assigned_to) {
                 await db.query(
                     'INSERT INTO task_assignments (task_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
                     [task.id, userId]
                 );
-                // NOTIFICATION
                 await notificationController.createNotification(userId, `Yeni Gezici Görev: ${title}`, 'task');
             }
         }
-        // Backward compatibility for single ID
         else if (assigned_to && !Array.isArray(assigned_to)) {
             await db.query(
                 'INSERT INTO task_assignments (task_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
@@ -78,8 +72,8 @@ exports.createTask = async (req, res) => {
 
         res.json(task);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: err.message });
+        console.error('createTask error:', err);
+        res.status(500).json({ message: 'Görev oluşturulamadı.', error: err.message });
     }
 };
 
@@ -88,12 +82,11 @@ exports.updateTask = async (req, res) => {
     const { status, assigned_to, title, description } = req.body;
 
     try {
-        // 1. Update Basic Fields
         let updatedTask = null;
         let query = 'UPDATE tasks SET ';
         const params = [id];
         const updates = [];
-        let counter = 2; // $1 is id
+        let counter = 2;
 
         if (status) { updates.push(`status = $${counter++}`); params.push(status); }
         if (req.body.due_date !== undefined) {
@@ -108,26 +101,19 @@ exports.updateTask = async (req, res) => {
         if (req.body.service_form_no) { updates.push(`service_form_no = $${counter++}`); params.push(req.body.service_form_no); }
         if (req.body.is_quoted !== undefined) { updates.push(`is_quoted = $${counter++}`); params.push(req.body.is_quoted); }
 
-        // Track who updated
         updates.push(`updated_by = $${counter++}`);
         params.push(req.user.id);
 
-        // Only run update if there are fields (excluding assigned_to which is handled separately)
         if (updates.length > 0) {
             query += updates.join(', ') + ' WHERE id = $1 RETURNING *';
             const { rows } = await db.query(query, params);
             updatedTask = rows[0];
         } else {
-            // Get existing task info if no direct fields updated (e.g. only assignment changed)
             updatedTask = await exports.getTaskByIdInternal(id);
         }
 
-        // 2. Handle Assignments Update (If provided)
         if (assigned_to !== undefined) {
-            // Clear existing
             await db.query('DELETE FROM task_assignments WHERE task_id = $1', [id]);
-
-            // Insert New (Bulk Insert)
             const userIds = Array.isArray(assigned_to) ? assigned_to : [assigned_to];
             const validIds = userIds.filter(uid => uid);
 
@@ -135,12 +121,10 @@ exports.updateTask = async (req, res) => {
                 const values = [];
                 const valueParams = [id];
                 let paramCounter = 2;
-
                 validIds.forEach(uid => {
                     values.push(`($1, $${paramCounter++})`);
                     valueParams.push(uid);
                 });
-
                 const insertQuery = `INSERT INTO task_assignments (task_id, user_id) VALUES ${values.join(', ')}`;
                 await db.query(insertQuery, valueParams);
 
@@ -153,12 +137,11 @@ exports.updateTask = async (req, res) => {
 
         res.json(updatedTask);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: err.message });
+        console.error('updateTask error:', err);
+        res.status(500).json({ message: 'Görev güncellenemedi.', error: err.message });
     }
 };
 
-// Internal Helper to get fresh task data after update
 exports.getTaskByIdInternal = async (id) => {
     const query = `
             SELECT t.*, 
@@ -179,48 +162,35 @@ exports.deleteTask = async (req, res) => {
     const { id } = req.params;
     try {
         const { rowCount } = await db.query('DELETE FROM tasks WHERE id = $1', [id]);
-
-        if (rowCount === 0) {
-            return res.status(404).json({ message: 'Task not found' });
-        }
-
-        res.json({ message: 'Task deleted' });
+        if (rowCount === 0) return res.status(404).json({ message: 'Görev bulunamadı.' });
+        res.json({ message: 'Görev silindi.' });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: err.message });
+        console.error('deleteTask error:', err);
+        res.status(500).json({ message: 'Görev silinemedi.', error: err.message });
     }
 };
 
 exports.addPhoto = async (req, res) => {
     const { id } = req.params;
-
-    // Check for multiple files (req.files) or single file (req.file) fallback
     const files = req.files || (req.file ? [req.file] : []);
-
-    if (files.length === 0) {
-        return res.status(400).json({ message: 'No file uploaded' });
-    }
+    if (files.length === 0) return res.status(400).json({ message: 'Dosya yüklenmedi.' });
 
     const { type, gps_lat, gps_lng } = req.body;
     const uploadedPhotos = [];
 
     try {
         for (const file of files) {
-            // Cloudinary returns the full SSL URL in file.path
             const url = file.path;
-
             const { rows } = await db.query(
                 'INSERT INTO photos (task_id, url, type, gps_lat, gps_lng) VALUES ($1, $2, $3, $4, $5) RETURNING *',
                 [id, url, type, gps_lat, gps_lng]
             );
             uploadedPhotos.push(rows[0]);
         }
-
-        // Return array of saved photos (or single object if frontend expects one, but array is safer now)
         res.json(uploadedPhotos);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: err.message });
+        console.error('addPhoto error:', err);
+        res.status(500).json({ message: 'Fotoğraf yüklenemedi.', error: err.message });
     }
 };
 
@@ -228,47 +198,39 @@ exports.getTaskById = async (req, res) => {
     const { id } = req.params;
     try {
         const taskQuery = await db.query('SELECT * FROM tasks WHERE id = $1', [id]);
-        if (taskQuery.rows.length === 0) return res.status(404).json({ message: 'Task not found' });
+        if (taskQuery.rows.length === 0) return res.status(404).json({ message: 'Görev bulunamadı.' });
 
         const photosQuery = await db.query('SELECT * FROM photos WHERE task_id = $1', [id]);
-
         const task = taskQuery.rows[0];
         task.photos = photosQuery.rows;
 
         res.json(task);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: err.message });
+        console.error('getTaskById error:', err);
+        res.status(500).json({ message: 'Görev detayı alınamadı.', error: err.message });
     }
 };
 
-// NEW: Cancel / Return Task to Pool
 exports.cancelTask = async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body;
-    const userId = req.user.id; // From auth middleware
+    const userId = req.user.id;
 
     try {
-        // 1. Log to task_logs
         await db.query(
             'INSERT INTO task_logs (task_id, user_id, action, description) VALUES ($1, $2, $3, $4)',
             [id, userId, 'cancelled', reason]
         );
-
-        // 2. Reset Task (Status: pending) & Clear Assignments
         await db.query('DELETE FROM task_assignments WHERE task_id = $1', [id]);
-
         const { rows } = await db.query(
             'UPDATE tasks SET status = $1 WHERE id = $2 RETURNING *',
             ['pending', id]
         );
-
-        if (rows.length === 0) return res.status(404).json({ message: 'Task not found' });
-
-        res.json({ message: 'Task returned to pool', task: rows[0] });
+        if (rows.length === 0) return res.status(404).json({ message: 'Görev bulunamadı.' });
+        res.json({ message: 'Görev havuza iade edildi.', task: rows[0] });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: err.message });
+        console.error('cancelTask error:', err);
+        res.status(500).json({ message: 'İşlem başarısız.', error: err.message });
     }
 };
 
@@ -276,26 +238,21 @@ exports.deletePhoto = async (req, res) => {
     const { id, photoId } = req.params;
     try {
         const { rowCount } = await db.query('DELETE FROM photos WHERE id = $1 AND task_id = $2', [photoId, id]);
-
-        if (rowCount === 0) {
-            return res.status(404).json({ message: 'Photo not found' });
-        }
-        res.json({ message: 'Photo deleted' });
+        if (rowCount === 0) return res.status(404).json({ message: 'Fotoğraf bulunamadı.' });
+        res.json({ message: 'Fotoğraf silindi.' });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: err.message });
+        console.error('deletePhoto error:', err);
+        res.status(500).json({ message: 'Fotoğraf silinemedi.', error: err.message });
     }
 };
-
-
 
 exports.verifyTask = async (req, res) => {
     const { id } = req.params;
     try {
         await db.query('UPDATE tasks SET verified_by = $1 WHERE id = $2', [req.user.id, id]);
-        res.json({ message: 'Task verified' });
+        res.json({ message: 'Görev doğrulandı.' });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Verification failed' });
+        console.error('verifyTask error:', err);
+        res.status(500).json({ message: 'Doğrulama başarısız.', error: err.message });
     }
 };
