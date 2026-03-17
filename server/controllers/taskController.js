@@ -89,6 +89,7 @@ exports.updateTask = async (req, res) => {
 
     try {
         // 1. Update Basic Fields
+        let updatedTask = null;
         let query = 'UPDATE tasks SET ';
         const params = [id];
         const updates = [];
@@ -114,7 +115,11 @@ exports.updateTask = async (req, res) => {
         // Only run update if there are fields (excluding assigned_to which is handled separately)
         if (updates.length > 0) {
             query += updates.join(', ') + ' WHERE id = $1 RETURNING *';
-            await db.query(query, params);
+            const { rows } = await db.query(query, params);
+            updatedTask = rows[0];
+        } else {
+            // Get existing task info if no direct fields updated (e.g. only assignment changed)
+            updatedTask = await exports.getTaskByIdInternal(id);
         }
 
         // 2. Handle Assignments Update (If provided)
@@ -127,7 +132,6 @@ exports.updateTask = async (req, res) => {
             const validIds = userIds.filter(uid => uid);
 
             if (validIds.length > 0) {
-                // Construct ($1, $2), ($1, $3), ...
                 const values = [];
                 const valueParams = [id];
                 let paramCounter = 2;
@@ -140,17 +144,14 @@ exports.updateTask = async (req, res) => {
                 const insertQuery = `INSERT INTO task_assignments (task_id, user_id) VALUES ${values.join(', ')}`;
                 await db.query(insertQuery, valueParams);
 
-                // NOTIFICATIONS (Still loop effectively, but db write is batched)
-                // Sending notifications is async fire-and-forget ideally, but here we await to ensure delivery
-                // Optimization: Promise.all
                 const notificationPromises = validIds.map(uid =>
-                    notificationController.createNotification(uid, `Size yeni bir görev atandı: ${result ? result.title : 'Görev'}`, 'task')
+                    notificationController.createNotification(uid, `Size yeni bir görev atandı: ${updatedTask ? updatedTask.title : 'Görev'}`, 'task')
                 );
                 await Promise.all(notificationPromises);
             }
         }
 
-        res.json(result);
+        res.json(updatedTask);
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: err.message });
