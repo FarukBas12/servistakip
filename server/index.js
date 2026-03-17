@@ -388,7 +388,6 @@ async function runMigrations() {
         `);
         console.log(' - Checked task_logs table');
 
-        // Create Subcontractors Table
         await db.query(`
             CREATE TABLE IF NOT EXISTS subcontractors (
                 id SERIAL PRIMARY KEY,
@@ -397,6 +396,7 @@ async function runMigrations() {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
+        await db.query("ALTER TABLE subcontractors ADD COLUMN IF NOT EXISTS photo TEXT");
         console.log(' - Checked subcontractors table');
 
         // Create Price Definitions Table (Master List)
