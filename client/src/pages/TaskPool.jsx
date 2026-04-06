@@ -82,22 +82,23 @@ const TaskPool = () => {
             const res = await api.get(`/tasks/${task.id}`);
             const fullTask = res.data;
 
-            // 1. TEMEL BİLGİLER
-            let text = `*Yeni Görev*\n\n`;
-            text += `*Başlık:* ${fullTask.title}\n`;
-            text += `*Adres:* ${fullTask.address}\n\n`;
+            // 1. GÖRSEL BAŞLIK VE TEMEL BİLGİLER
+            let text = `🛠️ *YENİ GÖREV ATAMASI*\n`;
+            text += `━━━━━━━━━━━━━\n\n`;
+            text += `📋 *Konu:* ${fullTask.title}\n`;
+            text += `🏢 *Adres:* ${fullTask.address}\n\n`;
             
-            text += `Detaylar için uygulamaya bakınız.\n`;
+            text += `📝 *Detay:* Detaylar için uygulamaya bakınız.\n`;
             
             if (fullTask.description) {
                 const cleanDesc = fullTask.description.replace(/\[Otomatik oluşturuldu.*\]/, '').trim();
                 const shortDesc = cleanDesc.length > 200 ? cleanDesc.substring(0, 200) + '...' : cleanDesc;
-                text += `_Not: ${shortDesc}_\n`;
+                text += `_📎 Not: ${shortDesc}_\n`;
             }
 
             if (fullTask.assigned_users && fullTask.assigned_users.length > 0) {
                 const names = fullTask.assigned_users.map(u => u.username).join(', ');
-                text += `*Ekip:* ${names}\n`;
+                text += `👥 *Ekip:* ${names}\n`;
             }
 
             // 2. FOTOĞRAF LİNKLERİ
@@ -108,16 +109,15 @@ const TaskPool = () => {
                 });
             }
 
-            // 3. KONUM LİNKİ: Varsa direkt kullan, yoksa adresten üret
-            text += `\n📍 *KONUM / HARİTA:*\n`;
+            // 3. KONUM LİNKİ
+            text += `\n📍 *KONUM / NAVİGASYON:*\n`;
             if (fullTask.maps_link) {
-                text += `${fullTask.maps_link}`;
+                text += `🌐 Maps: ${fullTask.maps_link}`;
             } else if (fullTask.address && fullTask.address !== 'Adres belirtilmedi (Mailden geldi)') {
-                // Adresi Google Haritalar'da aratacak link oluştur
                 const searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullTask.address)}`;
-                text += `${searchUrl}`;
+                text += `🌐 Harita: ${searchUrl}`;
             } else {
-                text += `Konum bilgisi girilmemiş.`;
+                text += `⚠️ Konum bilgisi mevcut değil.`;
             }
 
             // STANDART LINK PAYLAŞIMI (Hızlı ve direkt WhatsApp)
