@@ -83,63 +83,45 @@ const TaskPool = () => {
             const fullTask = res.data;
 
             // 1. TEMEL BİLGİLER
-            let header = `*Yeni Görev*\n`;
-            header += `*Başlık:* ${fullTask.title}\n`;
-            header += `*Adres:* ${fullTask.address}\n\n`;
+            let text = `*Yeni Görev*\n\n`;
+            text += `*Başlık:* ${fullTask.title}\n`;
+            text += `*Adres:* ${fullTask.address}\n\n`;
             
-            let note = `Detaylar için uygulamaya bakınız.\n`;
+            text += `Detaylar için uygulamaya bakınız.\n`;
+            
             if (fullTask.description) {
                 const cleanDesc = fullTask.description.replace(/\[Otomatik oluşturuldu.*\]/, '').trim();
-                const shortDesc = cleanDesc.length > 150 ? cleanDesc.substring(0, 150) + '...' : cleanDesc;
-                note += `_Not: ${shortDesc}_\n`;
+                const shortDesc = cleanDesc.length > 200 ? cleanDesc.substring(0, 200) + '...' : cleanDesc;
+                text += `_Not: ${shortDesc}_\n`;
             }
 
-            // 2. KONUM BİLGİSİ
-            let mapsLink = "";
-            if (fullTask.maps_link) {
-                mapsLink = fullTask.maps_link;
-            } else if (fullTask.address && fullTask.address !== 'Adres belirtilmedi (Mailden geldi)') {
-                mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullTask.address)}`;
+            if (fullTask.assigned_users && fullTask.assigned_users.length > 0) {
+                const names = fullTask.assigned_users.map(u => u.username).join(', ');
+                text += `*Ekip:* ${names}\n`;
             }
 
-            // 3. FOTOĞRAF LİNKLERİ (Sadece fallback mesajı için)
-            let photoLinks = "";
+            // 2. FOTOĞRAF LİNKLERİ
             if (fullTask.photos && fullTask.photos.length > 0) {
-                photoLinks += `\n🖼️ *FOTOĞRAFLAR:*\n`;
+                text += `\n🖼️ *GÖREV FOTOĞRAFLARI:*\n`;
                 fullTask.photos.forEach((p, i) => {
-                    photoLinks += `📸 Foto ${i+1}: ${p.url}\n`;
+                    text += `📸 Foto ${i + 1}: ${p.url}\n`;
                 });
             }
 
-            // --- GELİŞMİŞ PAYLAŞIM: WEB SHARE API (GERÇEK FOTOĞRAF GÖNDERİMİ) ---
-            if (navigator.share && fullTask.photos && fullTask.photos.length > 0) {
-                try {
-                    // Resim altı yazısını (caption) kısa ve öz tutalım (WhatsApp için kritik)
-                    const captionHeader = `*Yeni Görev: ${fullTask.title}*\n📍 ${fullTask.address}\n\n`;
-                    const captionFooter = mapsLink ? `🗺️ Konum: ${mapsLink}` : `Detaylar için uygulamaya bakınız.`;
-                    const caption = captionHeader + captionFooter;
-
-                    const photoUrl = fullTask.photos[0].url;
-                    const response = await fetch(photoUrl);
-                    const blob = await response.blob();
-                    const file = new File([blob], 'gorev_fotograf.jpg', { type: 'image/jpeg' });
-
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        await navigator.share({
-                            files: [file],
-                            title: `Görev: ${fullTask.title}`,
-                            text: caption // Resim altına bu kısa yazı gidecek
-                        });
-                        return; // Başarılıysa linke gitme
-                    }
-                } catch (shareErr) {
-                    console.warn("Web Share başarısız, linke dönülüyor:", shareErr);
-                }
+            // 3. KONUM LİNKİ: Varsa direkt kullan, yoksa adresten üret
+            text += `\n📍 *KONUM / HARİTA:*\n`;
+            if (fullTask.maps_link) {
+                text += `${fullTask.maps_link}`;
+            } else if (fullTask.address && fullTask.address !== 'Adres belirtilmedi (Mailden geldi)') {
+                // Adresi Google Haritalar'da aratacak link oluştur
+                const searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullTask.address)}`;
+                text += `${searchUrl}`;
+            } else {
+                text += `Konum bilgisi girilmemiş.`;
             }
 
-            // STANDART LINK PAYLAŞIMI (Fallback veya fotosuz görevler)
-            const fallbackMessage = header + note + (mapsLink ? `\n📍 *KONUM / HARİTA:*\n${mapsLink}` : "") + photoLinks;
-            const url = `https://wa.me/?text=${encodeURIComponent(fallbackMessage)}`;
+            // STANDART LINK PAYLAŞIMI (Hızlı ve direkt WhatsApp)
+            const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
             window.open(url, '_blank');
         } catch (err) {
             console.error('WhatsApp share error:', err);
