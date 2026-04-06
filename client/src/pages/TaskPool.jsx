@@ -89,9 +89,7 @@ const TaskPool = () => {
             
             text += `Detaylar için uygulamaya bakınız.\n`;
             
-            // Eğer açıklama varsa, mailden gelen içeriği veya notu buraya ekleyelim
             if (fullTask.description) {
-                // Çok uzun metinler için özetleyelim
                 const cleanDesc = fullTask.description.replace(/\[Otomatik oluşturuldu.*\]/, '').trim();
                 const shortDesc = cleanDesc.length > 200 ? cleanDesc.substring(0, 200) + '...' : cleanDesc;
                 text += `_Not: ${shortDesc}_\n`;
@@ -102,32 +100,51 @@ const TaskPool = () => {
                 text += `*Ekip:* ${names}\n`;
             }
 
-            if (fullTask.region) {
-                text += `*Bölge:* ${fullTask.region}\n`;
-            }
-
-            // TÜM FOTOĞRAFLARI LİSTELE
+            // FOTOĞRAFLAR VE KONUM LİNKİ
+            let photoLinks = "";
             if (fullTask.photos && fullTask.photos.length > 0) {
-                text += `\n🖼️ *GÖREV FOTOĞRAFLARI:*\n`;
+                photoLinks += `\n🖼️ *GÖREV FOTOĞRAFLARI:*\n`;
                 fullTask.photos.forEach((p, i) => {
-                    // Bulut üzerindeki resim URL'lerini ekle
-                    text += `📸 Foto ${i + 1}: ${p.url}\n`;
+                    photoLinks += `📸 Foto ${i + 1}: ${p.url}\n`;
                 });
             }
 
-            // KONUM LİNKİ: Varsa direkt kullan, yoksa adresten üret
-            text += `\n📍 *KONUM / HARİTA:*\n`;
+            let mapsInfo = `\n📍 *KONUM / HARİTA:*\n`;
             if (fullTask.maps_link) {
-                text += `${fullTask.maps_link}`;
+                mapsInfo += `${fullTask.maps_link}`;
             } else if (fullTask.address && fullTask.address !== 'Adres belirtilmedi (Mailden geldi)') {
-                // Adresi Google Haritalar'da aratacak link oluştur
-                const searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullTask.address)}`;
-                text += `${searchUrl}`;
+                mapsInfo += `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullTask.address)}`;
             } else {
-                text += `Konum bilgisi girilmemiş.`;
+                mapsInfo += `Konum bilgisi girilmemiş.`;
             }
 
-            const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+            const fullMessage = text + photoLinks + mapsInfo;
+
+            // --- GELİŞMİŞ PAYLAŞIM: WEB SHARE API (GERÇEK FOTOĞRAF GÖNDERİMİ) ---
+            // Eğer tarayıcı dosya paylaşımını destekliyorsa (Mobil cihazlarda)
+            if (navigator.share && fullTask.photos && fullTask.photos.length > 0) {
+                try {
+                    // İlk fotoğrafı indir ve dosya haline getir
+                    const photoUrl = fullTask.photos[0].url;
+                    const response = await fetch(photoUrl);
+                    const blob = await response.blob();
+                    const file = new File([blob], 'gorev_fotograf.jpg', { type: 'image/jpeg' });
+
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: `Görev: ${fullTask.title}`,
+                            text: fullMessage // Fotoğrafın altına açıklama olarak gider
+                        });
+                        return; // İşlem başarılıysa aşağıya devam etme
+                    }
+                } catch (shareErr) {
+                    console.warn("Web Share başarısız, linke dönülüyor:", shareErr);
+                }
+            }
+
+            // STANDART LINK PAYLAŞIMI (Fallback)
+            const url = `https://wa.me/?text=${encodeURIComponent(fullMessage)}`;
             window.open(url, '_blank');
         } catch (err) {
             console.error('WhatsApp share error:', err);

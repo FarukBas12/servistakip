@@ -62,11 +62,15 @@ exports.createUser = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // Date check: If start_date exists and not empty, use it. Else use null or today? 
+        // User says "only saves today's date", let's ensure it uses the provided date.
+        const effectiveDate = (start_date && start_date !== '') ? start_date : new Date();
+
         const { rows } = await db.query(
             `INSERT INTO users (username, password_hash, role, full_name, phone, start_date, photo_url, status, job_title) 
              VALUES ($1, $2, $3, $4, $5, $6, $7, 'active', $8) 
              RETURNING id, username, role, full_name, photo_url, phone, start_date, status, job_title`,
-            [username, hashedPassword, role, full_name || null, phone || null, start_date || new Date(), photo_url || null, job_title || null]
+            [username, hashedPassword, role, full_name || null, phone || null, effectiveDate, photo_url || null, job_title || null]
         );
 
         res.json(rows[0]);
@@ -78,7 +82,7 @@ exports.createUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
     const { id } = req.params;
-    const { full_name, phone, role, status, photo_url, password, job_title } = req.body;
+    const { full_name, phone, role, status, photo_url, password, job_title, start_date } = req.body;
 
     try {
         let updateFields = [];
@@ -91,6 +95,7 @@ exports.updateUser = async (req, res) => {
         if (status !== undefined) { updateFields.push(`status = $${paramCount++}`); values.push(status); }
         if (photo_url !== undefined) { updateFields.push(`photo_url = $${paramCount++}`); values.push(photo_url); }
         if (job_title !== undefined) { updateFields.push(`job_title = $${paramCount++}`); values.push(job_title); }
+        if (start_date !== undefined) { updateFields.push(`start_date = $${paramCount++}`); values.push(start_date || null); }
 
         if (password) {
             const salt = await bcrypt.genSalt(10);
