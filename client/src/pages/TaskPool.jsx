@@ -78,36 +78,53 @@ const TaskPool = () => {
 
     const handleWhatsAppShare = async (task) => {
         try {
-            // Görev detaylarını (fotoğraflar ve atanan personeller için) çek
+            // Görev detaylarını (fotoğraflar ve atanan personeller için) her zaman güncel çek
             const res = await api.get(`/tasks/${task.id}`);
             const fullTask = res.data;
 
-            let text = `*Yeni Görev Atandı*\n\n`;
+            // WhatsApp formatlı mesaj metni oluşturma
+            let text = `*Yeni Görev*\n\n`;
             text += `*Başlık:* ${fullTask.title}\n`;
-            text += `*Adres:* ${fullTask.address}\n`;
+            text += `*Adres:* ${fullTask.address}\n\n`;
+            
+            text += `Detaylar için uygulamaya bakınız.\n`;
+            
+            // Eğer açıklama varsa, mailden gelen içeriği veya notu buraya ekleyelim
+            if (fullTask.description) {
+                // Çok uzun metinler için özetleyelim
+                const cleanDesc = fullTask.description.replace(/\[Otomatik oluşturuldu.*\]/, '').trim();
+                const shortDesc = cleanDesc.length > 200 ? cleanDesc.substring(0, 200) + '...' : cleanDesc;
+                text += `_Not: ${shortDesc}_\n`;
+            }
 
             if (fullTask.assigned_users && fullTask.assigned_users.length > 0) {
                 const names = fullTask.assigned_users.map(u => u.username).join(', ');
-                text += `*Personel:* ${names}\n`;
-            }
-
-            if (fullTask.description) {
-                text += `*Açıklama:* ${fullTask.description}\n`;
+                text += `*Ekip:* ${names}\n`;
             }
 
             if (fullTask.region) {
                 text += `*Bölge:* ${fullTask.region}\n`;
             }
 
+            // TÜM FOTOĞRAFLARI LİSTELE
             if (fullTask.photos && fullTask.photos.length > 0) {
-                text += `\n*Fotoğraflar:*\n`;
+                text += `\n🖼️ *GÖREV FOTOĞRAFLARI:*\n`;
                 fullTask.photos.forEach((p, i) => {
+                    // Bulut üzerindeki resim URL'lerini ekle
                     text += `📸 Foto ${i + 1}: ${p.url}\n`;
                 });
             }
 
+            // KONUM LİNKİ: Varsa direkt kullan, yoksa adresten üret
+            text += `\n📍 *KONUM / HARİTA:*\n`;
             if (fullTask.maps_link) {
-                text += `\n📍 *Harita:* ${fullTask.maps_link}`;
+                text += `${fullTask.maps_link}`;
+            } else if (fullTask.address && fullTask.address !== 'Adres belirtilmedi (Mailden geldi)') {
+                // Adresi Google Haritalar'da aratacak link oluştur
+                const searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullTask.address)}`;
+                text += `${searchUrl}`;
+            } else {
+                text += `Konum bilgisi girilmemiş.`;
             }
 
             const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
