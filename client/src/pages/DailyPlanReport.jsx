@@ -65,7 +65,7 @@ const DailyPlanReport = () => {
         if (!reportRef.current) return;
 
         const canvas = await html2canvas(reportRef.current, {
-            backgroundColor: isDarkMode ? '#111827' : '#ffffff',
+            backgroundColor: '#111827',
             scale: 2 // High resolution
         });
 

@@ -78,10 +78,44 @@ const TaskPool = () => {
 
     const handleWhatsAppShare = async (task) => {
         try {
-            const text = `*Yeni Görev*\n\n*${task.title}*\n${task.address}\n\nDetaylar için uygulamaya bakınız.`;
+            // Görev detaylarını (fotoğraflar ve atanan personeller için) çek
+            const res = await api.get(`/tasks/${task.id}`);
+            const fullTask = res.data;
+
+            let text = `*Yeni Görev Atandı*\n\n`;
+            text += `*Başlık:* ${fullTask.title}\n`;
+            text += `*Adres:* ${fullTask.address}\n`;
+
+            if (fullTask.assigned_users && fullTask.assigned_users.length > 0) {
+                const names = fullTask.assigned_users.map(u => u.username).join(', ');
+                text += `*Personel:* ${names}\n`;
+            }
+
+            if (fullTask.description) {
+                text += `*Açıklama:* ${fullTask.description}\n`;
+            }
+
+            if (fullTask.region) {
+                text += `*Bölge:* ${fullTask.region}\n`;
+            }
+
+            if (fullTask.photos && fullTask.photos.length > 0) {
+                text += `\n*Fotoğraflar:*\n`;
+                fullTask.photos.forEach((p, i) => {
+                    text += `📸 Foto ${i + 1}: ${p.url}\n`;
+                });
+            }
+
+            if (fullTask.maps_link) {
+                text += `\n📍 *Harita:* ${fullTask.maps_link}`;
+            }
+
             const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
             window.open(url, '_blank');
-        } catch (err) { toast.error('WhatsApp paylaşımı sırasında hata oluştu'); }
+        } catch (err) {
+            console.error('WhatsApp share error:', err);
+            toast.error('WhatsApp paylaşımı sırasında hata oluştu');
+        }
     };
 
     const handleEditSave = async (id, formData, files) => {

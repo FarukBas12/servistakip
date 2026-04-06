@@ -197,7 +197,18 @@ exports.addPhoto = async (req, res) => {
 exports.getTaskById = async (req, res) => {
     const { id } = req.params;
     try {
-        const taskQuery = await db.query('SELECT * FROM tasks WHERE id = $1', [id]);
+        const taskQuery = await db.query(`
+            SELECT t.*, 
+            COALESCE(
+                (SELECT json_agg(json_build_object('id', u.id, 'username', u.username))
+                 FROM task_assignments ta
+                 JOIN users u ON ta.user_id = u.id
+                 WHERE ta.task_id = t.id),
+                '[]'
+            ) as assigned_users
+            FROM tasks t WHERE t.id = $1
+        `, [id]);
+
         if (taskQuery.rows.length === 0) return res.status(404).json({ message: 'Görev bulunamadı.' });
 
         const photosQuery = await db.query('SELECT * FROM photos WHERE task_id = $1', [id]);
