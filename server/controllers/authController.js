@@ -52,7 +52,7 @@ exports.getMe = async (req, res) => {
 exports.getUsers = async (req, res) => {
     try {
         const { rows } = await db.query(`
-            SELECT id, username, role, full_name, photo_url, phone, start_date, status, job_title, last_lat, last_lng, last_location_update
+            SELECT id, username, role, full_name, photo_url, phone, start_date, status, job_title 
             FROM users 
             ORDER BY created_at DESC
         `);
