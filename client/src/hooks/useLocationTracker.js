@@ -1,9 +1,14 @@
 import { useEffect } from 'react';
 import api from '../utils/api';
+import toast from 'react-hot-toast';
 
 const useLocationTracker = (user) => {
     useEffect(() => {
-        if (!user || user.role !== 'technician') return;
+        if (!user) return;
+        
+        // Check role case-insensitively or for 'technician'
+        const isTech = user.role?.toLowerCase() === 'technician';
+        if (!isTech) return;
 
         let watchId;
 
@@ -14,7 +19,8 @@ const useLocationTracker = (user) => {
                     lat: latitude, 
                     lng: longitude 
                 });
-                console.log('Location updated live');
+                console.log('Location updated live:', latitude, longitude);
+                // toast.success('Konum güncellendi', { id: 'loc-update', duration: 1000 }); // Optional feedback
             } catch (err) {
                 console.error('Failed to update location:', err);
             }

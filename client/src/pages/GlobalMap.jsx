@@ -48,7 +48,9 @@ const GlobalMap = () => {
 
             // 2. Fetch Technicians
             const resUsers = await api.get('/auth/users');
-            const validTechs = resUsers.data.filter(u => u.role === 'technician' && u.last_lat && u.last_lng);
+            const validTechs = resUsers.data.filter(u => 
+                u.role?.toLowerCase() === 'technician' && u.last_lat && u.last_lng
+            );
             setTechs(validTechs);
 
             // 3. Update Bounds
