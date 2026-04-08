@@ -36,6 +36,19 @@ exports.login = async (req, res) => {
     }
 };
 
+exports.getMe = async (req, res) => {
+    try {
+        const { rows } = await db.query(
+            'SELECT id, username, role, full_name, photo_url, phone, start_date, job_title FROM users WHERE id = $1',
+            [req.user.id]
+        );
+        if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
+        res.json(rows[0]);
+    } catch (err) {
+        res.status(500).send('Server Error');
+    }
+};
+
 exports.getUsers = async (req, res) => {
     try {
         const { rows } = await db.query(`

@@ -11,6 +11,10 @@ const upload = multer({ storage: multer.memoryStorage() });
 // @access  Public
 router.post('/login', authController.login);
 
+// @route   GET api/auth/me
+// @desc    Get current user profile
+router.get('/me', require('../middleware/authorize')(['admin', 'technician', 'depocu']), authController.getMe);
+
 // @route   GET api/auth/users
 // @desc    Get all users
 router.get('/users', authController.getUsers);

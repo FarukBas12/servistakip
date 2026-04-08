@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
     LayoutDashboard, Inbox, Users, LogOut, FolderOpen, Package,
-    Truck, Settings, Sun, Moon, Network, Menu, X, Home
+    Truck, Settings, Sun, Moon, Network, Menu, X, Home, User
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -58,6 +58,12 @@ const Sidebar = () => {
                     ))}
                 </nav>
                 <div className="sidebar-actions">
+                    <NavLink to="/admin/profile"
+                        className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                        title="Profilim">
+                        <span className="sidebar-icon"><User size={22} /></span>
+                        <span className="sidebar-label">Profilim</span>
+                    </NavLink>
                     <NavLink to="/admin/settings"
                         className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                         title="Ayarlar">
@@ -140,6 +146,13 @@ const Sidebar = () => {
                 {/* Footer: Settings + Theme + Logout */}
                 <div className="mobile-drawer-footer">
                     <p className="mobile-drawer-section-label">Genel</p>
+
+                    <NavLink to="/admin/profile"
+                        className={({ isActive }) => `mobile-drawer-link ${isActive ? 'active' : ''}`}
+                        onClick={closeDrawer}>
+                        <span className="mobile-drawer-link-icon"><User size={20} /></span>
+                        <span>Profilim</span>
+                    </NavLink>
 
                     <NavLink to="/admin/settings"
                         className={({ isActive }) => `mobile-drawer-link ${isActive ? 'active' : ''}`}

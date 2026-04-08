@@ -26,6 +26,7 @@ const Suppliers = lazy(() => import('../pages/Suppliers'));
 const NotesPage = lazy(() => import('../pages/NotesPage'));
 const SettingsPage = lazy(() => import('../pages/SettingsPage'));
 const HierarchyPage = lazy(() => import('../pages/HierarchyPage'));
+const ProfilePage = lazy(() => import('../pages/Profile'));
 
 const AdminLayout = () => {
     return (
@@ -57,6 +58,7 @@ const AdminLayout = () => {
                         <Route path="/suppliers" element={<Suppliers />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/hierarchy" element={<HierarchyPage />} />
+                        <Route path="/profile" element={<ProfilePage />} />
                     </Routes>
                 </Suspense>
             </div>
