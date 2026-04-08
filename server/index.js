@@ -32,6 +32,7 @@ app.use('/api/definitions', require('./routes/definitions'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/subs', require('./routes/subs'));
+app.use('/api/expenses', require('./routes/expenses'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/stock-tracking', require('./routes/stockTracking'));
 app.use('/api/backup', require('./routes/backup'));
@@ -69,8 +70,19 @@ const initDB = async () => {
             ALTER TABLE users ADD COLUMN IF NOT EXISTS last_lat NUMERIC;
             ALTER TABLE users ADD COLUMN IF NOT EXISTS last_lng NUMERIC;
             ALTER TABLE users ADD COLUMN IF NOT EXISTS last_location_update TIMESTAMP;
+
+            CREATE TABLE IF NOT EXISTS expenses (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                amount NUMERIC(10, 2) NOT NULL,
+                category VARCHAR(50),
+                description TEXT,
+                receipt_url TEXT,
+                status VARCHAR(20) DEFAULT 'pending', -- pending, approved, rejected
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
         `);
-        console.log('Database columns verified/added.');
+        console.log('Database columns and tables verified/added.');
     } catch (err) {
         console.error('Migration error:', err.message);
     }

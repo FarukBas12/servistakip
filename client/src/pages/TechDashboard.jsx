@@ -63,9 +63,20 @@ const TechDashboard = () => {
         <div className="dashboard" style={{ paddingBottom: '80px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h1 style={{ margin: 0, fontSize: '1.8rem', background: 'linear-gradient(90deg, #e0e7ff, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Saha Paneli</h1>
-                <div style={{ fontSize: '0.9rem', color: '#5a6d8a' }}>
-                    {new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' })}
-                </div>
+                <Link to="/tech/expenses/create" style={{ 
+                    background: 'rgba(99, 102, 241, 0.2)', 
+                    color: '#a5b4fc', 
+                    padding: '8px 12px', 
+                    borderRadius: '10px', 
+                    textDecoration: 'none',
+                    fontSize: '0.85rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    border: '1px solid rgba(99, 102, 241, 0.3)'
+                }}>
+                    <Wallet size={16} /> Harcama Ekle
+                </Link>
             </div>
 
             {/* TABS */}

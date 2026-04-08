@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
     LayoutDashboard, Inbox, Users, LogOut, FolderOpen, Package,
-    Truck, Settings, Sun, Moon, Network, Menu, X, Home, User
+    Truck, Settings, Sun, Moon, Network, Menu, X, Home, User, CreditCard
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -22,6 +22,7 @@ const Sidebar = () => {
         { path: '/admin/subs', icon: <Users size={22} />, drawerIcon: <Users size={20} />, label: 'Taşeronlar' },
         ...(!isTech ? [{ path: '/admin/projects', icon: <FolderOpen size={22} />, drawerIcon: <FolderOpen size={20} />, label: 'Projeler', primary: true }] : []),
         { path: '/admin/stocks', icon: <Package size={22} />, drawerIcon: <Package size={20} />, label: 'Stok', primary: true },
+        { path: '/admin/expenses', icon: <CreditCard size={22} />, drawerIcon: <CreditCard size={20} />, label: 'Harcamalar' },
     ].filter(item => {
         if (user?.role === 'depocu') return item.path === '/admin/stocks';
         return true;

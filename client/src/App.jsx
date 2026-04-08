@@ -13,6 +13,8 @@ const Login = React.lazy(() => import('./pages/Login'));
 const AdminLayout = React.lazy(() => import('./components/AdminLayout'));
 const TechDashboard = React.lazy(() => import('./pages/TechDashboard'));
 const TechTaskDetail = React.lazy(() => import('./pages/TechTaskDetail'));
+const ExpenseCreate = React.lazy(() => import('./pages/ExpenseCreate'));
+const ExpenseList = React.lazy(() => import('./pages/ExpenseList'));
 const ProjectDashboard = React.lazy(() => import('./pages/ProjectDashboard'));
 const ProjectDetail = React.lazy(() => import('./pages/ProjectDetail'));
 
@@ -34,7 +36,9 @@ const AppContent = () => {
 
                     {/* Admin Routes (Managed by AdminLayout) */}
                     <Route element={<PrivateRoute allowedRoles={['admin', 'depocu']} />}>
-                        <Route path="/admin/*" element={<AdminLayout />} />
+                        <Route path="/admin/*" element={<AdminLayout />}>
+                            <Route path="expenses" element={<ExpenseList />} />
+                        </Route>
                     </Route>
 
                     {/* Technician Routes */}
@@ -45,6 +49,7 @@ const AppContent = () => {
                                 <Routes>
                                     <Route path="/" element={<TechDashboard />} />
                                     <Route path="/task/:id" element={<TechTaskDetail />} />
+                                    <Route path="/expenses/create" element={<ExpenseCreate />} />
                                     <Route path="/projects" element={<ProjectDashboard />} />
                                     <Route path="/projects/:id" element={<ProjectDetail />} />
                                 </Routes>
