@@ -10,13 +10,20 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        const role = localStorage.getItem('role');
-        if (token) {
-            // Ideally verify token with backend, for now assume valid if present
-            setUser({ role, token });
-        }
-        setLoading(false);
+        const fetchUser = async () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const res = await api.get('/auth/me');
+                    setUser({ ...res.data, token });
+                } catch (err) {
+                    console.error('Session expired or invalid token');
+                    logout();
+                }
+            }
+            setLoading(false);
+        };
+        fetchUser();
     }, []);
 
     const login = async (username, password) => {
