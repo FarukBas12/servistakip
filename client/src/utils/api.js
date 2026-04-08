@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'https://servistakip-backend.onrender.com/api',
+    baseURL: (import.meta.env.VITE_API_URL || '') + '/api',
     timeout: 300000, // 5 minutes timeout
     headers: {
         'Content-Type': 'application/json'

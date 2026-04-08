@@ -18,65 +18,69 @@ const ProjectDetail = React.lazy(() => import('./pages/ProjectDetail'));
 
 
 import { Toaster } from 'react-hot-toast';
+import { useAuth } from './context/AuthContext';
+import useLocationTracker from './hooks/useLocationTracker';
 
 const AppContent = () => {
-  const { isDarkMode } = useTheme();
+    const { user } = useAuth();
+    const { isDarkMode } = useTheme();
+    useLocationTracker(user);
 
-  return (
-    <AuthProvider>
-      <Router>
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
-            <Route path="/login" element={<Login />} />
+    return (
+        <Router>
+            <Suspense fallback={<LoadingSpinner />}>
+                <Routes>
+                    <Route path="/login" element={<Login />} />
 
-            {/* Admin Routes (Managed by AdminLayout) */}
-            <Route element={<PrivateRoute allowedRoles={['admin', 'depocu']} />}>
-              <Route path="/admin/*" element={<AdminLayout />} />
-            </Route>
+                    {/* Admin Routes (Managed by AdminLayout) */}
+                    <Route element={<PrivateRoute allowedRoles={['admin', 'depocu']} />}>
+                        <Route path="/admin/*" element={<AdminLayout />} />
+                    </Route>
 
-            {/* Technician Routes */}
-            <Route element={<PrivateRoute allowedRoles={['technician']} />}>
-              <Route path="/tech/*" element={
-                <>
-                  <Navbar />
-                  <Routes>
-                    <Route path="/" element={<TechDashboard />} />
-                    <Route path="/task/:id" element={<TechTaskDetail />} />
-                    <Route path="/projects" element={<ProjectDashboard />} />
-                    <Route path="/projects/:id" element={<ProjectDetail />} />
-                  </Routes>
-                </>
-              } />
-            </Route>
+                    {/* Technician Routes */}
+                    <Route element={<PrivateRoute allowedRoles={['technician']} />}>
+                        <Route path="/tech/*" element={
+                            <>
+                                <Navbar />
+                                <Routes>
+                                    <Route path="/" element={<TechDashboard />} />
+                                    <Route path="/task/:id" element={<TechTaskDetail />} />
+                                    <Route path="/projects" element={<ProjectDashboard />} />
+                                    <Route path="/projects/:id" element={<ProjectDetail />} />
+                                </Routes>
+                            </>
+                        } />
+                    </Route>
 
-            <Route path="/" element={<Navigate to="/login" />} />
-          </Routes>
-        </Suspense>
-        <PWAInstallPrompt />
-        <VersionManager />
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: isDarkMode ? '#1e293b' : '#fff',
-              color: isDarkMode ? '#fff' : '#1e293b',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)',
-              backdropFilter: 'blur(10px)'
-            }
-          }}
-        />
-      </Router>
-    </AuthProvider>
-  );
+                    <Route path="/" element={<Navigate to="/login" />} />
+                </Routes>
+            </Suspense>
+            <PWAInstallPrompt />
+            <VersionManager />
+            <Toaster
+                position="top-right"
+                toastOptions={{
+                    duration: 3000,
+                    style: {
+                        background: isDarkMode ? '#1e293b' : '#fff',
+                        color: isDarkMode ? '#fff' : '#1e293b',
+                        border: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)',
+                        backdropFilter: 'blur(10px)'
+                    }
+                }}
+            />
+        </Router>
+    );
 };
 
 function App() {
-  return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
-  );
+    return (
+        <ThemeProvider>
+            <AuthProvider>
+                <AppContent />
+            </AuthProvider>
+        </ThemeProvider>
+    );
 }
 
 export default App;

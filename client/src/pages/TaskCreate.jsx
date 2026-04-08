@@ -13,7 +13,9 @@ const TaskCreate = () => {
         due_date: '',
         assigned_to: '',
         maps_link: '',
-        region: 'Diğer'
+        region: 'Diğer',
+        lat: null,
+        lng: null
     });
     // New state for file attachments
     const [files, setFiles] = useState([]);
@@ -40,17 +42,38 @@ const TaskCreate = () => {
         setFiles(e.target.files);
     };
 
+    const parseCoordsFromLink = (link) => {
+        if (!link) return null;
+        // Try to find lat/lng in URL (standard @lat,lng style)
+        const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+        const match = link.match(regex);
+        if (match) {
+            return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+        }
+        // Try query param style q=lat,lng
+        const qRegex = /[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+        const qMatch = link.match(qRegex);
+        if (qMatch) {
+            return { lat: parseFloat(qMatch[1]), lng: parseFloat(qMatch[2]) };
+        }
+        return null;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             setError(null); // Reset error
+
+            if (!formData.lat || !formData.lng) {
+                toast.error('Lütfen geçerli bir konum doğrulayın/seçin.');
+                return;
+            }
+
             // 1. Prepare Payload (Sanitize)
             const payload = {
                 ...formData,
                 due_date: formData.due_date ? formData.due_date : null, // Handle empty date string
-                assigned_to: formData.assigned_to ? formData.assigned_to : null,
-                lat: 0,
-                lng: 0
+                assigned_to: formData.assigned_to ? formData.assigned_to : null
             };
 
             // 1. Create Task
@@ -66,8 +89,8 @@ const TaskCreate = () => {
                 }
 
                 fileData.append('type', 'before'); // DB Constraint
-                fileData.append('gps_lat', 0);
-                fileData.append('gps_lng', 0);
+                fileData.append('gps_lat', formData.lat);
+                fileData.append('gps_lng', formData.lng);
 
                 await api.post(`/tasks/${taskId}/photos`, fileData, {
                     headers: {
@@ -87,13 +110,8 @@ const TaskCreate = () => {
     };
 
     const handleGeocode = async (addressToSearch) => {
-        // Legacy: Just fills coordinates in backend if needed, but we removed visual map
-        // Keeping it simple: Maybe just find maps link?
-        // Actually user said "address text and link part stay".
-        // Let's keep a simple "Find Link" feature if they want
         if (!addressToSearch) return toast.error('Lütfen önce bir adres girin.');
 
-        // ... (Same logic but just set maps_link if empty)
         try {
             // Smart Clean
             let cleanAddr = addressToSearch
@@ -109,15 +127,21 @@ const TaskCreate = () => {
             const geoData = await geoRes.json();
 
             if (geoData && geoData.length > 0) {
+                const { lat, lon } = geoData[0];
                 setFormData(prev => ({
                     ...prev,
-                    maps_link: `https://www.google.com/maps?q=${geoData[0].lat},${geoData[0].lon}`
+                    lat: parseFloat(lat),
+                    lng: parseFloat(lon),
+                    maps_link: `https://www.google.com/maps?q=${lat},${lon}`
                 }));
-                toast.success('Konum linki otomatik oluşturuldu');
+                toast.success('Konum başarıyla doğrulandı ve haritaya işlendi.');
             } else {
                 toast.error('Girdiğiniz adrese uygun bir konum bulunamadı.');
             }
-        } catch (e) { console.log(e); }
+        } catch (e) { 
+            console.error(e);
+            toast.error('Konum servisi şu an meşgul.');
+        }
     };
 
     const handleStoreCodeBlur = async (e) => {
@@ -131,19 +155,31 @@ const TaskCreate = () => {
                 ...formData,
                 title: store.name,
                 address: store.address,
-                description: `Mağaza Kodu: ${store.code}`
+                description: `Mağaza Kodu: ${store.code}`,
+                lat: store.lat ? parseFloat(store.lat) : null,
+                lng: store.lng ? parseFloat(store.lng) : null,
+                maps_link: (store.lat && store.lng) ? `https://www.google.com/maps?q=${store.lat},${store.lng}` : ''
             });
-            // Auto find link
-            handleGeocode(store.address);
-        } catch (err) {
-            if (err.response && err.response.status === 404) {
-                // alert('Mağaza kodu bulunamadı!'); // Don't annoy if just typing
+            
+            if (!store.lat || !store.lng) {
+                handleGeocode(store.address);
+            } else {
+                toast.success('Mağaza konumu hazır.');
             }
+        } catch (err) {
+            console.error(err);
         }
     };
 
     const handleLinkChange = (e) => {
-        setFormData({ ...formData, maps_link: e.target.value });
+        const link = e.target.value;
+        const coords = parseCoordsFromLink(link);
+        if (coords) {
+            setFormData({ ...formData, maps_link: link, lat: coords.lat, lng: coords.lng });
+            toast.success('Linkten koordinatlar ayıklandı!');
+        } else {
+            setFormData({ ...formData, maps_link: link });
+        }
     };
 
     return (

@@ -157,6 +157,21 @@ exports.uploadPhoto = async (req, res) => {
     }
 };
 
+exports.updateLocation = async (req, res) => {
+    try {
+        const { lat, lng } = req.body;
+        const userId = req.user.id;
+        
+        await db.query(
+            'UPDATE users SET last_lat = $1, last_lng = $2, last_location_update = CURRENT_TIMESTAMP WHERE id = $3',
+            [lat, lng, userId]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).send('Location update failed');
+    }
+};
+
 exports.deleteUser = async (req, res) => {
     try {
         const { id } = req.params;

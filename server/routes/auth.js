@@ -27,6 +27,10 @@ router.post('/register', authController.createUser);
 // @desc    Update user
 router.put('/:id', authController.updateUser);
 
+// @route   POST api/auth/update-location
+// @desc    Update user location
+router.post('/update-location', require('../middleware/authorize')(['admin', 'technician', 'depocu']), authController.updateLocation);
+
 // @route   POST api/auth/upload-photo
 // @desc    Upload user photo
 router.post('/upload-photo', upload.single('photo'), authController.uploadPhoto);
