@@ -62,6 +62,21 @@ app.use((err, req, res, next) => {
     });
 });
 
+// Database auto-migration
+const initDB = async () => {
+    try {
+        await db.query(`
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS last_lat NUMERIC;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS last_lng NUMERIC;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS last_location_update TIMESTAMP;
+        `);
+        console.log('Database columns verified/added.');
+    } catch (err) {
+        console.error('Migration error:', err.message);
+    }
+};
+initDB();
+
 // Initialize and Start
 app.listen(PORT, async () => {
     console.log(`🚀 Server running on port ${PORT}`);
