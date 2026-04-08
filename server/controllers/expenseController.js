@@ -20,7 +20,7 @@ exports.createExpense = async (req, res) => {
 exports.getExpenses = async (req, res) => {
     try {
         let query = `
-            SELECT e.*, u.full_name, u.username 
+            SELECT e.*, u.full_name, u.username, u.photo_url 
             FROM expenses e 
             JOIN users u ON e.user_id = u.id 
         `;

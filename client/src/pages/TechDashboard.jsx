@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { Link } from 'react-router-dom';
 import { playNotificationSound } from '../utils/sound';
-import { MapPin, Phone, Navigation, Calendar, Clock, ArrowRight, CheckCircle, AlertCircle, Wallet } from 'lucide-react';
+import { MapPin, Phone, Navigation, Calendar, Clock, ArrowRight, CheckCircle, AlertCircle, Wallet, History } from 'lucide-react';
 
 const TechDashboard = () => {
     const [tasks, setTasks] = useState([]);
@@ -61,22 +61,46 @@ const TechDashboard = () => {
 
     return (
         <div className="dashboard" style={{ paddingBottom: '80px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <div style={{ marginBottom: '1rem' }}>
                 <h1 style={{ margin: 0, fontSize: '1.8rem', background: 'linear-gradient(90deg, #e0e7ff, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Saha Paneli</h1>
-                <Link to="/tech/expenses/create" style={{ 
-                    background: 'rgba(99, 102, 241, 0.2)', 
-                    color: '#a5b4fc', 
-                    padding: '8px 12px', 
-                    borderRadius: '10px', 
-                    textDecoration: 'none',
-                    fontSize: '0.85rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    border: '1px solid rgba(99, 102, 241, 0.3)'
-                }}>
-                    <Wallet size={16} /> Harcama Ekle
-                </Link>
+                
+                {/* HARCAMA BUTONLARI */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '15px' }}>
+                    <Link 
+                        to="/tech/expenses/create" 
+                        className="glass-panel" 
+                        style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center', 
+                            gap: '8px', 
+                            padding: '12px', 
+                            color: '#818cf8', 
+                            textDecoration: 'none', 
+                            fontWeight: 'bold',
+                            fontSize: '0.9rem'
+                        }}
+                    >
+                        <Wallet size={18} /> Harcama Ekle
+                    </Link>
+                    <Link 
+                        to="/tech/expenses" 
+                        className="glass-panel" 
+                        style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center', 
+                            gap: '8px', 
+                            padding: '12px', 
+                            color: 'rgba(255,255,255,0.7)', 
+                            textDecoration: 'none', 
+                            fontWeight: 'bold',
+                            fontSize: '0.9rem'
+                        }}
+                    >
+                        <History size={18} /> Harcamalarım
+                    </Link>
+                </div>
             </div>
 
             {/* TABS */}

@@ -14,6 +14,7 @@ const AdminLayout = React.lazy(() => import('./components/AdminLayout'));
 const TechDashboard = React.lazy(() => import('./pages/TechDashboard'));
 const TechTaskDetail = React.lazy(() => import('./pages/TechTaskDetail'));
 const ExpenseCreate = React.lazy(() => import('./pages/ExpenseCreate'));
+const ExpenseHistory = React.lazy(() => import('./pages/ExpenseHistory'));
 const ExpenseList = React.lazy(() => import('./pages/ExpenseList'));
 const ProjectDashboard = React.lazy(() => import('./pages/ProjectDashboard'));
 const ProjectDetail = React.lazy(() => import('./pages/ProjectDetail'));
@@ -48,6 +49,7 @@ const AppContent = () => {
                                     <Route path="/" element={<TechDashboard />} />
                                     <Route path="/task/:id" element={<TechTaskDetail />} />
                                     <Route path="/expenses/create" element={<ExpenseCreate />} />
+                                    <Route path="/expenses" element={<ExpenseHistory />} />
                                     <Route path="/projects" element={<ProjectDashboard />} />
                                     <Route path="/projects/:id" element={<ProjectDetail />} />
                                 </Routes>

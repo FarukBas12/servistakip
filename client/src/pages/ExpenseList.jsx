@@ -90,9 +90,17 @@ const ExpenseList = () => {
                                     </td>
                                     <td style={{ padding: '15px 20px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.8rem', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
-                                                {exp.username.substring(0, 2).toUpperCase()}
-                                            </div>
+                                            {exp.photo_url ? (
+                                                <img 
+                                                    src={exp.photo_url} 
+                                                    alt={exp.username} 
+                                                    style={{ width: '32px', height: '32px', borderRadius: '10px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
+                                                />
+                                            ) : (
+                                                <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.8rem', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+                                                    {exp.username.substring(0, 2).toUpperCase()}
+                                                </div>
+                                            )}
                                             <span style={{ fontWeight: '500', color: 'rgba(255,255,255,0.9)' }}>{exp.full_name || exp.username}</span>
                                         </div>
                                     </td>
