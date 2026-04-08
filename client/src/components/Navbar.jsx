@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, NavLink } from 'react-router-dom';
-import { List, Sun, Moon, Search } from 'lucide-react';
+import { List, Sun, Moon, Search, Wallet } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import GlobalSearch from './GlobalSearch';
 import { useTheme } from '../context/ThemeContext';
