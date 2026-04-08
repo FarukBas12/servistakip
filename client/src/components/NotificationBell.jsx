@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Bell, Check, BellOff, BellRing } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { subscribeToPush } from '../utils/pushSubscription';
 
 const NOTIFICATION_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
 
@@ -68,6 +69,7 @@ const NotificationBell = ({ placement = 'bottom-right' }) => {
     useEffect(() => {
         requestDesktopPermission();
         fetchNotifications();
+        subscribeToPush(); // Subscribe for Web Push
         const interval = setInterval(fetchNotifications, 10000);
         return () => clearInterval(interval);
     }, []);

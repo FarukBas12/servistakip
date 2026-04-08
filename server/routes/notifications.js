@@ -14,4 +14,7 @@ router.put('/:id/read', notificationController.markAsRead);
 // Mark ALL as read
 router.put('/mark-all-read', notificationController.markAllAsRead);
 
+// Subscribe to push notifications
+router.post('/subscribe', notificationController.subscribe);
+
 module.exports = router;
