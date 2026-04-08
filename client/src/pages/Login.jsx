@@ -5,11 +5,20 @@ import './Login.css';
 
 const Login = () => {
     const [formData, setFormData] = useState({ username: '', password: '' });
-    const { login } = useAuth();
+    const { user, login } = useAuth();
     const navigate = useNavigate();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+
+    // Redirect if already logged in
+    React.useEffect(() => {
+        if (user) {
+            if (user.role === 'admin') navigate('/admin');
+            else if (user.role === 'depocu') navigate('/admin/stocks');
+            else navigate('/tech');
+        }
+    }, [user, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
