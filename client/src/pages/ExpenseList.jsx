@@ -74,32 +74,41 @@ const ExpenseList = () => {
             </div>
 
             {/* Tabs Navigation */}
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '25px', padding: '5px', background: 'rgba(0,0,0,0.2)', borderRadius: '18px', width: 'fit-content' }}>
                 {[
-                    { id: 'pending', label: 'Bekleyenler', color: '#f59e0b' },
-                    { id: 'approved', label: 'Onaylananlar', color: '#10b981' },
-                    { id: 'rejected', label: 'Reddedilenler', color: '#f43f5e' }
+                    { id: 'pending', label: 'Bekleyenler', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+                    { id: 'approved', label: 'Onaylananlar', color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+                    { id: 'rejected', label: 'Reddedilenler', color: '#f43f5e', bg: 'rgba(244,63,94,0.1)' }
                 ].map(tab => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         style={{
-                            padding: '12px 25px',
-                            borderRadius: '15px',
-                            border: 'none',
-                            background: activeTab === tab.id ? 'rgba(255,255,255,0.1)' : 'transparent',
+                            padding: '10px 20px',
+                            borderRadius: '14px',
+                            border: '1px solid',
+                            borderColor: activeTab === tab.id ? 'rgba(255,255,255,0.1)' : 'transparent',
+                            background: activeTab === tab.id ? 'rgba(255,255,255,0.08)' : 'transparent',
                             color: activeTab === tab.id ? 'white' : 'rgba(255,255,255,0.4)',
-                            fontWeight: 'bold',
+                            fontWeight: '600',
+                            fontSize: '0.85rem',
                             cursor: 'pointer',
-                            transition: 'all 0.3s',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px'
                         }}
                     >
-                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: tab.color }}></div>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: tab.color, boxShadow: `0 0 10px ${tab.color}` }}></div>
                         {tab.label}
-                        <span style={{ fontSize: '0.7rem', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '6px', marginLeft: '5px' }}>
+                        <span style={{ 
+                            fontSize: '0.7rem', 
+                            background: activeTab === tab.id ? tab.bg : 'rgba(255,255,255,0.05)', 
+                            color: activeTab === tab.id ? tab.color : 'rgba(255,255,255,0.3)',
+                            padding: '2px 8px', 
+                            borderRadius: '20px',
+                            marginLeft: '4px'
+                        }}>
                             {expenses.filter(e => e.status === tab.id).length}
                         </span>
                     </button>

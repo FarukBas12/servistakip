@@ -218,6 +218,15 @@
     }
 }
 
+button {
+    background: none;
+    border: none;
+    font-family: 'Outfit', sans-serif;
+    color: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
 body {
     margin: 0;
     font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;

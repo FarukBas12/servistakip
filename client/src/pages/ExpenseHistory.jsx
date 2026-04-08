@@ -45,8 +45,8 @@ const ExpenseHistory = () => {
                 </div>
                 <button 
                     onClick={() => navigate('/tech/expenses/create')}
-                    className="login-btn"
-                    style={{ padding: '10px 15px', fontSize: '0.9rem', width: 'auto', margin: 0, display: 'flex', alignItems: 'center', gap: '5px' }}
+                    className="glass-btn glass-btn-primary"
+                    style={{ padding: '8px 16px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '5px' }}
                 >
                     <Plus size={18} /> Ekle
                 </button>
