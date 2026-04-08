@@ -52,7 +52,7 @@ exports.getMe = async (req, res) => {
 exports.getUsers = async (req, res) => {
     try {
         const { rows } = await db.query(`
-            SELECT id, username, role, full_name, photo_url, phone, start_date, status, job_title 
+            SELECT id, username, role, full_name, photo_url, phone, start_date, status, job_title, last_lat, last_lng, last_location_update
             FROM users 
             ORDER BY created_at DESC
         `);
@@ -193,6 +193,9 @@ exports.migrateUsers = async (req, res) => {
             ALTER TABLE users ADD COLUMN IF NOT EXISTS start_date DATE DEFAULT CURRENT_DATE;
             ALTER TABLE users ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'active';
             ALTER TABLE users ADD COLUMN IF NOT EXISTS job_title VARCHAR(100);
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS last_lat NUMERIC;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS last_lng NUMERIC;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS last_location_update TIMESTAMP;
             ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
         `);
         res.json({ message: 'Migration complete' });
