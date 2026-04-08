@@ -102,41 +102,60 @@ const GlobalMap = () => {
                 <ChangeView bounds={bounds} />
 
                 {/* TASKS */}
-                {tasks.map((task) => (
-                    <Marker 
-                        key={task.id} 
-                        position={[parseFloat(task.lat), parseFloat(task.lng)]}
-                        icon={createMarkerIcon(getTaskColor(task.created_at))}
-                    >
-                        <Popup>
-                            <div style={{ padding: '5px' }}>
-                                <h4 style={{ margin: '0 0 5px 0' }}>{task.title}</h4>
-                                <p style={{ margin: '0 0 5px 0', fontSize: '12px' }}>{task.address}</p>
-                                <div style={{ fontSize: '11px', opacity: 0.7 }}>
-                                    Oluşturulma: {new Date(task.created_at).toLocaleDateString()}
+                {tasks.map((task, idx) => {
+                    // Slight offset for overlapping points
+                    const offsetLat = parseFloat(task.lat) + (Math.random() - 0.5) * 0.0001;
+                    const offsetLng = parseFloat(task.lng) + (Math.random() - 0.5) * 0.0001;
+
+                    return (
+                        <Marker 
+                            key={`task-${task.id}`} 
+                            position={[offsetLat, offsetLng]}
+                            icon={createMarkerIcon(getTaskColor(task.created_at))}
+                        >
+                            <Popup>
+                                <div style={{ padding: '5px' }}>
+                                    <h4 style={{ margin: '0 0 5px 0' }}>{task.title}</h4>
+                                    <p style={{ margin: '0 0 5px 0', fontSize: '12px' }}>{task.address}</p>
+                                    <div style={{ fontSize: '11px', opacity: 0.7 }}>
+                                        Oluşturulma: {new Date(task.created_at).toLocaleDateString()}
+                                    </div>
                                 </div>
-                            </div>
-                        </Popup>
-                    </Marker>
-                ))}
+                            </Popup>
+                        </Marker>
+                    );
+                })}
 
                 {/* TECHNICIANS (CARS) */}
-                {techs.map((tech) => (
-                    <Marker 
-                        key={tech.id} 
-                        position={[parseFloat(tech.last_lat), parseFloat(tech.last_lng)]}
-                        icon={carIcon}
-                    >
-                        <Popup>
-                            <div style={{ textAlign: 'center' }}>
-                                <strong style={{ color: '#2563eb' }}>{tech.username}</strong>
-                                <div style={{ fontSize: '11px', marginTop: '5px' }}>
-                                    Son Konum: {new Date(tech.last_location_update).toLocaleTimeString()}
+                {techs.map((tech) => {
+                    // Check if multiple techs are at the same spot
+                    const sameSpotCount = techs.filter(t => t.last_lat === tech.last_lat && t.last_lng === tech.last_lng).length;
+                    const techIndex = techs.filter(t => t.last_lat === tech.last_lat && t.last_lng === tech.last_lng).indexOf(tech);
+                    
+                    // Apply offset if overlapping
+                    const offsetLat = parseFloat(tech.last_lat) + (sameSpotCount > 1 ? (Math.cos(techIndex * 2 * Math.PI / sameSpotCount) * 0.0002) : 0);
+                    const offsetLng = parseFloat(tech.last_lng) + (sameSpotCount > 1 ? (Math.sin(techIndex * 2 * Math.PI / sameSpotCount) * 0.0002) : 0);
+
+                    return (
+                        <Marker 
+                            key={`tech-${tech.id}`} 
+                            position={[offsetLat, offsetLng]}
+                            icon={carIcon}
+                        >
+                            <Popup>
+                                <div style={{ textAlign: 'center' }}>
+                                    <strong style={{ color: '#2563eb' }}>{tech.full_name || tech.username}</strong>
+                                    <div style={{ fontSize: '11px', marginTop: '5px' }}>
+                                        Son Konum: {new Date(tech.last_location_update).toLocaleTimeString()}
+                                    </div>
+                                    <div style={{ fontSize: '10px', color: '#666', marginTop: '2px' }}>
+                                        {tech.job_title || 'Teknisyen'}
+                                    </div>
                                 </div>
-                            </div>
-                        </Popup>
-                    </Marker>
-                ))}
+                            </Popup>
+                        </Marker>
+                    );
+                })}
             </MapContainer>
         </div>
     );
