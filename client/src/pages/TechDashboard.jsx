@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { Link } from 'react-router-dom';
 import { playNotificationSound } from '../utils/sound';
-import { MapPin, Phone, Navigation, Calendar, Clock, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
+import { MapPin, Phone, Navigation, Calendar, Clock, ArrowRight, CheckCircle, AlertCircle, Wallet } from 'lucide-react';
 
 const TechDashboard = () => {
     const [tasks, setTasks] = useState([]);
