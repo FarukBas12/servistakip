@@ -52,7 +52,7 @@ const Navbar = () => {
                                 <Link to="/admin/create-user" className="nav-link">Personel Ekle</Link>
                             </div>
                         ) : (
-                            <div style={{ display: 'flex', gap: '15px' }}>
+                            <div style={{ display: 'flex', gap: '5px' }}>
                                 <NavLink
                                     to="/tech"
                                     end
@@ -69,6 +69,22 @@ const Navbar = () => {
                                 >
                                     <List size={20} style={{ marginBottom: '4px' }} />
                                     Görevlerim
+                                </NavLink>
+                                <NavLink
+                                    to="/tech/expenses"
+                                    style={({ isActive }) => ({
+                                        color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
+                                        textDecoration: 'none',
+                                        fontWeight: 'bold',
+                                        fontSize: '0.9rem',
+                                        padding: '10px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center'
+                                    })}
+                                >
+                                    <Wallet size={20} style={{ marginBottom: '4px' }} />
+                                    Harcamalarım
                                 </NavLink>
                             </div>
                         )}

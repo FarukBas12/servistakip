@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Wallet, Clock, CheckCircle, XCircle, FileText, Calendar } from 'lucide-react';
+import { ChevronLeft, Wallet, Clock, CheckCircle, XCircle, FileText, Calendar, Plus } from 'lucide-react';
 
 const ExpenseHistory = () => {
     const [expenses, setExpenses] = useState([]);
@@ -11,9 +11,6 @@ const ExpenseHistory = () => {
     const fetchMyExpenses = async () => {
         try {
             const res = await api.get('/expenses');
-            // Filter only own expenses if not already filtered by backend (backend current returns all for admin, but we should ensure security)
-            // Ideally backend should have a /my route, but filter here for now or update backend later.
-            // Actually, for technician panel, we'll assume the current user's expenses.
             setExpenses(res.data);
         } catch (err) {
             console.error(err);
@@ -36,14 +33,23 @@ const ExpenseHistory = () => {
 
     return (
         <div className="dashboard" style={{ paddingBottom: '100px', maxWidth: '600px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px', padding: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '25px', padding: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <button 
+                        onClick={() => navigate(-1)} 
+                        style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', padding: '10px', borderRadius: '12px', cursor: 'pointer' }}
+                    >
+                        <ChevronLeft size={24} />
+                    </button>
+                    <h1 style={{ margin: 0, fontSize: '1.5rem', color: 'white' }}>Harcamalarım</h1>
+                </div>
                 <button 
-                    onClick={() => navigate(-1)} 
-                    style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', padding: '10px', borderRadius: '12px', cursor: 'pointer' }}
+                    onClick={() => navigate('/tech/expenses/create')}
+                    className="login-btn"
+                    style={{ padding: '10px 15px', fontSize: '0.9rem', width: 'auto', margin: 0, display: 'flex', alignItems: 'center', gap: '5px' }}
                 >
-                    <ChevronLeft size={24} />
+                    <Plus size={18} /> Ekle
                 </button>
-                <h1 style={{ margin: 0, fontSize: '1.5rem', color: 'white' }}>Harcama Geçmişim</h1>
             </div>
 
             {loading ? (
