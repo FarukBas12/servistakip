@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Bell, Check, BellOff, BellRing } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
 const NOTIFICATION_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
@@ -26,6 +28,7 @@ const showDesktopNotification = (title, body) => {
 
 const NotificationBell = ({ placement = 'bottom-right' }) => {
     const { isDarkMode } = useTheme();
+    const { user } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -237,7 +240,7 @@ const NotificationBell = ({ placement = 'bottom-right' }) => {
                         )}
                     </div>
 
-                    <Link to="/admin" onClick={() => setIsOpen(false)} style={{
+                    <Link to={user?.role === 'admin' ? "/admin" : "/tech"} onClick={() => setIsOpen(false)} style={{
                         padding: '12px',
                         textAlign: 'center',
                         fontSize: '0.85rem',
