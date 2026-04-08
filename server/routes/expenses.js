@@ -15,4 +15,8 @@ router.get('/', authorize(['admin', 'technician', 'depocu']), expenseController.
 // @desc    Update expense status (Admin only)
 router.put('/:id/status', authorize(['admin']), expenseController.updateExpenseStatus);
 
+// @route   DELETE api/expenses/:id
+// @desc    Delete expense (Admin only)
+router.delete('/:id', authorize(['admin']), expenseController.deleteExpense);
+
 module.exports = router;

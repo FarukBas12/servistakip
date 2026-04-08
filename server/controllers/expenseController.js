@@ -43,16 +43,21 @@ exports.getExpenses = async (req, res) => {
 };
 
 exports.updateExpenseStatus = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
     try {
-        const { id } = req.params;
-        const { status } = req.body; // approved, rejected
+        await db.query('UPDATE expenses SET status = $1 WHERE id = $2', [status, id]);
+        res.json({ message: 'Status updated' });
+    } catch (err) {
+        res.status(500).send('Server Error');
+    }
+};
 
-        const { rows } = await db.query(
-            'UPDATE expenses SET status = $1 WHERE id = $2 RETURNING *',
-            [status, id]
-        );
-
-        res.json(rows[0]);
+exports.deleteExpense = async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.query('DELETE FROM expenses WHERE id = $1', [id]);
+        res.json({ message: 'Expense deleted successfully' });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
