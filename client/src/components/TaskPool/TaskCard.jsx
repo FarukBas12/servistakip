@@ -1,12 +1,31 @@
 import React, { useState } from 'react';
-import { MapPin, Clock, MessageCircle, UserPlus, MoreVertical, Eye, Edit2, CheckCircle, Trash2, AlertTriangle } from 'lucide-react';
+import { MapPin, Clock, MessageCircle, UserPlus, MoreVertical, Eye, Edit2, CheckCircle, Trash2, AlertTriangle, RotateCcw } from 'lucide-react';
 import { getInitials, stringToColor } from '../../utils/helpers';
 
-const TaskCard = ({ task, isSahada, onAssign, onEdit, onView, onDelete, onVerify, onWhatsApp }) => {
+const TaskCard = ({ task, isSahada, onAssign, onEdit, onView, onDelete, onVerify, onWhatsApp, onToggleRetry }) => {
     const [menuOpen, setMenuOpen] = useState(false);
 
+    const now = new Date();
+    const createdDate = new Date(task.created_at);
+    const diffDays = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
+
+    // Kenar rengi mantığı
+    let borderColor = 'transparent';
+    if (task.status === 'open' || task.status === 'pending' || task.status === 'assigned') {
+        if (diffDays >= 4) borderColor = '#ef4444'; // ACİL
+        else if (diffDays >= 1) borderColor = '#fbbf24'; // BEKLEYEN
+        else borderColor = '#22c55e'; // YENİ
+    }
+
     return (
-        <div className={`tp-card ${isSahada ? 'tp-card--active' : 'tp-card--waiting'}`} style={{ zIndex: menuOpen ? 100 : 1 }}>
+        <div 
+            className={`tp-card ${isSahada ? 'tp-card--active' : 'tp-card--waiting'}`} 
+            style={{ 
+                zIndex: menuOpen ? 100 : 1,
+                borderLeft: `5px solid ${borderColor}`,
+                transition: 'border 0.3s ease'
+            }}
+        >
             {/* LEFT CONTENT */}
             <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px', flexWrap: 'wrap' }}>
@@ -23,6 +42,12 @@ const TaskCard = ({ task, isSahada, onAssign, onEdit, onView, onDelete, onVerify
                     {task.source === 'email' && !task.verified_by && (
                         <span className="tp-verify-badge">
                             <AlertTriangle size={12} /> KONTROL BEKLİYOR
+                        </span>
+                    )}
+
+                    {task.is_retry && (
+                        <span className="tp-retry-badge" style={{ backgroundColor: 'rgba(249, 115, 22, 0.2)', color: '#f97316', fontSize: '0.65rem', padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold' }}>
+                            🔄 TEKRAR DENEME
                         </span>
                     )}
                 </div>
@@ -95,6 +120,9 @@ const TaskCard = ({ task, isSahada, onAssign, onEdit, onView, onDelete, onVerify
                                     </button>
                                     <button onClick={() => { setMenuOpen(false); onEdit(task); }}>
                                         <Edit2 size={15} /> Düzenle
+                                    </button>
+                                    <button onClick={() => { setMenuOpen(false); onToggleRetry(task.id); }}>
+                                        <RotateCcw size={15} /> {task.is_retry ? 'Normal Liste' : 'Tekrar Gidilecek'}
                                     </button>
                                     {task.source === 'email' && !task.verified_by && (
                                         <button className="success" onClick={() => { setMenuOpen(false); onVerify(task.id); }}>

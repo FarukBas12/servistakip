@@ -211,6 +211,14 @@ const TaskPool = () => {
     };
 
 
+    const handleToggleRetry = async (taskId) => {
+        try {
+            await api.put(`/tasks/${taskId}/retry`);
+            fetchTasks();
+            toast.success('Durum güncellendi');
+        } catch (err) { toast.error('İşlem başarısız'); }
+    };
+
     // Filter Logic
     const filteredTasks = tasks.filter(task => {
         const hasAssignees = task.assigned_users && task.assigned_users.length > 0;
@@ -332,6 +340,7 @@ const TaskPool = () => {
                                 onDelete={handleDelete}
                                 onVerify={handleVerify}
                                 onWhatsApp={handleWhatsAppShare}
+                                onToggleRetry={handleToggleRetry}
                             />
                         ))
                     )}

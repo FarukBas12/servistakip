@@ -61,15 +61,32 @@ const AdminDashboard = () => {
             const users = usersRes.data;
             const stocks = stockRes.data;
 
-            // Calc Total Stock Value
-            let stockVal = 0;
-            stocks.forEach(s => stockVal += (parseFloat(s.quantity) * parseFloat(s.purchase_price || 0)));
+            // --- YENİ KPI HESAPLAMALARI ---
+            const now = new Date();
+            const getDaysDiff = (dateStr) => {
+                const date = new Date(dateStr);
+                const diffTime = Math.abs(now - date);
+                return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            };
+
+            const mailTasks = tasks.filter(t => (t.source === 'email' || t.status === 'pending') && t.status !== 'completed' && t.status !== 'cancelled');
+            const criticalTasks = tasks.filter(t => 
+                (t.status === 'open' || t.status === 'pending' || t.status === 'assigned') && 
+                getDaysDiff(t.created_at) >= 4
+            );
+            const standardPending = tasks.filter(t => 
+                (t.status === 'open' || t.status === 'pending') && 
+                getDaysDiff(t.created_at) < 4 && getDaysDiff(t.created_at) >= 0
+            );
+            const assignedTasks = tasks.filter(t => t.status === 'assigned' || (t.assigned_to && t.status === 'open'));
+            const retryTasks = tasks.filter(t => t.status === 'cancelled' && t.is_retry);
 
             setStats({
-                activeTasks: tasks.filter(t => t.status === 'in_progress').length,
-                pendingTasks: tasks.filter(t => t.status === 'open').length,
-                totalStock: stockVal,
-                technicians: users.filter(u => u.role === 'technician').length
+                mailCount: mailTasks.length,
+                pendingCount: standardPending.length,
+                urgentCount: criticalTasks.length,
+                assignedCount: assignedTasks.length,
+                retryCount: retryTasks.length
             });
             setLoading(false);
         } catch (err) { console.error(err); setLoading(false); }
@@ -86,7 +103,6 @@ const AdminDashboard = () => {
             const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relative_humidity_2m,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4`);
             const wData = await wRes.json();
 
-            // Format weather data
             setWeather({
                 current: wData.current_weather,
                 daily: wData.daily,
@@ -102,7 +118,6 @@ const AdminDashboard = () => {
             const allNotes = res.data.filter(n => !n.completed);
             setNotes(allNotes);
 
-            // Filter for today's notes that haven't been dismissed in this session
             const now = new Date();
             const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             const alerts = allNotes.filter(n => n.date && n.date.startsWith(todayStr));
@@ -142,7 +157,7 @@ const AdminDashboard = () => {
     const handleCompleteNote = async (id) => {
         try {
             await api.put(`/calendar/${id}`, { completed: true });
-            loadNotes(); // Refresh to remove completed
+            loadNotes(); 
         } catch (err) { alert('Güncellenemedi'); }
     };
 
@@ -150,7 +165,6 @@ const AdminDashboard = () => {
         setTodayNotes(todayNotes.filter(n => n.id !== id));
     };
 
-    // Sorting & Coloring Logic
     const sortedNotes = [...notes].sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const getNoteColor = (dateStr) => {
@@ -159,23 +173,21 @@ const AdminDashboard = () => {
         const diffTime = target - today;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        if (diffDays < 0) return '#666'; // Past
-        if (diffDays <= 3) return '#ef5350'; // Red (Urgent)
-        if (diffDays <= 7) return '#ffa726'; // Orange (Soon)
-        return '#66bb6a'; // Green (Safe)
+        if (diffDays < 0) return '#666'; 
+        if (diffDays <= 3) return '#ef5350'; 
+        if (diffDays <= 7) return '#ffa726'; 
+        return '#66bb6a'; 
     };
 
-    // Calendar Helpers
     const getDaysInMonth = (date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-    const getFirstDayOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay(); // 0 = Sun
+    const getFirstDayOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay(); 
 
     const renderCalendar = () => {
         const daysInMonth = getDaysInMonth(currentDate);
         const firstDay = getFirstDayOfMonth(currentDate);
-        const startDay = firstDay === 0 ? 6 : firstDay - 1; // Adjust for Monday start
+        const startDay = firstDay === 0 ? 6 : firstDay - 1; 
 
         const days = [];
-        // Empty slots
         for (let i = 0; i < startDay; i++) {
             days.push(<div key={`empty-${i}`} style={{ height: '40px' }}></div>);
         }
@@ -223,7 +235,6 @@ const AdminDashboard = () => {
                     </h1>
                     <p style={{ color: 'var(--text-secondary)' }}>Sistem durumu ve özet raporlar</p>
                 </div>
-                {/* Widget Visibility Control */}
                 <div style={{ position: 'relative' }}>
                     <button
                         onClick={() => setShowWidgetMenu(v => !v)}
@@ -252,29 +263,44 @@ const AdminDashboard = () => {
                 onComplete={handleCompleteNote}
                 onClose={handleDismissAlert}
             />
-
-            {/* KPI WIDGETS */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '20px', marginBottom: '30px' }}>
-                <StatCard
-                    icon={Activity}
-                    title="Sahadaki İşler"
-                    value={stats.activeTasks}
-                    color="#2196f3"
-                    gradient={['rgba(33, 150, 243, 0.1)', 'rgba(33, 150, 243, 0.02)', 'rgba(33, 150, 243, 0.2)', 'rgba(33, 150, 243, 0.2)']}
-                />
+            
+            {/* KPI WIDGETS - 5 YENİ KATEGORİ */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '30px' }}>
                 <StatCard
                     icon={ClipboardList}
-                    title="Bekleyen İşler"
-                    value={stats.pendingTasks}
-                    color="#ffa726"
-                    gradient={['rgba(255, 167, 38, 0.1)', 'rgba(255, 167, 38, 0.02)', 'rgba(255, 167, 38, 0.2)', 'rgba(255, 167, 38, 0.2)']}
+                    title="Mail Kontrol"
+                    value={stats.mailCount}
+                    color="#2196f3"
+                    gradient={['rgba(33, 150, 243, 0.1)', 'rgba(33, 150, 243, 0.05)']}
+                />
+                <StatCard
+                    icon={Activity}
+                    title="1-3 Günlük"
+                    value={stats.pendingCount}
+                    color="#fbbf24"
+                    gradient={['rgba(251, 191, 36, 0.1)', 'rgba(251, 191, 36, 0.05)']}
+                />
+                <StatCard
+                    icon={Activity}
+                    title="🚨 ACİL (4+ GÜN)"
+                    value={stats.urgentCount}
+                    color="#ef4444"
+                    pulse={stats.urgentCount > 0}
+                    gradient={['rgba(239, 68, 68, 0.15)', 'rgba(239, 68, 68, 0.05)']}
                 />
                 <StatCard
                     icon={Users}
-                    title="Aktif Teknisyen"
-                    value={stats.technicians}
+                    title="Atanan / Bekleyen"
+                    value={stats.assignedCount}
                     color="#a855f7"
-                    gradient={['rgba(168, 85, 247, 0.1)', 'rgba(168, 85, 247, 0.02)', 'rgba(168, 85, 247, 0.2)', 'rgba(168, 85, 247, 0.2)']}
+                    gradient={['rgba(168, 85, 247, 0.1)', 'rgba(168, 85, 247, 0.05)']}
+                />
+                <StatCard
+                    icon={Trash2}
+                    title="İptal / Tekrar"
+                    value={stats.retryCount}
+                    color="#f97316"
+                    gradient={['rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.05)']}
                 />
             </div>
 

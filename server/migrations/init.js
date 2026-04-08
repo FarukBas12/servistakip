@@ -252,6 +252,10 @@ async function runMigrations() {
             ON CONFLICT (username) DO NOTHING
         `, [hash]);
 
+        // Ensure tasks table has source and is_retry for the new dashboard
+        await pool.query('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS source VARCHAR(20) DEFAULT \'manual\'');
+        await pool.query('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS is_retry BOOLEAN DEFAULT FALSE');
+
         console.log('✅ Database Schema Verified & Updated!');
     } catch (e) {
         console.error('❌ Schema update error:', e.message);

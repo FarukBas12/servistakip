@@ -100,6 +100,7 @@ exports.updateTask = async (req, res) => {
         if (req.body.region) { updates.push(`region = $${counter++}`); params.push(req.body.region); }
         if (req.body.service_form_no) { updates.push(`service_form_no = $${counter++}`); params.push(req.body.service_form_no); }
         if (req.body.is_quoted !== undefined) { updates.push(`is_quoted = $${counter++}`); params.push(req.body.is_quoted); }
+        if (req.body.is_retry !== undefined) { updates.push(`is_retry = $${counter++}`); params.push(req.body.is_retry); }
 
         updates.push(`updated_by = $${counter++}`);
         params.push(req.user.id);
@@ -265,5 +266,18 @@ exports.verifyTask = async (req, res) => {
     } catch (err) {
         console.error('verifyTask error:', err);
         res.status(500).json({ message: 'Doğrulama başarısız.', error: err.message });
+    }
+};
+
+exports.toggleRetry = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const { rows } = await db.query(
+            'UPDATE tasks SET is_retry = NOT is_retry WHERE id = $1 RETURNING is_retry',
+            [id]
+        );
+        res.json({ is_retry: rows[0].is_retry });
+    } catch (err) {
+        res.status(500).json({ message: 'Hata oluştu' });
     }
 };

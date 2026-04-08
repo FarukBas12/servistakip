@@ -33,4 +33,7 @@ router.post('/:id/cancel', authorize(['technician', 'admin']), taskController.ca
 // Verify Task
 router.put('/:id/verify', authorize(['admin']), taskController.verifyTask);
 
+// Toggle Retry
+router.put('/:id/retry', authorize(['admin']), taskController.toggleRetry);
+
 module.exports = router;
