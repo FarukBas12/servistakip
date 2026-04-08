@@ -27,6 +27,7 @@ const NotesPage = lazy(() => import('../pages/NotesPage'));
 const SettingsPage = lazy(() => import('../pages/SettingsPage'));
 const HierarchyPage = lazy(() => import('../pages/HierarchyPage'));
 const ProfilePage = lazy(() => import('../pages/Profile'));
+const ExpenseList = lazy(() => import('../pages/ExpenseList'));
 
 const AdminLayout = () => {
     return (
@@ -59,6 +60,7 @@ const AdminLayout = () => {
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/hierarchy" element={<HierarchyPage />} />
                         <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="/expenses" element={<ExpenseList />} />
                     </Routes>
                 </Suspense>
             </div>

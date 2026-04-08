@@ -36,9 +36,7 @@ const AppContent = () => {
 
                     {/* Admin Routes (Managed by AdminLayout) */}
                     <Route element={<PrivateRoute allowedRoles={['admin', 'depocu']} />}>
-                        <Route path="/admin/*" element={<AdminLayout />}>
-                            <Route path="expenses" element={<ExpenseList />} />
-                        </Route>
+                        <Route path="/admin/*" element={<AdminLayout />} />
                     </Route>
 
                     {/* Technician Routes */}
