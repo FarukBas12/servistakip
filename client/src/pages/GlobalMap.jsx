@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Tooltip } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
@@ -132,9 +132,9 @@ const GlobalMap = () => {
                     const sameSpotCount = techs.filter(t => t.last_lat === tech.last_lat && t.last_lng === tech.last_lng).length;
                     const techIndex = techs.filter(t => t.last_lat === tech.last_lat && t.last_lng === tech.last_lng).indexOf(tech);
                     
-                    // Apply offset if overlapping
-                    const offsetLat = parseFloat(tech.last_lat) + (sameSpotCount > 1 ? (Math.cos(techIndex * 2 * Math.PI / sameSpotCount) * 0.0002) : 0);
-                    const offsetLng = parseFloat(tech.last_lng) + (sameSpotCount > 1 ? (Math.sin(techIndex * 2 * Math.PI / sameSpotCount) * 0.0002) : 0);
+                    // Apply LARGER offset for better visibility
+                    const offsetLat = parseFloat(tech.last_lat) + (sameSpotCount > 1 ? (Math.cos(techIndex * 2 * Math.PI / sameSpotCount) * 0.0008) : 0);
+                    const offsetLng = parseFloat(tech.last_lng) + (sameSpotCount > 1 ? (Math.sin(techIndex * 2 * Math.PI / sameSpotCount) * 0.0008) : 0);
 
                     return (
                         <Marker 
@@ -142,6 +142,9 @@ const GlobalMap = () => {
                             position={[offsetLat, offsetLng]}
                             icon={carIcon}
                         >
+                            <Tooltip direction="bottom" offset={[0, 10]} opacity={1} permanent>
+                                <span style={{ fontWeight: 'bold' }}>{tech.full_name || tech.username}</span>
+                            </Tooltip>
                             <Popup>
                                 <div style={{ textAlign: 'center' }}>
                                     <strong style={{ color: '#2563eb' }}>{tech.full_name || tech.username}</strong>
