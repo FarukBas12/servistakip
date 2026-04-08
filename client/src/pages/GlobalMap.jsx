@@ -46,10 +46,10 @@ const GlobalMap = () => {
             const validTasks = resTasks.data.filter(t => t.lat && t.lng && t.status !== 'completed');
             setTasks(validTasks);
 
-            // 2. Fetch Technicians
+            // 2. Fetch Technicians / Personnel
             const resUsers = await api.get('/auth/users');
             const validTechs = resUsers.data.filter(u => 
-                u.role?.toLowerCase() === 'technician' && u.last_lat && u.last_lng
+                u.role?.toLowerCase() !== 'admin' && u.last_lat && u.last_lng
             );
             setTechs(validTechs);
 

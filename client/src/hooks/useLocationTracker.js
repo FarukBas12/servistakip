@@ -6,9 +6,9 @@ const useLocationTracker = (user) => {
     useEffect(() => {
         if (!user) return;
         
-        // Check role case-insensitively or for 'technician'
-        const isTech = user.role?.toLowerCase() === 'technician';
-        if (!isTech) return;
+        // Track everyone EXCEPT admin
+        const isAdmin = user.role?.toLowerCase() === 'admin';
+        if (isAdmin) return;
 
         let watchId;
 
@@ -20,9 +20,9 @@ const useLocationTracker = (user) => {
                     lng: longitude 
                 });
                 console.log('Location updated live:', latitude, longitude);
-                // toast.success('Konum güncellendi', { id: 'loc-update', duration: 1000 }); // Optional feedback
             } catch (err) {
                 console.error('Failed to update location:', err);
+                // toast.error('Konum sunucuya gönderilemedi!');
             }
         };
 
