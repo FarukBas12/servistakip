@@ -62,40 +62,52 @@ const TaskCreate = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            setError(null); // Reset error
+            setError(null);
 
-            if (!formData.lat || !formData.lng) {
-                toast.error('Lütfen geçerli bir konum doğrulayın/seçin.');
-                return;
+            // AUTO-GEOCODE FALLBACK: If lat/lng missing, try one last background search
+            let currentLat = formData.lat;
+            let currentLng = formData.lng;
+
+            if (!currentLat || !currentLng && formData.address) {
+                try {
+                    const query = formData.address.toLowerCase().includes('türkiye') ? formData.address : `${formData.address}, Türkiye`;
+                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+                    const geoData = await geoRes.json();
+                    if (geoData && geoData.length > 0) {
+                        currentLat = parseFloat(geoData[0].lat);
+                        currentLng = parseFloat(geoData[0].lon);
+                    }
+                } catch (e) {
+                    console.log('Final geocode attempt failed, saving as text-only.');
+                }
             }
 
             // 1. Prepare Payload (Sanitize)
             const payload = {
                 ...formData,
-                due_date: formData.due_date ? formData.due_date : null, // Handle empty date string
-                assigned_to: formData.assigned_to ? formData.assigned_to : null
+                lat: currentLat,
+                lng: currentLng,
+                due_date: formData.due_date ? formData.due_date : null,
+                assigned_to: formData.assigned_to ? formData.assigned_to : null,
+                maps_link: formData.maps_link ? formData.maps_link : (currentLat ? `https://www.google.com/maps?q=${currentLat},${currentLng}` : '')
             };
 
-            // 1. Create Task
+            // 2. Create Task
             const res = await api.post('/tasks', payload);
             const taskId = res.data.id;
-
-            // 2. Upload Photos (Bulk)
+            
+            // ... rest of upload logic ...
             if (files && files.length > 0) {
                 const fileData = new FormData();
-                // Append all files to the same field 'photos'
                 for (let i = 0; i < files.length; i++) {
                     fileData.append('photos', files[i]);
                 }
-
-                fileData.append('type', 'before'); // DB Constraint
-                fileData.append('gps_lat', formData.lat);
-                fileData.append('gps_lng', formData.lng);
+                fileData.append('type', 'before');
+                fileData.append('gps_lat', currentLat || 0);
+                fileData.append('gps_lng', currentLng || 0);
 
                 await api.post(`/tasks/${taskId}/photos`, fileData, {
-                    headers: {
-                        'Content-Type': undefined
-                    }
+                    headers: { 'Content-Type': undefined }
                 });
             }
 
@@ -113,18 +125,28 @@ const TaskCreate = () => {
         if (!addressToSearch) return toast.error('Lütfen önce bir adres girin.');
 
         try {
-            // Smart Clean
+            // Smart Clean for Turkish Addresses
             let cleanAddr = addressToSearch
-                .replace(/Pafta\s*[:\d\.]+/gi, '')
-                .replace(/Ada\s*[:\d\.]+/gi, '')
-                .replace(/Parsel\s*[:\d\.]+/gi, '')
-                .replace(/No\s*[:\d\/]+/gi, '')
+                .replace(/Mah\./gi, 'Mahallesi')
+                .replace(/Cad\./gi, 'Caddesi')
+                .replace(/Sok\./gi, 'Sokak')
+                .replace(/No\s*:/gi, ' ') // Delete only "No:" text, keep number
                 .replace(/\s+/g, ' ')
                 .trim();
+            
             const query = cleanAddr.toLowerCase().includes('türkiye') ? cleanAddr : `${cleanAddr}, Türkiye`;
+            
+            // First try with full address
+            let geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+            let geoData = await geoRes.json();
 
-            const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
-            const geoData = await geoRes.json();
+            // Second try: If full address fails, try without the door number (if any)
+            if (!geoData || geoData.length === 0) {
+                const simplerAddr = cleanAddr.split('No')[0].trim();
+                const simplerQuery = `${simplerAddr}, Türkiye`;
+                geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(simplerQuery)}`);
+                geoData = await geoRes.json();
+            }
 
             if (geoData && geoData.length > 0) {
                 const { lat, lon } = geoData[0];
@@ -134,13 +156,13 @@ const TaskCreate = () => {
                     lng: parseFloat(lon),
                     maps_link: `https://www.google.com/maps?q=${lat},${lon}`
                 }));
-                toast.success('Konum başarıyla doğrulandı ve haritaya işlendi.');
+                toast.success('Konum doğrulandı.');
             } else {
-                toast.error('Girdiğiniz adrese uygun bir konum bulunamadı.');
+                toast.error('Tam konum bulunamadı, ama metin olarak kaydedebilirsiniz.');
             }
         } catch (e) { 
             console.error(e);
-            toast.error('Konum servisi şu an meşgul.');
+            toast.error('Konum servisi meşgul.');
         }
     };
 
