@@ -2,6 +2,54 @@ import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+const redPinIcon = L.divIcon({
+    html: `<div style="background-color: #ef4444; width: 14px; height: 14px; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); cursor: pointer;"></div>`,
+    className: 'custom-pin',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10]
+});
+
+const MapRelocator = ({ center }) => {
+    const map = useMap();
+    useEffect(() => {
+        if (center) {
+            map.flyTo(center, 16); // Yakınlaştırarak zıpla
+        }
+    }, [center, map]);
+    return null;
+};
+
+const DraggableMarker = ({ position, setPosition }) => {
+    useMapEvents({
+        click(e) {
+            setPosition({ lat: e.latlng.lat, lng: e.latlng.lng });
+            toast.success("Konum nokta atışı güncellendi!", {id: 'drag-toast'});
+        },
+    });
+
+    return position ? (
+        <Marker
+            draggable={true}
+            icon={redPinIcon}
+            eventHandlers={{
+                dragstart: () => {
+                    toast.loading("İşaretçi taşınıyor...", {id: 'drag-toast'});
+                },
+                dragend: (e) => {
+                    const marker = e.target;
+                    const pos = marker.getLatLng();
+                    setPosition({ lat: pos.lat, lng: pos.lng });
+                    toast.success("Konum başarıyla taşındı!", {id: 'drag-toast'});
+                },
+            }}
+            position={[position.lat, position.lng]}
+        />
+    ) : null;
+};
 
 // A helper function to intelligently search Turkish addresses using OpenStreetMap Nominatim
 const fetchGeocode = async (addressText) => {
@@ -272,10 +320,41 @@ const TaskCreate = () => {
 
                     <div style={{ display: 'flex', gap: '10px' }}>
                         <input className="glass-input" name="address" placeholder="Adres (Metin)" value={formData.address} onChange={handleChange} required style={{ flex: 1 }} />
-                        <button type="button" onClick={() => handleGeocode(formData.address)} className="glass-btn" style={{ background: 'rgba(33, 150, 243, 0.3)', whiteSpace: 'nowrap' }}>📍 Link Bul</button>
+                        <button type="button" onClick={() => handleGeocode(formData.address)} className="glass-btn" style={{ background: 'rgba(33, 150, 243, 0.3)', whiteSpace: 'nowrap' }}>📍 Hedefe Yaklaş</button>
                     </div>
 
                     <input className="glass-input" name="maps_link" value={formData.maps_link} placeholder="Google Maps Linki (Opsiyonel)" onChange={handleLinkChange} />
+
+                    {/* INTERACTIVE MAP FOR PINPOINT ACCURACY */}
+                    <div style={{ marginTop: '5px', height: '300px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ background: 'rgba(33, 150, 243, 0.2)', padding: '5px', textAlign: 'center', fontSize: '0.8rem', color: '#90caf9' }}>
+                            Aramadan sonra haritaya TIKLAYARAK veya işareti SÜRÜKLEYEREK nokta atışı yapabilirsiniz.
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <MapContainer 
+                                center={formData.lat ? [formData.lat, formData.lng] : [39.0, 35.0]} 
+                                zoom={formData.lat ? 16 : 5} 
+                                style={{ height: '100%', width: '100%' }}
+                            >
+                                <TileLayer
+                                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                                    attribution='&copy; CARTO'
+                                />
+                                <MapRelocator center={formData.lat ? [formData.lat, formData.lng] : null} />
+                                <DraggableMarker 
+                                    position={formData.lat ? { lat: formData.lat, lng: formData.lng } : null}
+                                    setPosition={(pos) => {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            lat: pos.lat,
+                                            lng: pos.lng,
+                                            maps_link: `https://www.google.com/maps?q=${pos.lat},${pos.lng}`
+                                        }));
+                                    }} 
+                                />
+                            </MapContainer>
+                        </div>
+                    </div>
 
                     <div style={{ background: 'rgba(255,255,255,0.1)', padding: '15px', borderRadius: '8px', border: '2px solid #ff9800' }}>
                         <label style={{ color: '#ff9800', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>📸 FOTOĞRAF EKLEME BÖLÜMÜ</label>
