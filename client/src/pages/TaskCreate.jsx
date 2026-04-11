@@ -3,6 +3,55 @@ import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
+// A helper function to intelligently search Turkish addresses using OpenStreetMap Nominatim
+const fetchGeocode = async (addressText) => {
+    if (!addressText) return null;
+
+    let cleanAddr = addressText
+        .replace(/Mah\./gi, 'Mahallesi')
+        .replace(/Cad\./gi, 'Caddesi')
+        .replace(/Sok\./gi, 'Sokak')
+        .replace(/Apt\./gi, 'Apartmanı')
+        .replace(/Blv\./gi, 'Bulvarı')
+        .replace(/Bul\./gi, 'Bulvarı')
+        .replace(/-/g, ' ') // Tire yerine boşluk
+        .replace(/,/g, ' ') // Virgül yerine boşluk
+        .replace(/\s+/g, ' ')
+        .trim();
+        
+    // Remove "No: 267/1", "No:267", or loose "No" which frequently break Nominatim searches
+    let addressWithoutNo = cleanAddr.replace(/No\s*:\s*\S+/gi, '').replace(/\bNo\b/gi, '').replace(/\s+/g, ' ').trim();
+    
+    // Remove street specific parts (Cadde, Sokak, vb.) to fall back to Neighborhood/District level
+    let noStreetMatch = addressWithoutNo.replace(/(\S+)\s+(Caddesi|Sokak|Bulvarı|Meydanı)/gi, '').replace(/\s+/g, ' ').trim();
+
+    let queriesToTry = [
+        `${addressWithoutNo}, Türkiye`,
+        `${noStreetMatch}, Türkiye`
+    ];
+
+    const words = addressWithoutNo.split(' ').filter(w => w.length > 2);
+    if (words.length >= 2) {
+        queriesToTry.push(`${words[words.length - 2]} ${words[words.length - 1]}, Türkiye`);
+    }
+
+    queriesToTry = [...new Set(queriesToTry)]; // Remove duplicates
+
+    for (let query of queriesToTry) {
+        if (!query || query.length < 8) continue; // Skip too short queries
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            if (data && data.length > 0) {
+                return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+            }
+        } catch (err) {
+            console.error("Geocode error for query:", query, err);
+        }
+    }
+    return null;
+};
+
 const TaskCreate = () => {
     const navigate = useNavigate();
     const [users, setUsers] = useState([]);
@@ -70,12 +119,10 @@ const TaskCreate = () => {
 
             if (!currentLat || !currentLng && formData.address) {
                 try {
-                    const query = formData.address.toLowerCase().includes('türkiye') ? formData.address : `${formData.address}, Türkiye`;
-                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
-                    const geoData = await geoRes.json();
-                    if (geoData && geoData.length > 0) {
-                        currentLat = parseFloat(geoData[0].lat);
-                        currentLng = parseFloat(geoData[0].lon);
+                    const geoResult = await fetchGeocode(formData.address);
+                    if (geoResult) {
+                        currentLat = geoResult.lat;
+                        currentLng = geoResult.lng;
                     }
                 } catch (e) {
                     console.log('Final geocode attempt failed, saving as text-only.');
@@ -125,44 +172,24 @@ const TaskCreate = () => {
         if (!addressToSearch) return toast.error('Lütfen önce bir adres girin.');
 
         try {
-            // Smart Clean for Turkish Addresses
-            let cleanAddr = addressToSearch
-                .replace(/Mah\./gi, 'Mahallesi')
-                .replace(/Cad\./gi, 'Caddesi')
-                .replace(/Sok\./gi, 'Sokak')
-                .replace(/No\s*:/gi, ' ') // Delete only "No:" text, keep number
-                .replace(/\s+/g, ' ')
-                .trim();
-            
-            const query = cleanAddr.toLowerCase().includes('türkiye') ? cleanAddr : `${cleanAddr}, Türkiye`;
-            
-            // First try with full address
-            let geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
-            let geoData = await geoRes.json();
+            toast.loading('Haritada aranıyor...', { id: 'geo-toast' });
+            const geoResult = await fetchGeocode(addressToSearch);
 
-            // Second try: If full address fails, try without the door number (if any)
-            if (!geoData || geoData.length === 0) {
-                const simplerAddr = cleanAddr.split('No')[0].trim();
-                const simplerQuery = `${simplerAddr}, Türkiye`;
-                geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(simplerQuery)}`);
-                geoData = await geoRes.json();
-            }
-
-            if (geoData && geoData.length > 0) {
-                const { lat, lon } = geoData[0];
+            if (geoResult) {
+                const { lat, lng } = geoResult;
                 setFormData(prev => ({
                     ...prev,
-                    lat: parseFloat(lat),
-                    lng: parseFloat(lon),
-                    maps_link: `https://www.google.com/maps?q=${lat},${lon}`
+                    lat,
+                    lng,
+                    maps_link: `https://www.google.com/maps?q=${lat},${lng}`
                 }));
-                toast.success('Konum doğrulandı.');
+                toast.success('Konum haritada yaklaşık olarak bulundu.', { id: 'geo-toast' });
             } else {
-                toast.error('Tam konum bulunamadı, ama metin olarak kaydedebilirsiniz.');
+                toast.error('Tam konum bulunamadı, ama metin olarak kaydedebilirsiniz.', { id: 'geo-toast' });
             }
         } catch (e) { 
             console.error(e);
-            toast.error('Konum servisi meşgul.');
+            toast.error('Konum servisi meşgul.', { id: 'geo-toast' });
         }
     };
 
