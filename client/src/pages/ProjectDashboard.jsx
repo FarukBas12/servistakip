@@ -273,6 +273,14 @@ const ProjectDashboard = () => {
                                             <span>{new Date(project.end_date).toLocaleDateString('tr-TR')}</span>
                                         </div>
 
+                                        {/* File Warning Badge */}
+                                        {Number(project.file_count) === 0 && (
+                                            <div style={{ margin: '10px 16px 0 16px', padding: '6px 8px', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <span style={{ fontSize: '12px' }}>⚠️</span>
+                                                <span style={{ fontSize: '0.72rem', color: '#ef4444', fontWeight: 'bold' }}>EVRAK EKSİK: Proje dosyası yok!</span>
+                                            </div>
+                                        )}
+
                                         {/* Progress Bar Row */}
                                         <div style={{ padding: '12px 16px 0 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                             <div style={{ flex: 1, background: 'rgba(255,255,255,0.06)', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>

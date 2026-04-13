@@ -10,7 +10,9 @@ const path = require('path');
 router.get('/', async (req, res) => {
     try {
         const result = await db.query(`
-            SELECT p.*, COALESCE(SUM(pe.amount), 0) as total_expenses 
+            SELECT p.*, 
+                   COALESCE(SUM(pe.amount), 0) as total_expenses,
+                   (SELECT COUNT(*) FROM project_files pf WHERE pf.project_id = p.id) as file_count
             FROM projects p 
             LEFT JOIN project_expenses pe ON p.id = pe.project_id 
             GROUP BY p.id 
