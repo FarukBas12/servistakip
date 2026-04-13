@@ -24,8 +24,17 @@ const CurrencyInput = ({ value, onChange, placeholder, className, style, require
     const handleInputChange = (e) => {
         let val = e.target.value;
         
-        // Sadece rakam ve virgüle izin ver (Kullanıcı nokta girerse virgüle çevir)
-        val = val.replace(/\./g, ',');
+        // Eğer virgülden hiç yoksa ve en sonda veya ortada bir yerde nokta eklendiyse (numpad için)
+        // Eğer birden fazla nokta varsa, formattan gelen binlik ayraçlardır, karışma.
+        const dotCount = (val.match(/\./g) || []).length;
+        if (dotCount === 1 && !val.includes(',')) {
+            val = val.replace('.', ',');
+        }
+
+        // Formattan gelen mevcut tüm noktaları temizle (binlik ayraçlar)
+        val = val.replace(/\./g, '');
+        
+        // Sadece rakam ve virgüle izin ver
         val = val.replace(/[^0-9,]/g, '');
 
         if (!val) {
