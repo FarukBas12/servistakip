@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, Upload, FileText, Grid, Box, Image as ImageIcon, Download, DollarSign, Calendar, Edit, Trash2, Printer, Eye, X, TrendingUp, TrendingDown, Wallet, CreditCard, Users, UserPlus } from 'lucide-react';
+import CurrencyInput from '../components/CurrencyInput';
 
 const ProjectDetail = () => {
     const { id } = useParams();
@@ -573,7 +574,7 @@ const ProjectDetail = () => {
                         <h3>{editingExpense ? 'Gideri Düzenle' : 'Gider Ekle'}</h3>
                         <form onSubmit={handleExpenseSubmit}>
                             <input type="date" required value={expenseForm.date} onChange={e => setExpenseForm({ ...expenseForm, date: e.target.value })} className="glass-input" style={{ marginBottom: '10px' }} />
-                            <input type="number" step="0.01" placeholder="Tutar (TL)" required value={expenseForm.amount} onChange={e => setExpenseForm({ ...expenseForm, amount: e.target.value })} className="glass-input" style={{ marginBottom: '10px' }} />
+                            <CurrencyInput required placeholder="Tutar (TL)" value={expenseForm.amount} onChange={val => setExpenseForm({ ...expenseForm, amount: val })} className="glass-input" style={{ marginBottom: '10px', width: '100%' }} />
                             <select value={expenseForm.category} onChange={e => setExpenseForm({ ...expenseForm, category: e.target.value })} className="glass-input" style={{ marginBottom: '10px' }}>
                                 <option value="">Kategori Seçin</option>
                                 <option value="Malzeme">Malzeme</option>
@@ -612,11 +613,11 @@ const ProjectDetail = () => {
                             <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                                 <div style={{ flex: 1 }}>
                                     <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.8rem', color: '#aaa' }}>İhale Bedeli</label>
-                                    <input type="number" step="0.01" placeholder="0.00" value={projectForm.tender_price} onChange={e => setProjectForm({ ...projectForm, tender_price: e.target.value })} className="glass-input" />
+                                    <CurrencyInput placeholder="0,00" value={projectForm.tender_price} onChange={val => setProjectForm({ ...projectForm, tender_price: val })} className="glass-input" style={{ width: '100%' }} />
                                 </div>
                                 <div style={{ flex: 1 }}>
                                     <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.8rem', color: '#aaa' }}>Hakediş (Alınan)</label>
-                                    <input type="number" step="0.01" placeholder="0.00" value={projectForm.progress_payment} onChange={e => setProjectForm({ ...projectForm, progress_payment: e.target.value })} className="glass-input" />
+                                    <CurrencyInput placeholder="0,00" value={projectForm.progress_payment} onChange={val => setProjectForm({ ...projectForm, progress_payment: val })} className="glass-input" style={{ width: '100%' }} />
                                 </div>
                             </div>
 

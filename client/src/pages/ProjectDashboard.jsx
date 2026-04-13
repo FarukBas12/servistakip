@@ -3,6 +3,7 @@ import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Calendar, FolderOpen, ArrowRight, CheckCircle, Clock, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import CurrencyInput from '../components/CurrencyInput';
 
 const ProjectDashboard = () => {
     const [projects, setProjects] = useState([]);
@@ -321,11 +322,11 @@ const ProjectDashboard = () => {
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <div className="form-group" style={{ flex: 1 }}>
                                         <label style={{ fontSize: '0.85rem', color: '#8b9dc3', marginBottom: '4px', display: 'block' }}>İhale Bedeli</label>
-                                        <input type="number" step="0.01" value={newProject.tender_price || ''} onChange={e => setNewProject({ ...newProject, tender_price: e.target.value })} className="glass-input" />
+                                        <CurrencyInput value={newProject.tender_price || ''} onChange={val => setNewProject({ ...newProject, tender_price: val })} className="glass-input" style={{ width: '100%' }} />
                                     </div>
                                     <div className="form-group" style={{ flex: 1 }}>
                                         <label style={{ fontSize: '0.85rem', color: '#8b9dc3', marginBottom: '4px', display: 'block' }}>Hakediş (Alınan)</label>
-                                        <input type="number" step="0.01" value={newProject.progress_payment || ''} onChange={e => setNewProject({ ...newProject, progress_payment: e.target.value })} className="glass-input" />
+                                        <CurrencyInput value={newProject.progress_payment || ''} onChange={val => setNewProject({ ...newProject, progress_payment: val })} className="glass-input" style={{ width: '100%' }} />
                                     </div>
                                 </div>
 
