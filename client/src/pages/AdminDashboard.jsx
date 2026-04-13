@@ -365,15 +365,6 @@ const AdminDashboard = () => {
                             <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{formatCurrency(projectStats.activeTotalTender)}</div>
                         </div>
                     </div>
-                    <div className="glass-panel" style={{ padding: '20px', borderLeft: '4px solid #10b981', display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
-                        <div style={{ padding: '10px', background: 'rgba(16, 185, 129, 0.15)', borderRadius: '10px' }}>
-                            <Wallet size={24} color="#10b981" />
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '5px' }}>Şu Ana Kadar Alınan Hakediş</div>
-                            <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{formatCurrency(projectStats.activeTotalReceived)}</div>
-                        </div>
-                    </div>
                     <div className="glass-panel" style={{ padding: '20px', borderLeft: '4px solid #f59e0b', display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
                         <div style={{ padding: '10px', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '10px' }}>
                             <DollarSign size={24} color="#f59e0b" />
