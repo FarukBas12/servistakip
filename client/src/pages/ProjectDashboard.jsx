@@ -9,6 +9,7 @@ const ProjectDashboard = () => {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('active'); // 'active' or 'completed'
+    const [selectedMonth, setSelectedMonth] = useState('Tümü'); // NEW: For completed sub-tabs
     const navigate = useNavigate();
     const { user } = useAuth();
     const isTech = user?.role === 'technician';
@@ -142,12 +143,64 @@ const ProjectDashboard = () => {
                 </button>
             </div>
 
-            {loading ? <p>Yükleniyor...</p> : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-                    {projects
-                        .filter(p => activeTab === 'active' ? p.status !== 'completed' : p.status === 'completed')
-                        .map(project => {
-                            const progress = calculateProgress(project.start_date, project.end_date);
+            {loading ? <p>Yükleniyor...</p> : (() => {
+                const activeProjectsList = projects.filter(p => p.status !== 'completed');
+                const completedProjects = projects.filter(p => p.status === 'completed');
+
+                // AYA GÖRE GRUPLAMA
+                const monthGroups = {};
+                completedProjects.forEach(p => {
+                    const d = p.end_date ? new Date(p.end_date) : new Date(p.created_at || Date.now());
+                    const mName = d.toLocaleString('tr-TR', { month: 'long', year: 'numeric' });
+                    if (!monthGroups[mName]) monthGroups[mName] = [];
+                    monthGroups[mName].push(p);
+                });
+
+                const uniqueMonths = Object.keys(monthGroups).sort((a,b) => {
+                    const dA = monthGroups[a][0].end_date ? new Date(monthGroups[a][0].end_date) : new Date();
+                    const dB = monthGroups[b][0].end_date ? new Date(monthGroups[b][0].end_date) : new Date();
+                    return dB - dA;
+                });
+
+                const displayedProjects = activeTab === 'active' 
+                    ? activeProjectsList 
+                    : (selectedMonth === 'Tümü' ? completedProjects : monthGroups[selectedMonth] || []);
+
+                return (
+                    <>
+                        {/* ALT SEKMELER (SADECE TAMAMLANANLARDA) */}
+                        {activeTab === 'completed' && completedProjects.length > 0 && (
+                            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '20px', WebkitOverflowScrolling: 'touch' }}>
+                                <button
+                                    onClick={() => setSelectedMonth('Tümü')}
+                                    className="glass-btn"
+                                    style={{
+                                        padding: '6px 14px', borderRadius: '20px', border: '1px solid transparent', cursor: 'pointer',
+                                        background: selectedMonth === 'Tümü' ? '#6366f1' : 'rgba(255,255,255,0.05)',
+                                        color: selectedMonth === 'Tümü' ? '#fff' : '#8b9dc3',
+                                        transition: 'all 0.2s', whiteSpace: 'nowrap', fontSize: '0.85rem'
+                                    }}
+                                >Tümü</button>
+                                {uniqueMonths.map(m => (
+                                    <button
+                                        key={m}
+                                        onClick={() => setSelectedMonth(m)}
+                                        className="glass-btn"
+                                        style={{
+                                            padding: '6px 14px', borderRadius: '20px', border: '1px solid transparent', cursor: 'pointer',
+                                            background: selectedMonth === m ? '#6366f1' : 'rgba(255,255,255,0.05)',
+                                            color: selectedMonth === m ? '#fff' : '#8b9dc3',
+                                            transition: 'all 0.2s', whiteSpace: 'nowrap', fontSize: '0.85rem'
+                                        }}
+                                    >{m}</button>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* PROJECT CARDS */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+                            {displayedProjects.map(project => {
+                                const progress = calculateProgress(project.start_date, project.end_date);
                             const progressColor = getProgressColor(progress);
                             const isOverdue = new Date() > new Date(project.end_date) && project.status !== 'completed';
                             const progressPct = Math.round(progress);
@@ -298,10 +351,11 @@ const ProjectDashboard = () => {
                                     </div>
                                 </div>
                             );
-                        })}
-                </div>
-            )
-            }
+                            })}
+                        </div>
+                    </>
+                );
+            })()}
 
             {/* CREATE MODAL */}
             {
