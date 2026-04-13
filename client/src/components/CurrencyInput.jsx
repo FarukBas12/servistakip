@@ -24,14 +24,13 @@ const CurrencyInput = ({ value, onChange, placeholder, className, style, require
     const handleInputChange = (e) => {
         let val = e.target.value;
         
-        // Eğer virgülden hiç yoksa ve en sonda veya ortada bir yerde nokta eklendiyse (numpad için)
-        // Eğer birden fazla nokta varsa, formattan gelen binlik ayraçlardır, karışma.
-        const dotCount = (val.match(/\./g) || []).length;
-        if (dotCount === 1 && !val.includes(',')) {
-            val = val.replace('.', ',');
+        // Kullanıcı klavyeden (numpad) en sona nokta koyarsa ve daha önce virgül girilmemişse,
+        // bu noktayı direkt virgüle (küsürat başlangıcı) çevir.
+        if (val.endsWith('.') && !val.slice(0, -1).includes(',')) {
+            val = val.slice(0, -1) + ',';
         }
 
-        // Formattan gelen mevcut tüm noktaları temizle (binlik ayraçlar)
+        // Daha sonra sayıdaki BÜTÜN noktaları sil (çünkü bunlar formatlayıcının eklediği binlik ayraçlar)
         val = val.replace(/\./g, '');
         
         // Sadece rakam ve virgüle izin ver
