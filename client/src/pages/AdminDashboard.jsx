@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Activity, ClipboardList, ChevronLeft, ChevronRight, Trash2, LayoutDashboard, Eye, EyeOff } from 'lucide-react';
+import { Users, Activity, ClipboardList, ChevronLeft, ChevronRight, Trash2, LayoutDashboard, Eye, EyeOff, DollarSign, Wallet, Briefcase, BarChart2 } from 'lucide-react';
 
 import api from '../utils/api';
 import StatCard from '../components/Dashboard/StatCard';
@@ -17,6 +17,14 @@ const AdminDashboard = () => {
         totalStock: 0,
         technicians: 0
     });
+
+    const [projectStats, setProjectStats] = useState({
+        activeTotalTender: 0,
+        activeTotalReceived: 0,
+        monthlyCompleted: []
+    });
+
+    const formatCurrency = (val) => new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val || 0) + ' TL';
 
     // Weather & Notes State
     const [weather, setWeather] = useState(null);
@@ -51,15 +59,51 @@ const AdminDashboard = () => {
 
     const fetchDashboardData = async () => {
         try {
-            const [tasksRes, usersRes, stockRes] = await Promise.all([
+            const [tasksRes, usersRes, stockRes, projectsRes] = await Promise.all([
                 api.get('/tasks'),
                 api.get('/auth/users'),
-                api.get('/stock-tracking')
+                api.get('/stock-tracking'),
+                api.get('/projects')
             ]);
 
             const tasks = tasksRes.data;
             const users = usersRes.data;
             const stocks = stockRes.data;
+            const projects = projectsRes.data;
+
+            // --- FİNANSAL PROJE HESAPLAMALARI ---
+            let activeTotalTender = 0;
+            let activeTotalReceived = 0;
+            const monthlyCompleted = {}; 
+
+            projects.forEach(p => {
+                const tender = parseFloat(p.tender_price) || 0;
+                const received = parseFloat(p.progress_payment) || 0;
+
+                if (p.status !== 'completed') {
+                    activeTotalTender += tender;
+                    activeTotalReceived += received;
+                } else {
+                    const d = p.end_date ? new Date(p.end_date) : new Date(p.created_at || Date.now());
+                    const monthName = d.toLocaleString('tr-TR', { month: 'long', year: 'numeric' }); 
+                    
+                    if (!monthlyCompleted[monthName]) {
+                        monthlyCompleted[monthName] = { tender: 0, received: 0, rawDate: d };
+                    }
+                    monthlyCompleted[monthName].tender += tender;
+                    monthlyCompleted[monthName].received += received;
+                }
+            });
+
+            const sortedMonthly = Object.entries(monthlyCompleted)
+                .sort((a,b) => b[1].rawDate - a[1].rawDate)
+                .map(e => ({ month: e[0], ...e[1] }));
+
+            setProjectStats({
+                activeTotalTender,
+                activeTotalReceived,
+                monthlyCompleted: sortedMonthly
+            });
 
             // --- YENİ KPI HESAPLAMALARI ---
             const now = new Date();
@@ -302,6 +346,85 @@ const AdminDashboard = () => {
                     color="#f97316"
                     gradient={['rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.05)']}
                 />
+            </div>
+
+            {/* FİNANSAL PROJE YÖNETİMİ BÖLÜMÜ */}
+            <div style={{ marginBottom: '30px' }}>
+                <h3 style={{ fontSize: '1.4rem', marginBottom: '15px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Briefcase size={22} color="#10b981" /> Finansal Durum & Projeler
+                </h3>
+                
+                {/* AKTİF PROJELER KARTLARI */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+                    <div className="glass-panel" style={{ padding: '20px', borderLeft: '4px solid #3b82f6', display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
+                        <div style={{ padding: '10px', background: 'rgba(59, 130, 246, 0.15)', borderRadius: '10px' }}>
+                            <Briefcase size={24} color="#3b82f6" />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '5px' }}>Bekleyen İhale Toplamı (Aktif)</div>
+                            <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{formatCurrency(projectStats.activeTotalTender)}</div>
+                        </div>
+                    </div>
+                    <div className="glass-panel" style={{ padding: '20px', borderLeft: '4px solid #10b981', display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
+                        <div style={{ padding: '10px', background: 'rgba(16, 185, 129, 0.15)', borderRadius: '10px' }}>
+                            <Wallet size={24} color="#10b981" />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '5px' }}>Şu Ana Kadar Alınan Hakediş</div>
+                            <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{formatCurrency(projectStats.activeTotalReceived)}</div>
+                        </div>
+                    </div>
+                    <div className="glass-panel" style={{ padding: '20px', borderLeft: '4px solid #f59e0b', display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
+                        <div style={{ padding: '10px', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '10px' }}>
+                            <DollarSign size={24} color="#f59e0b" />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '5px' }}>Tahsil Edilecek Kalan Bütçe</div>
+                            <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{formatCurrency(projectStats.activeTotalTender - projectStats.activeTotalReceived)}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* BİTEN İŞLER AYLIK TABLO */}
+                {projectStats.monthlyCompleted.length > 0 && (
+                    <div className="glass-panel" style={{ padding: '20px', overflowX: 'auto' }}>
+                        <h4 style={{ margin: '0 0 15px 0', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <BarChart2 size={18} color="#8b5cf6" /> Biten İşler Aylık Tablosu
+                        </h4>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                    <th style={{ padding: '12px 10px', color: 'var(--text-secondary)', fontWeight: '600' }}>Ay / Yıl</th>
+                                    <th style={{ padding: '12px 10px', color: 'var(--text-secondary)', fontWeight: '600' }}>Toplam Sözleşme (İhale)</th>
+                                    <th style={{ padding: '12px 10px', color: 'var(--text-secondary)', fontWeight: '600' }}>Gerçekleşen (Hakediş)</th>
+                                    <th style={{ padding: '12px 10px', color: 'var(--text-secondary)', fontWeight: '600' }}>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {projectStats.monthlyCompleted.map((m, i) => {
+                                    const diff = m.received - m.tender;
+                                    let durumRender;
+                                    if (diff > 0) {
+                                        durumRender = <span style={{ color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '4px 8px', borderRadius: '4px' }}>+{formatCurrency(diff)} (Ek İş/Fazla)</span>;
+                                    } else if (diff < 0) {
+                                        durumRender = <span style={{ color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', padding: '4px 8px', borderRadius: '4px' }}>{formatCurrency(diff)} (Kayıp/Kesinti)</span>;
+                                    } else {
+                                        durumRender = <span style={{ color: '#a855f7', background: 'rgba(168, 85, 247, 0.1)', padding: '4px 8px', borderRadius: '4px' }}>Denk Kapanış</span>;
+                                    }
+
+                                    return (
+                                        <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <td style={{ padding: '12px 10px', fontWeight: 'bold' }}>{m.month}</td>
+                                            <td style={{ padding: '12px 10px' }}>{formatCurrency(m.tender)}</td>
+                                            <td style={{ padding: '12px 10px' }}>{formatCurrency(m.received)}</td>
+                                            <td style={{ padding: '12px 10px' }}>{durumRender}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
 
             {/* MAIN CONTENT GRID */}
