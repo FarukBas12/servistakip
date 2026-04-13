@@ -321,11 +321,11 @@ const ProjectDashboard = () => {
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <div className="form-group" style={{ flex: 1 }}>
                                         <label style={{ fontSize: '0.85rem', color: '#8b9dc3', marginBottom: '4px', display: 'block' }}>İhale Bedeli</label>
-                                        <input type="number" value={newProject.tender_price || ''} onChange={e => setNewProject({ ...newProject, tender_price: e.target.value })} className="glass-input" />
+                                        <input type="number" step="0.01" value={newProject.tender_price || ''} onChange={e => setNewProject({ ...newProject, tender_price: e.target.value })} className="glass-input" />
                                     </div>
                                     <div className="form-group" style={{ flex: 1 }}>
                                         <label style={{ fontSize: '0.85rem', color: '#8b9dc3', marginBottom: '4px', display: 'block' }}>Hakediş (Alınan)</label>
-                                        <input type="number" value={newProject.progress_payment || ''} onChange={e => setNewProject({ ...newProject, progress_payment: e.target.value })} className="glass-input" />
+                                        <input type="number" step="0.01" value={newProject.progress_payment || ''} onChange={e => setNewProject({ ...newProject, progress_payment: e.target.value })} className="glass-input" />
                                     </div>
                                 </div>
 

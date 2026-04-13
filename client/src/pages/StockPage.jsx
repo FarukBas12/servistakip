@@ -129,7 +129,10 @@ const StockPage = () => {
 
     // Summary colors
     const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316', '#84cc16'];
-    const formatCurrency = (val) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(val || 0);
+    const formatCurrency = (amount) => {
+        const val = parseFloat(amount) || 0;
+        return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val) + ' TL';
+    };
 
     // ── Data fetching ────────────────────────────────────────────
     const fetchStocks = async () => {

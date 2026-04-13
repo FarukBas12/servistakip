@@ -232,7 +232,8 @@ const ProjectDetail = () => {
     };
 
     const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount || 0);
+        const val = parseFloat(amount) || 0;
+        return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val) + ' TL';
     };
 
     const handleDownload = async (url, filename, fileType) => {
@@ -572,7 +573,7 @@ const ProjectDetail = () => {
                         <h3>{editingExpense ? 'Gideri Düzenle' : 'Gider Ekle'}</h3>
                         <form onSubmit={handleExpenseSubmit}>
                             <input type="date" required value={expenseForm.date} onChange={e => setExpenseForm({ ...expenseForm, date: e.target.value })} className="glass-input" style={{ marginBottom: '10px' }} />
-                            <input type="number" placeholder="Tutar (TL)" required value={expenseForm.amount} onChange={e => setExpenseForm({ ...expenseForm, amount: e.target.value })} className="glass-input" style={{ marginBottom: '10px' }} />
+                            <input type="number" step="0.01" placeholder="Tutar (TL)" required value={expenseForm.amount} onChange={e => setExpenseForm({ ...expenseForm, amount: e.target.value })} className="glass-input" style={{ marginBottom: '10px' }} />
                             <select value={expenseForm.category} onChange={e => setExpenseForm({ ...expenseForm, category: e.target.value })} className="glass-input" style={{ marginBottom: '10px' }}>
                                 <option value="">Kategori Seçin</option>
                                 <option value="Malzeme">Malzeme</option>
@@ -611,11 +612,11 @@ const ProjectDetail = () => {
                             <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                                 <div style={{ flex: 1 }}>
                                     <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.8rem', color: '#aaa' }}>İhale Bedeli</label>
-                                    <input type="number" placeholder="0.00" value={projectForm.tender_price} onChange={e => setProjectForm({ ...projectForm, tender_price: e.target.value })} className="glass-input" />
+                                    <input type="number" step="0.01" placeholder="0.00" value={projectForm.tender_price} onChange={e => setProjectForm({ ...projectForm, tender_price: e.target.value })} className="glass-input" />
                                 </div>
                                 <div style={{ flex: 1 }}>
                                     <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.8rem', color: '#aaa' }}>Hakediş (Alınan)</label>
-                                    <input type="number" placeholder="0.00" value={projectForm.progress_payment} onChange={e => setProjectForm({ ...projectForm, progress_payment: e.target.value })} className="glass-input" />
+                                    <input type="number" step="0.01" placeholder="0.00" value={projectForm.progress_payment} onChange={e => setProjectForm({ ...projectForm, progress_payment: e.target.value })} className="glass-input" />
                                 </div>
                             </div>
 
