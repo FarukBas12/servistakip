@@ -96,7 +96,7 @@ const SubPaymentPage = () => {
         const validDate = header.date ? header.date : new Date().toLocaleDateString('en-CA');
         formData.append('payment_date', validDate);
         formData.append('waybill_info', header.waybill_info);
-        formData.append('kdv_rate', header.kdv_rate || 20);
+        formData.append('kdv_rate', header.kdv_rate !== '' ? header.kdv_rate : 20);
         if (waybillFile) formData.append('waybill', waybillFile);
         formData.append('items', JSON.stringify(items));
 
@@ -277,7 +277,7 @@ const SubPaymentPage = () => {
                                 }}>
                                     <input
                                         type="number"
-                                        value={header.kdv_rate || 20}
+                                        value={header.kdv_rate}
                                         onChange={e => setHeader({ ...header, kdv_rate: e.target.value })}
                                         style={{ 
                                             width: '35px', 
@@ -299,7 +299,7 @@ const SubPaymentPage = () => {
                                     const qty = parseFloat(quantities[p.id]) || 0;
                                     const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);
                                     return acc + (qty * unitPrice);
-                                }, 0) * ((header.kdv_rate || 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
+                                }, 0) * ((header.kdv_rate !== '' ? header.kdv_rate : 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
                             </span>
                         </div>
 
@@ -314,7 +314,7 @@ const SubPaymentPage = () => {
                                     const qty = parseFloat(quantities[p.id]) || 0;
                                     const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);
                                     return acc + (qty * unitPrice);
-                                }, 0) * (1 + ((header.kdv_rate || 20) / 100))).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
+                                }, 0) * (1 + ((header.kdv_rate !== '' ? header.kdv_rate : 20) / 100))).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
                             </span>
                         </div>
 

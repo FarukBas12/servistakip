@@ -232,14 +232,14 @@ const PaymentCreate = () => {
                                                                 borderColor: 'rgba(255,160,0,0.3)',
                                                                 color: '#ffb300'
                                                             }}
-                                                            value={header.kdv_rate || 20}
+                                                            value={header.kdv_rate}
                                                             onChange={e => setHeader({ ...header, kdv_rate: e.target.value })}
                                                         />
                                                         <span style={{ marginLeft: '4px', color: '#ffb300', fontWeight: 'bold' }}>%</span>
                                                     </div>
                                                 </div>
                                                 <span style={{ color: '#ffb300', fontWeight: '600' }}>
-                                                    {(calculateTotal() * ((header.kdv_rate || 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
+                                                    {(calculateTotal() * ((header.kdv_rate !== '' ? header.kdv_rate : 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
                                                 </span>
                                             </div>
 
@@ -249,7 +249,7 @@ const PaymentCreate = () => {
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                 <span style={{ fontSize: '1.1rem', fontWeight: '700' }}>GENEL TOPLAM</span>
                                                 <span style={{ fontSize: '1.5rem', fontWeight: '800', color: '#4caf50' }}>
-                                                    {(calculateTotal() * (1 + ((header.kdv_rate || 20) / 100))).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
+                                                    {(calculateTotal() * (1 + ((header.kdv_rate !== '' ? header.kdv_rate : 20) / 100))).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
                                                 </span>
                                             </div>
                                         </div>

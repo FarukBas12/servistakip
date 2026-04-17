@@ -70,7 +70,7 @@ const SubcontractorDetail = () => {
                 title: paymentHeader.title,
                 payment_date: paymentHeader.date,
                 subcontractor_id: id,
-                kdv_rate: paymentHeader.kdv_rate || 20,
+                kdv_rate: paymentHeader.kdv_rate !== '' ? paymentHeader.kdv_rate : 20,
                 items: itemsToSave
             });
             alert('Hakediş oluşturuldu!');
@@ -258,7 +258,7 @@ const SubcontractorDetail = () => {
                                                      }}>
                                                          <input
                                                              type="number"
-                                                             value={paymentHeader.kdv_rate || 20}
+                                                             value={paymentHeader.kdv_rate}
                                                              onChange={e => setPaymentHeader({ ...paymentHeader, kdv_rate: e.target.value })}
                                                              style={{ 
                                                                  width: '35px', 
@@ -276,7 +276,7 @@ const SubcontractorDetail = () => {
                                                      </div>
                                                  </div>
                                                  <span style={{ color: '#fbbf24', fontWeight: '600' }}>
-                                                     {(calculateTotal() * ((paymentHeader.kdv_rate || 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
+                                                     {(calculateTotal() * ((paymentHeader.kdv_rate !== '' ? paymentHeader.kdv_rate : 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
                                                  </span>
                                              </div>
 
@@ -286,7 +286,7 @@ const SubcontractorDetail = () => {
                                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                 <span style={{ fontSize: '1.1rem', fontWeight: '700' }}>GENEL TOPLAM</span>
                                                 <span style={{ fontSize: '1.6rem', fontWeight: '800', color: '#4caf50' }}>
-                                                    {(calculateTotal() * (1 + ((paymentHeader.kdv_rate || 20) / 100))).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
+                                                    {(calculateTotal() * (1 + ((paymentHeader.kdv_rate !== '' ? paymentHeader.kdv_rate : 20) / 100))).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
                                                 </span>
                                              </div>
                                         </div>
