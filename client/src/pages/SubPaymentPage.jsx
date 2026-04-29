@@ -51,7 +51,9 @@ const SubPaymentPage = () => {
         formData.append('subId', id);
 
         try {
-            await api.post('/subs/prices/import', formData);
+            await api.post('/subs/prices/import', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
             alert('Veriler Yüklendi');
             loadPrices();
             setShowDataModal(false);

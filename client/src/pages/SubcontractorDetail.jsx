@@ -44,7 +44,9 @@ const SubcontractorDetail = () => {
         formData.append('subId', id); // Link to this sub
 
         try {
-            await api.post('/definitions/prices/import', formData);
+            await api.post('/definitions/prices/import', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
             alert('Fiyat listesi yüklendi');
             fetchSubData();
         } catch (err) {
