@@ -43,4 +43,9 @@ router.post('/migrate', authController.migrateUsers);
 // @desc    Delete user
 router.delete('/:id', authController.deleteUser);
 
+// User Documents
+router.get('/:id/documents', authController.getUserDocuments);
+router.post('/:id/documents', upload.single('document'), authController.uploadUserDocument);
+router.delete('/documents/:docId', authController.deleteUserDocument);
+
 module.exports = router;

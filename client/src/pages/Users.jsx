@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
-import { Users, Plus, Save, Trash2, Search, Phone, Calendar, User, Shield } from 'lucide-react';
+import { Users, Plus, Save, Trash2, Search, Phone, Calendar, User, Shield, Upload, FileText } from 'lucide-react';
 import { getInitials, stringToColor } from '../utils/helpers';
 
 const UsersPage = () => {
@@ -11,8 +11,11 @@ const UsersPage = () => {
     const [formData, setFormData] = useState({
         username: '', password: '', role: 'technician',
         full_name: '', phone: '', start_date: new Date().toLocaleDateString('en-CA'), photo_url: '',
-        job_title: ''
+        job_title: '', status: 'active'
     });
+    const [documents, setDocuments] = useState([]);
+    const [docType, setDocType] = useState('Giriş Evrağı');
+    const [docUploading, setDocUploading] = useState(false);
     const [photoUploading, setPhotoUploading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -31,7 +34,7 @@ const UsersPage = () => {
         }
     };
 
-    const handleEditUser = (user) => {
+    const handleEditUser = async (user) => {
         setFormData({
             username: user.username,
             password: '',
@@ -40,19 +43,27 @@ const UsersPage = () => {
             phone: user.phone || '',
             start_date: user.start_date ? user.start_date.split('T')[0] : '',
             photo_url: user.photo_url || '',
-            job_title: user.job_title || ''
+            job_title: user.job_title || '',
+            status: user.status || 'active'
         });
         setEditingUser(user);
         setShowUserForm(true);
+        try {
+            const res = await api.get(`/auth/${user.id}/documents`);
+            setDocuments(res.data);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const resetForm = () => {
         setFormData({
             username: '', password: '', role: 'technician',
             full_name: '', phone: '', start_date: new Date().toLocaleDateString('en-CA'), photo_url: '',
-            job_title: ''
+            job_title: '', status: 'active'
         });
         setEditingUser(null);
+        setDocuments([]);
         setShowUserForm(true);
     };
 
@@ -74,6 +85,37 @@ const UsersPage = () => {
             alert('Fotoğraf yüklenemedi');
         }
         setPhotoUploading(false);
+    };
+
+    const handleDocUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file || !editingUser) return;
+
+        setDocUploading(true);
+        try {
+            const formDataUpload = new FormData();
+            formDataUpload.append('document', file);
+            formDataUpload.append('document_type', docType);
+
+            const res = await api.post(`/auth/${editingUser.id}/documents`, formDataUpload, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            setDocuments([res.data, ...documents]);
+        } catch (err) {
+            alert('Evrak yüklenemedi');
+        }
+        setDocUploading(false);
+        e.target.value = null;
+    };
+
+    const handleDocDelete = async (docId) => {
+        if (!window.confirm('Evrağı silmek istediğinize emin misiniz?')) return;
+        try {
+            await api.delete(`/auth/documents/${docId}`);
+            setDocuments(documents.filter(d => d.id !== docId));
+        } catch (err) {
+            alert('Silme başarısız');
+        }
     };
 
     const handleUserSubmit = async (e) => {
@@ -164,7 +206,7 @@ const UsersPage = () => {
             {/* User Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
                 {filteredUsers.map(user => (
-                    <div key={user.id} className="glass-panel user-card" style={{ padding: '20px', borderRadius: '16px', position: 'relative', overflow: 'hidden' }}>
+                    <div key={user.id} className="glass-panel user-card" style={{ padding: '20px', borderRadius: '16px', position: 'relative', overflow: 'hidden', opacity: user.status === 'passive' ? 0.6 : 1, filter: user.status === 'passive' ? 'grayscale(0.5)' : 'none' }}>
                         {/* Header with Role */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
                             <div style={{
@@ -179,12 +221,12 @@ const UsersPage = () => {
                             </div>
                             <span style={{
                                 padding: '4px 12px', borderRadius: '20px',
-                                background: roleColors[user.role]?.bg || roleColors.technician.bg,
-                                color: roleColors[user.role]?.text || roleColors.technician.text,
-                                border: `1px solid ${roleColors[user.role]?.border || 'transparent'}`,
+                                background: user.status === 'passive' ? 'rgba(239, 68, 68, 0.2)' : (roleColors[user.role]?.bg || roleColors.technician.bg),
+                                color: user.status === 'passive' ? '#ef4444' : (roleColors[user.role]?.text || roleColors.technician.text),
+                                border: `1px solid ${user.status === 'passive' ? 'rgba(239, 68, 68, 0.4)' : (roleColors[user.role]?.border || 'transparent')}`,
                                 fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase'
                             }}>
-                                {roleLabels[user.role] || user.role}
+                                {user.status === 'passive' ? 'PASİF' : (roleLabels[user.role] || user.role)}
                             </span>
                         </div>
 
@@ -272,9 +314,56 @@ const UsersPage = () => {
                                 </select>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                <select className="glass-input" name="status" value={formData.status} onChange={handleUserChange} style={{ background: '#2a2a2a', color: 'white' }}>
+                                    <option value="active">Durum: Aktif</option>
+                                    <option value="passive">Durum: Pasif</option>
+                                </select>
                                 <input type="date" className="glass-input" name="start_date" value={formData.start_date} onChange={handleUserChange} />
                             </div>
+
+                            {editingUser && (
+                                <div style={{ marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
+                                    <h4 style={{ margin: '0 0 15px 0', color: '#e2e8f0' }}>Evrak Yönetimi</h4>
+                                    <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+                                        <select className="glass-input" value={docType} onChange={e => setDocType(e.target.value)} style={{ flex: 1, background: '#2a2a2a', color: 'white' }}>
+                                            <option value="Giriş Evrağı">Giriş Evrağı</option>
+                                            <option value="Çıkış Evrağı">Çıkış Evrağı</option>
+                                            <option value="Kimlik Fotokopisi">Kimlik Fotokopisi</option>
+                                            <option value="Sağlık Raporu">Sağlık Raporu</option>
+                                            <option value="Sözleşme">Sözleşme</option>
+                                            <option value="Diğer Evrak">Diğer Evrak</option>
+                                        </select>
+                                        <label className="glass-btn primary-btn" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                            {docUploading ? 'Yükleniyor...' : <><Upload size={16} /> Yükle</>}
+                                            <input type="file" accept="image/*,.pdf" onChange={handleDocUpload} style={{ display: 'none' }} disabled={docUploading} />
+                                        </label>
+                                    </div>
+
+                                    {documents.length > 0 ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '200px', overflowY: 'auto' }}>
+                                            {documents.map(doc => (
+                                                <div key={doc.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                        <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{doc.document_type}</span>
+                                                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{new Date(doc.created_at).toLocaleDateString('tr-TR')}</span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                                        <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="glass-btn" style={{ padding: '6px' }} title="Görüntüle">
+                                                            <FileText size={16} color="#3b82f6" />
+                                                        </a>
+                                                        <button type="button" onClick={() => handleDocDelete(doc.id)} className="glass-btn" style={{ padding: '6px' }} title="Sil">
+                                                            <Trash2 size={16} color="#ef4444" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p style={{ fontSize: '0.85rem', color: '#94a3b8', textAlign: 'center', margin: 0 }}>Henüz evrak yüklenmemiş.</p>
+                                    )}
+                                </div>
+                            )}
 
                             <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
                                 <button type="submit" className="glass-btn primary-btn" style={{ flex: 1, padding: '12px' }}>

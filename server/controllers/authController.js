@@ -204,3 +204,61 @@ exports.migrateUsers = async (req, res) => {
         res.status(500).send('Migration Error: ' + err.message);
     }
 };
+
+exports.getUserDocuments = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { rows } = await db.query(
+            'SELECT * FROM user_documents WHERE user_id = $1 ORDER BY created_at DESC',
+            [id]
+        );
+        res.json(rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
+
+exports.uploadUserDocument = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { document_type } = req.body;
+        
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+
+        // Upload to Cloudinary
+        const result = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                { folder: 'user_documents', resource_type: 'auto' },
+                (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                }
+            );
+            stream.end(req.file.buffer);
+        });
+
+        const { rows } = await db.query(
+            'INSERT INTO user_documents (user_id, document_type, file_url, file_name) VALUES ($1, $2, $3, $4) RETURNING *',
+            [id, document_type || 'Diğer Evrak', result.secure_url, req.file.originalname]
+        );
+
+        res.json(rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
+
+exports.deleteUserDocument = async (req, res) => {
+    try {
+        const { docId } = req.params;
+        await db.query('DELETE FROM user_documents WHERE id = $1', [docId]);
+        res.json({ message: 'Document deleted' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
