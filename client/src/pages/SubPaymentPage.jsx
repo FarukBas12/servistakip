@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { ArrowLeft, Upload, Plus, Save, FileText, Paperclip, PlusCircle, Camera, Trash2, Search } from 'lucide-react';
+import { ArrowLeft, Upload, Plus, Save, FileText, Paperclip, PlusCircle, Camera, Trash2, Search, ScanLine } from 'lucide-react';
+import SmartOCRModal from '../components/SmartOCRModal';
 
 const SubPaymentPage = () => {
     const { id } = useParams();
@@ -34,6 +35,7 @@ const SubPaymentPage = () => {
     const [importFile, setImportFile] = useState(null);
     const [showItemModal, setShowItemModal] = useState(false);
     const [newItem, setNewItem] = useState({ work_item: '', unit_price: '' });
+    const [showOCRModal, setShowOCRModal] = useState(false);
 
     useEffect(() => { loadPrices(); }, []);
 
@@ -247,6 +249,14 @@ const SubPaymentPage = () => {
 
                     <button className="glass-btn" style={{ display: 'flex', gap: '5px', alignItems: 'center' }} onClick={() => setShowDataModal(true)}>
                         <Upload size={18} /> Fiyat/Kalem Data Ekle (Excel)
+                    </button>
+
+                    <button 
+                        className="glass-btn" 
+                        style={{ display: 'flex', gap: '5px', alignItems: 'center', background: 'rgba(59, 130, 246, 0.1)', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.3)' }} 
+                        onClick={() => setShowOCRModal(true)}
+                    >
+                        <ScanLine size={18} /> Akıllı OCR (Excel Asistanı)
                     </button>
 
                     {selectedItemIds.size > 0 && (
@@ -467,6 +477,11 @@ const SubPaymentPage = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Smart OCR Modal */}
+            {showOCRModal && (
+                <SmartOCRModal onClose={() => setShowOCRModal(false)} />
             )}
         </div>
     );
