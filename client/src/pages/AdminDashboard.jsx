@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Activity, ClipboardList, ChevronLeft, ChevronRight, Trash2, LayoutDashboard, Eye, EyeOff, DollarSign, Wallet, Briefcase, BarChart2 } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 import api from '../utils/api';
 import StatCard from '../components/Dashboard/StatCard';
@@ -376,12 +377,33 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
-                {/* BİTEN İŞLER AYLIK TABLO */}
+                {/* BİTEN İŞLER AYLIK TABLO & GRAFİK */}
                 {projectStats.monthlyCompleted.length > 0 && (
                     <div className="glass-panel" style={{ padding: '20px', overflowX: 'auto' }}>
-                        <h4 style={{ margin: '0 0 15px 0', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <BarChart2 size={18} color="#8b5cf6" /> Biten İşler Aylık Tablosu
+                        <h4 style={{ margin: '0 0 20px 0', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <BarChart2 size={18} color="#8b5cf6" /> Biten İşler: İhale ve Hakediş Karşılaştırması
                         </h4>
+
+                        {/* GRAFİK BÖLÜMÜ */}
+                        <div style={{ height: '300px', width: '100%', marginBottom: '30px' }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={[...projectStats.monthlyCompleted].reverse()} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                                    <XAxis dataKey="month" stroke="var(--text-secondary)" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
+                                    <YAxis stroke="var(--text-secondary)" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} tickFormatter={(val) => new Intl.NumberFormat('tr-TR', { notation: "compact", compactDisplay: "short" }).format(val)} />
+                                    <Tooltip 
+                                        contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
+                                        formatter={(value) => formatCurrency(value)}
+                                        labelStyle={{ color: 'var(--text-secondary)', marginBottom: '5px' }}
+                                    />
+                                    <Legend wrapperStyle={{ paddingTop: '10px' }} />
+                                    <Line type="monotone" name="Toplam İhale" dataKey="tender" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                                    <Line type="monotone" name="Gerçekleşen Hakediş" dataKey="received" stroke="#10b981" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+
+                        {/* TABLO BÖLÜMÜ */}
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
