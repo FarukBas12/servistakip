@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { ArrowLeft, Upload, Plus, Save, FileText, Paperclip, PlusCircle, Camera, Trash2 } from 'lucide-react';
+import { ArrowLeft, Upload, Plus, Save, FileText, Paperclip, PlusCircle, Camera, Trash2, Search } from 'lucide-react';
 
 const SubPaymentPage = () => {
     const { id } = useParams();
@@ -25,6 +25,8 @@ const SubPaymentPage = () => {
     const [customPrices, setCustomPrices] = useState({}); // Overridden prices
     const [customNames, setCustomNames] = useState({}); // Overridden names
     const [deletedItemIds, setDeletedItemIds] = useState(new Set()); // Hidden items
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedItemIds, setSelectedItemIds] = useState(new Set()); // Selected for bulk delete
     const [loading, setLoading] = useState(false);
 
     // Modals
@@ -40,6 +42,7 @@ const SubPaymentPage = () => {
             const res = await api.get(`/subs/prices?subId=${id}`);
             setPrices(res.data);
             setDeletedItemIds(new Set()); // Reset deletes on reload? Or keep? Reset seems safer.
+            setSelectedItemIds(new Set());
         } catch (err) { console.error(err); }
     };
 
@@ -127,10 +130,75 @@ const SubPaymentPage = () => {
             const newQuantities = { ...quantities };
             delete newQuantities[id];
             setQuantities(newQuantities);
+            
+            const newSelected = new Set(selectedItemIds);
+            if (newSelected.has(id)) {
+                newSelected.delete(id);
+                setSelectedItemIds(newSelected);
+            }
         } catch (err) {
             console.error(err);
             alert('Silme işlemi başarısız oldu.');
         }
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedItemIds.size === 0) return alert('Lütfen silinecek kalemleri seçin.');
+        if (!window.confirm(`Seçili ${selectedItemIds.size} kalemi KALICI olarak silmek istediğinize emin misiniz?`)) return;
+
+        try {
+            await Promise.all(Array.from(selectedItemIds).map(itemId => api.delete(`/subs/prices/${itemId}`)));
+            
+            setPrices(prev => prev.filter(p => !selectedItemIds.has(p.id)));
+            
+            const newQuantities = { ...quantities };
+            const newCustomNames = { ...customNames };
+            const newCustomPrices = { ...customPrices };
+            selectedItemIds.forEach(itemId => {
+                delete newQuantities[itemId];
+                delete newCustomNames[itemId];
+                delete newCustomPrices[itemId];
+            });
+            setQuantities(newQuantities);
+            setCustomNames(newCustomNames);
+            setCustomPrices(newCustomPrices);
+            setSelectedItemIds(new Set());
+            alert('Seçili kalemler başarıyla silindi.');
+        } catch (err) {
+            console.error(err);
+            alert('Silme işlemi sırasında bir hata oluştu, bazı kalemler silinememiş olabilir.');
+            loadPrices();
+        }
+    };
+
+    const visiblePrices = prices.filter(p => {
+        if (deletedItemIds.has(p.id)) return false;
+        if (searchTerm) {
+            const itemName = customNames[p.id] !== undefined ? customNames[p.id] : p.work_item;
+            if (!itemName.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+        }
+        return true;
+    });
+
+    const isAllSelected = visiblePrices.length > 0 && visiblePrices.every(p => selectedItemIds.has(p.id));
+
+    const toggleSelectAll = () => {
+        if (isAllSelected) {
+            const newSelected = new Set(selectedItemIds);
+            visiblePrices.forEach(p => newSelected.delete(p.id));
+            setSelectedItemIds(newSelected);
+        } else {
+            const newSelected = new Set(selectedItemIds);
+            visiblePrices.forEach(p => newSelected.add(p.id));
+            setSelectedItemIds(newSelected);
+        }
+    };
+
+    const toggleSelect = (id) => {
+        const newSelected = new Set(selectedItemIds);
+        if (newSelected.has(id)) newSelected.delete(id);
+        else newSelected.add(id);
+        setSelectedItemIds(newSelected);
     };
 
     return (
@@ -181,16 +249,38 @@ const SubPaymentPage = () => {
                         <Upload size={18} /> Fiyat/Kalem Data Ekle (Excel)
                     </button>
 
+                    {selectedItemIds.size > 0 && (
+                        <button className="glass-btn" style={{ display: 'flex', gap: '5px', alignItems: 'center', background: 'rgba(244, 67, 54, 0.1)', color: '#f44336', borderColor: 'rgba(244, 67, 54, 0.3)' }} onClick={handleBulkDelete}>
+                            <Trash2 size={18} /> Seçili ({selectedItemIds.size}) Sil
+                        </button>
+                    )}
+
                     <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span>Tarih:</span>
                         <input type="date" className="glass-input" value={header.date} onChange={e => setHeader({ ...header, date: e.target.value })} />
                     </div>
                 </div>
 
+                {/* Search Row */}
+                <div style={{ marginBottom: '20px', position: 'relative' }}>
+                    <Search size={20} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                    <input
+                        type="text"
+                        className="glass-input"
+                        placeholder="Kalemlerde Ara..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ width: '100%', paddingLeft: '45px' }}
+                    />
+                </div>
+
                 {/* Table */}
                 <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr style={{ background: 'rgba(255,255,255,0.1)', textAlign: 'left' }}>
+                            <th style={{ padding: '12px', width: '40px', textAlign: 'center' }}>
+                                <input type="checkbox" checked={isAllSelected} onChange={toggleSelectAll} style={{ cursor: 'pointer', width: '16px', height: '16px' }} />
+                            </th>
                             <th style={{ padding: '12px' }}>Kalem (Düzenlenebilir)</th>
                             <th style={{ padding: '12px' }}>Birim Fiyat</th>
                             <th style={{ padding: '12px' }}>Metraj</th>
@@ -199,12 +289,15 @@ const SubPaymentPage = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {prices.filter(p => !deletedItemIds.has(p.id)).map(p => {
+                        {visiblePrices.map(p => {
                             const qty = parseFloat(quantities[p.id]) || 0;
                             const unitPrice = customPrices[p.id] !== undefined ? parseFloat(customPrices[p.id]) : parseFloat(p.unit_price);
                             const total = qty * unitPrice;
                             return (
-                                <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: qty > 0 ? 'rgba(76, 175, 80, 0.1)' : 'transparent' }}>
+                                <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: qty > 0 ? 'rgba(76, 175, 80, 0.1)' : (selectedItemIds.has(p.id) ? 'rgba(244, 67, 54, 0.05)' : 'transparent') }}>
+                                    <td style={{ padding: '8px', textAlign: 'center' }}>
+                                        <input type="checkbox" checked={selectedItemIds.has(p.id)} onChange={() => toggleSelect(p.id)} style={{ cursor: 'pointer', width: '16px', height: '16px' }} />
+                                    </td>
                                     <td style={{ padding: '8px' }} data-label="Kalem">
                                         <input
                                             className="glass-input"
