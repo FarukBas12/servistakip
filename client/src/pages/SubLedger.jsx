@@ -48,11 +48,21 @@ const SubLedger = () => {
     const fetchData = async (periodVal = selectedPeriod) => {
         try {
             const res = await api.get(`/subs/${id}/ledger?period=${periodVal}`);
-            setTransactions(res.data.transactions || []);
-            setStartingBalance(parseFloat(res.data.startingBalance) || 0);
-            setAvailablePeriods(res.data.availablePeriods || []);
+            if (Array.isArray(res.data)) {
+                // Backward compatibility: If the API returns an array (old format)
+                setTransactions(res.data);
+                setStartingBalance(0);
+                setAvailablePeriods([]);
+            } else if (res.data && typeof res.data === 'object') {
+                // New API format
+                setTransactions(res.data.transactions || []);
+                setStartingBalance(parseFloat(res.data.startingBalance) || 0);
+                setAvailablePeriods(res.data.availablePeriods || []);
+            }
             setSelectedIds(new Set());
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error(e); 
+        }
     };
 
     const handleExport = async () => {
