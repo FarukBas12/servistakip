@@ -68,16 +68,65 @@ const SubLedger = () => {
     const handleExport = async () => {
         try {
             const XLSX = await import('xlsx');
-            const ws = XLSX.utils.json_to_sheet(transactions.map(t => ({
-                Tarih: new Date(t.date).toLocaleDateString('tr-TR'),
-                Mağaza: t.store_name || '-',
-                Açıklama: t.description,
-                Tür: t.type === 'hakedis' ? 'Hakediş (Alacak)' : 'Ödeme (Borç)',
-                Tutar: parseFloat(t.amount)
-            })));
+            
+            const exportRows = [];
+            
+            // 1. Add starting balance row if present
+            if (selectedPeriod !== 'all' && startingBalance !== 0) {
+                exportRows.push({
+                    Tarih: '-',
+                    Mağaza: '-',
+                    Açıklama: 'Önceki Dönemden Devreden Bakiye (Devir Bakiyesi)',
+                    'Borç (Ödeme)': startingBalance < 0 ? Math.abs(startingBalance) : 0,
+                    'Alacak (Hakediş)': startingBalance >= 0 ? startingBalance : 0,
+                    Bakiye: startingBalance
+                });
+            }
+            
+            // 2. Add all transactions, calculating cumulative balance
+            let runningBalance = startingBalance;
+            const sortedExportTrans = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            sortedExportTrans.forEach(t => {
+                const amt = parseFloat(t.amount) || 0;
+                const isHakedis = t.type === 'hakedis';
+                runningBalance += isHakedis ? amt : -amt;
+                
+                exportRows.push({
+                    Tarih: new Date(t.date).toLocaleDateString('tr-TR'),
+                    Mağaza: t.store_name || '-',
+                    Açıklama: t.description + (isHakedis ? ' (Hakediş)' : ' (Ödeme)'),
+                    'Borç (Ödeme)': !isHakedis ? amt : 0,
+                    'Alacak (Hakediş)': isHakedis ? amt : 0,
+                    Bakiye: runningBalance
+                });
+            });
+            
+            // 3. Add final balance row
+            exportRows.push({
+                Tarih: '-',
+                Mağaza: '-',
+                Açıklama: 'DÖNEM HESAP BAKİYESİ (GENEL TOPLAM)',
+                'Borç (Ödeme)': '',
+                'Alacak (Hakediş)': '',
+                Bakiye: runningBalance
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportRows);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Ekstre");
-            XLSX.writeFile(wb, `${sub?.name || 'Cari'}_Ekstre.xlsx`);
+            
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 12 }, // Tarih
+                { wch: 18 }, // Mağaza
+                { wch: 45 }, // Açıklama
+                { wch: 15 }, // Borç
+                { wch: 15 }, // Alacak
+                { wch: 15 }  // Bakiye
+            ];
+            
+            XLSX.writeFile(wb, `${sub?.name || 'Cari'}_${selectedPeriod === 'active' ? 'Aktif_Donem' : selectedPeriod === 'all' ? 'Tum_Zamanlar' : 'Donem_Arsiv'}_Ekstre.xlsx`);
         } catch (err) {
             console.error('Export Error:', err);
             alert('Excel oluşturulurken hata oluştu.');
@@ -271,6 +320,29 @@ const SubLedger = () => {
 
     const activeTransactions = transactions.filter(t => !t.closing_id);
 
+    // Calculate rollover summary for the period closing modal
+    const closingThreshold = closingDate ? new Date(closingDate) : new Date();
+    closingThreshold.setHours(23, 59, 59, 999);
+    
+    const targetTrans = transactions.filter(t => {
+        if (t.closing_id) return false;
+        return new Date(t.date) <= closingThreshold;
+    });
+    
+    const paymentsCount = targetTrans.filter(t => t.type === 'hakedis').length;
+    const cashCount = targetTrans.filter(t => t.type === 'odeme').length;
+    const totalPaymentsSum = targetTrans.filter(t => t.type === 'hakedis').reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+    const totalCashSum = targetTrans.filter(t => t.type === 'odeme').reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+    const calculatedCarriedBalance = startingBalance + totalPaymentsSum - totalCashSum;
+
+    // Check if there are active transactions older than the current month
+    const todayDate = new Date();
+    const hasOldActiveTransactions = selectedPeriod === 'active' && transactions.some(t => {
+        if (t.closing_id) return false;
+        const tDate = new Date(t.date);
+        return tDate.getMonth() !== todayDate.getMonth() || tDate.getFullYear() !== todayDate.getFullYear();
+    });
+
     return (
         <div className="dashboard">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
@@ -343,6 +415,44 @@ const SubLedger = () => {
                     </div>
                 )}
             </div>
+
+            {/* Archived period lock banner */}
+            {selectedPeriod !== 'active' && selectedPeriod !== 'all' && (
+                <div className="glass-panel" style={{ padding: '12px 20px', marginBottom: '20px', borderLeft: '4px solid #ff9800', background: 'rgba(255, 152, 0, 0.05)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ color: '#ff9800', display: 'flex', alignItems: 'center' }}><Lock size={18} /></span>
+                    <div style={{ fontSize: '0.9rem' }}>
+                        <strong>Bu Dönem Arşivlenmiştir:</strong> {availablePeriods.find(p => String(p.id) === String(selectedPeriod))?.period} dönemi, {new Date(availablePeriods.find(p => String(p.id) === String(selectedPeriod))?.closing_date).toLocaleDateString('tr-TR')} tarihinde kapatılmıştır. Dönem içerisindeki kayıtlar kilitlidir, düzenlenemez veya silinemez.
+                    </div>
+                </div>
+            )}
+
+            {/* Unarchived old transactions alert banner */}
+            {hasOldActiveTransactions && (
+                <div className="glass-panel" style={{ padding: '12px 20px', marginBottom: '20px', borderLeft: '4px solid #ff9800', background: 'rgba(255, 152, 0, 0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ color: '#ff9800', fontSize: '1.2rem' }}>⚠️</span>
+                        <span style={{ fontSize: '0.9rem' }}>
+                            <strong>Devir Hatırlatması:</strong> Geçmiş aylara ait kapatılmamış hareketleriniz bulunmaktadır. Hesap mutabakatını sabitlemek için dönemi kapatıp bakiyeyi devretmeniz önerilir.
+                        </span>
+                    </div>
+                    <button 
+                        onClick={() => {
+                            const today = new Date();
+                            const prevMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                            const year = prevMonthDate.getFullYear();
+                            const month = String(prevMonthDate.getMonth() + 1).padStart(2, '0');
+                            setClosingPeriod(`${year}-${month}`);
+                            const lastDay = new Date(year, prevMonthDate.getMonth() + 1, 0).getDate();
+                            setClosingDate(`${year}-${month}-${lastDay}`);
+                            setShowClosingModal(true);
+                        }} 
+                        className="glass-btn" 
+                        style={{ fontSize: '0.8rem', padding: '5px 12px', background: '#ff9800', color: '#fff' }}
+                    >
+                        Şimdi Devir Yap
+                    </button>
+                </div>
+            )}
 
             <div className="glass-panel" style={{ padding: '20px' }}>
                 <div style={{ marginBottom: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>
@@ -697,7 +807,28 @@ const SubLedger = () => {
                                 />
                             </div>
                             
-                            <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+                            {/* Realtime Rollover Summary Box */}
+                            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', padding: '12px', borderRadius: '6px', fontSize: '0.85rem', marginTop: '5px' }}>
+                                <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px' }}>Dönem Devir Özeti</p>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                    <span style={{ opacity: 0.7 }}>Mevcut Devir Bakiyesi:</span>
+                                    <span>{startingBalance.toLocaleString('tr-TR')} ₺</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                    <span style={{ opacity: 0.7 }}>Kapatılacak Hakediş ({paymentsCount} Adet):</span>
+                                    <span style={{ color: '#4caf50' }}>+{totalPaymentsSum.toLocaleString('tr-TR')} ₺</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                    <span style={{ opacity: 0.7 }}>Kapatılacak Ödeme ({cashCount} Adet):</span>
+                                    <span style={{ color: '#f44336' }}>-{totalCashSum.toLocaleString('tr-TR')} ₺</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: '6px', fontWeight: 'bold', marginTop: '6px' }}>
+                                    <span>Yeni Devir Bakiyesi:</span>
+                                    <span style={{ color: calculatedCarriedBalance >= 0 ? '#ff9800' : '#4caf50' }}>{calculatedCarriedBalance.toLocaleString('tr-TR')} ₺</span>
+                                </div>
+                            </div>
+                            
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                                 <button 
                                     onClick={() => setShowClosingModal(false)} 
                                     className="glass-btn" 
