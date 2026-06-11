@@ -140,6 +140,19 @@ async function runMigrations() {
             );
         `);
 
+        // Subcontractor Closings
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS subcontractor_closings (
+                id SERIAL PRIMARY KEY,
+                subcontractor_id INTEGER REFERENCES subcontractors(id) ON DELETE CASCADE,
+                period VARCHAR(7) NOT NULL,
+                closing_date DATE NOT NULL,
+                carried_balance NUMERIC(12, 2) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(subcontractor_id, period)
+            );
+        `);
+
         // Payments (Hakediş Header)
         await pool.query(`
             CREATE TABLE IF NOT EXISTS payments (
@@ -153,9 +166,11 @@ async function runMigrations() {
                 total_amount NUMERIC(12, 2) DEFAULT 0,
                 status VARCHAR(20) DEFAULT 'pending',
                 kdv_rate INTEGER DEFAULT 0,
+                closing_id INTEGER REFERENCES subcontractor_closings(id) ON DELETE SET NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
+        await pool.query('ALTER TABLE payments ADD COLUMN IF NOT EXISTS closing_id INTEGER REFERENCES subcontractor_closings(id) ON DELETE SET NULL');
 
         // Payment Items
         await pool.query(`
@@ -178,9 +193,11 @@ async function runMigrations() {
                 amount NUMERIC(12, 2) NOT NULL,
                 transaction_date DATE DEFAULT CURRENT_DATE,
                 description VARCHAR(255),
+                closing_id INTEGER REFERENCES subcontractor_closings(id) ON DELETE SET NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
+        await pool.query('ALTER TABLE cash_transactions ADD COLUMN IF NOT EXISTS closing_id INTEGER REFERENCES subcontractor_closings(id) ON DELETE SET NULL');
 
         // Stocks
         await pool.query(`
@@ -255,6 +272,46 @@ async function runMigrations() {
         // Ensure tasks table has source and is_retry for the new dashboard
         await pool.query('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS source VARCHAR(20) DEFAULT \'manual\'');
         await pool.query('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS is_retry BOOLEAN DEFAULT FALSE');
+
+        // Vehicles table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS vehicles (
+                id SERIAL PRIMARY KEY,
+                plate_number VARCHAR(20) UNIQUE NOT NULL,
+                brand VARCHAR(50) NOT NULL,
+                model VARCHAR(50) NOT NULL,
+                year INTEGER,
+                current_km NUMERIC(12, 2) DEFAULT 0,
+                status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'in_maintenance', 'out_of_service')),
+                fuel_type VARCHAR(20) DEFAULT 'diesel',
+                fuel_average NUMERIC(5, 2) DEFAULT 0,
+                last_inspection_date DATE,
+                next_inspection_date DATE,
+                last_maintenance_date DATE,
+                next_maintenance_date DATE,
+                assigned_to INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                photo_url TEXT,
+                model_3d_url TEXT,
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        // Vehicle Maintenances table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS vehicle_maintenances (
+                id SERIAL PRIMARY KEY,
+                vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE,
+                maintenance_type VARCHAR(50) DEFAULT 'Bakım & Servis',
+                maintenance_date DATE NOT NULL,
+                km_at_maintenance NUMERIC(12, 2),
+                cost NUMERIC(12, 2) NOT NULL,
+                description TEXT,
+                performed_by VARCHAR(150),
+                receipt_url TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
 
         console.log('✅ Database Schema Verified & Updated!');
     } catch (e) {

@@ -20,6 +20,8 @@ router.post('/', controller.createSub);
 router.put('/:id', upload.single('photo'), controller.updateSub);
 router.post('/:id/delete', controller.deleteSub); // POST to send body with password
 router.get('/:id/ledger', controller.getLedger);
+router.post('/:id/closing', controller.createClosing);
+router.post('/:id/closing/reopen', controller.reopenClosing);
 
 // Settings
 router.get('/settings/all', controller.getSettings);

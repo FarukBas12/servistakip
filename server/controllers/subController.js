@@ -297,25 +297,205 @@ exports.getPaymentDetails = async (req, res) => {
 exports.getLedger = async (req, res) => {
     try {
         const { id } = req.params;
-        // Fetch Payments (Credit)
-        const paymentsRes = await db.query(`
-            SELECT id, title as description, store_name, total_amount as amount, payment_date as date, 'hakedis' as type 
-            FROM payments WHERE subcontractor_id = $1 AND status != 'cancelled'
+        const { period = 'active' } = req.query;
+
+        // Fetch all closings for this subcontractor to populate the dropdown
+        const closingsRes = await db.query(`
+            SELECT id, period, closing_date, carried_balance 
+            FROM subcontractor_closings 
+            WHERE subcontractor_id = $1 
+            ORDER BY closing_date DESC
         `, [id]);
+        const availablePeriods = closingsRes.rows;
 
-        // Fetch Cash Transactions (Debit)
-        const cashRes = await db.query(`
-            SELECT id, description, amount, transaction_date as date, 'odeme' as type 
-            FROM cash_transactions WHERE subcontractor_id = $1
-        `, [id]);
+        let transactions = [];
+        let startingBalance = 0;
 
-        // Combine and Sort
-        const all = [...paymentsRes.rows, ...cashRes.rows].sort((a, b) => new Date(b.date) - new Date(a.date));
+        if (period === 'all') {
+            // Fetch All (Unarchived + Archived)
+            const paymentsRes = await db.query(`
+                SELECT id, title as description, store_name, total_amount as amount, payment_date as date, 'hakedis' as type, closing_id 
+                FROM payments WHERE subcontractor_id = $1 AND status != 'cancelled'
+            `, [id]);
 
-        res.json(all);
+            const cashRes = await db.query(`
+                SELECT id, description, amount, transaction_date as date, 'odeme' as type, closing_id 
+                FROM cash_transactions WHERE subcontractor_id = $1
+            `, [id]);
+
+            transactions = [...paymentsRes.rows, ...cashRes.rows].sort((a, b) => new Date(b.date) - new Date(a.date));
+            startingBalance = 0;
+        } else if (period === 'active') {
+            // Fetch Active (closing_id IS NULL)
+            const paymentsRes = await db.query(`
+                SELECT id, title as description, store_name, total_amount as amount, payment_date as date, 'hakedis' as type, closing_id 
+                FROM payments WHERE subcontractor_id = $1 AND status != 'cancelled' AND closing_id IS NULL
+            `, [id]);
+
+            const cashRes = await db.query(`
+                SELECT id, description, amount, transaction_date as date, 'odeme' as type, closing_id 
+                FROM cash_transactions WHERE subcontractor_id = $1 AND closing_id IS NULL
+            `, [id]);
+
+            transactions = [...paymentsRes.rows, ...cashRes.rows].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Starting balance is the carried_balance of the latest closing
+            if (availablePeriods.length > 0) {
+                startingBalance = parseFloat(availablePeriods[0].carried_balance) || 0;
+            } else {
+                startingBalance = 0;
+            }
+        } else {
+            // Fetch for a specific closing ID
+            const closingId = parseInt(period);
+            const currentClosing = availablePeriods.find(p => p.id === closingId);
+
+            if (currentClosing) {
+                const paymentsRes = await db.query(`
+                    SELECT id, title as description, store_name, total_amount as amount, payment_date as date, 'hakedis' as type, closing_id 
+                    FROM payments WHERE subcontractor_id = $1 AND status != 'cancelled' AND closing_id = $2
+                `, [id, closingId]);
+
+                const cashRes = await db.query(`
+                    SELECT id, description, amount, transaction_date as date, 'odeme' as type, closing_id 
+                    FROM cash_transactions WHERE subcontractor_id = $1 AND closing_id = $2
+                `, [id, closingId]);
+
+                transactions = [...paymentsRes.rows, ...cashRes.rows].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // Find the previous closing to get starting balance
+                const currentIdx = availablePeriods.findIndex(p => p.id === closingId);
+                if (currentIdx !== -1 && currentIdx + 1 < availablePeriods.length) {
+                    startingBalance = parseFloat(availablePeriods[currentIdx + 1].carried_balance) || 0;
+                } else {
+                    startingBalance = 0;
+                }
+            } else {
+                transactions = [];
+                startingBalance = 0;
+            }
+        }
+
+        res.json({
+            transactions,
+            startingBalance,
+            availablePeriods,
+            currentPeriod: period
+        });
     } catch (err) {
         console.error('getLedger error:', err);
         res.status(500).json({ message: 'Ekstre verileri alınamadı.', error: err.message });
+    }
+};
+
+exports.createClosing = async (req, res) => {
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+        const { id } = req.params; // Subcontractor ID
+        const { period, closing_date } = req.body;
+
+        if (!period || !closing_date) {
+            return res.status(400).json({ message: 'Dönem ve kapanış tarihi zorunludur.' });
+        }
+
+        // 1. Get the latest closing balance (if any)
+        const latestClosingRes = await client.query(`
+            SELECT carried_balance FROM subcontractor_closings 
+            WHERE subcontractor_id = $1 
+            ORDER BY closing_date DESC LIMIT 1
+        `, [id]);
+        const startBalance = latestClosingRes.rows.length > 0 
+            ? parseFloat(latestClosingRes.rows[0].carried_balance) 
+            : 0;
+
+        // 2. Fetch active payments up to closing_date
+        const paymentsRes = await client.query(`
+            SELECT id, total_amount FROM payments 
+            WHERE subcontractor_id = $1 AND status != 'cancelled' AND closing_id IS NULL AND payment_date <= $2
+        `, [id, closing_date]);
+
+        // 3. Fetch active cash transactions up to closing_date
+        const cashRes = await client.query(`
+            SELECT id, amount FROM cash_transactions 
+            WHERE subcontractor_id = $1 AND closing_id IS NULL AND transaction_date <= $2
+        `, [id, closing_date]);
+
+        const totalPayments = paymentsRes.rows.reduce((sum, p) => sum + parseFloat(p.total_amount), 0);
+        const totalCash = cashRes.rows.reduce((sum, c) => sum + parseFloat(c.amount), 0);
+
+        const newCarriedBalance = startBalance + totalPayments - totalCash;
+
+        // 4. Create the closing record
+        const closingRes = await client.query(`
+            INSERT INTO subcontractor_closings (subcontractor_id, period, closing_date, carried_balance)
+            VALUES ($1, $2, $3, $4)
+            RETURNING id
+        `, [id, period, closing_date, newCarriedBalance]);
+        const closingId = closingRes.rows[0].id;
+
+        // 5. Update payments and cash transactions
+        const paymentIds = paymentsRes.rows.map(p => p.id);
+        if (paymentIds.length > 0) {
+            await client.query(`
+                UPDATE payments SET closing_id = $1 
+                WHERE id = ANY($2::int[])
+            `, [closingId, paymentIds]);
+        }
+
+        const cashIds = cashRes.rows.map(c => c.id);
+        if (cashIds.length > 0) {
+            await client.query(`
+                UPDATE cash_transactions SET closing_id = $1 
+                WHERE id = ANY($2::int[])
+            `, [closingId, cashIds]);
+        }
+
+        await client.query('COMMIT');
+        res.json({ message: 'Dönem başarıyla kapatıldı.', closingId, carried_balance: newCarriedBalance });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('createClosing error:', err);
+        res.status(500).json({ message: 'Dönem kapatılırken bir hata oluştu.', error: err.message });
+    } finally {
+        client.release();
+    }
+};
+
+exports.reopenClosing = async (req, res) => {
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+        const { id } = req.params; // Subcontractor ID
+
+        // Find the latest closing for this subcontractor
+        const latestClosingRes = await client.query(`
+            SELECT id, period FROM subcontractor_closings 
+            WHERE subcontractor_id = $1 
+            ORDER BY closing_date DESC LIMIT 1
+        `, [id]);
+
+        if (latestClosingRes.rows.length === 0) {
+            return res.status(400).json({ message: 'Açık/kapatılmış herhangi bir dönem bulunamadı.' });
+        }
+
+        const closingId = latestClosingRes.rows[0].id;
+
+        // Set closing_id = NULL on all payments and cash transactions for this closing
+        await client.query(`UPDATE payments SET closing_id = NULL WHERE closing_id = $1`, [closingId]);
+        await client.query(`UPDATE cash_transactions SET closing_id = NULL WHERE closing_id = $1`, [closingId]);
+
+        // Delete the closing record
+        await client.query(`DELETE FROM subcontractor_closings WHERE id = $1`, [closingId]);
+
+        await client.query('COMMIT');
+        res.json({ message: `Dönem (${latestClosingRes.rows[0].period}) başarıyla yeniden açıldı.` });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('reopenClosing error:', err);
+        res.status(500).json({ message: 'Dönem yeniden açılırken bir hata oluştu.', error: err.message });
+    } finally {
+        client.release();
     }
 };
 
@@ -323,8 +503,16 @@ exports.deleteTransaction = async (req, res) => {
     try {
         const { type, id } = req.params;
         if (type === 'hakedis') {
+            const check = await db.query('SELECT closing_id FROM payments WHERE id = $1', [id]);
+            if (check.rows[0]?.closing_id) {
+                return res.status(400).json({ message: 'Arşivlenmiş/kapatılmış dönem işlemlerini silemezsiniz.' });
+            }
             await db.query('DELETE FROM payments WHERE id = $1', [id]);
         } else if (type === 'odeme') {
+            const check = await db.query('SELECT closing_id FROM cash_transactions WHERE id = $1', [id]);
+            if (check.rows[0]?.closing_id) {
+                return res.status(400).json({ message: 'Arşivlenmiş/kapatılmış dönem işlemlerini silemezsiniz.' });
+            }
             await db.query('DELETE FROM cash_transactions WHERE id = $1', [id]);
         }
         res.json({ message: 'Deleted' });
@@ -338,6 +526,11 @@ exports.updateCashTransaction = async (req, res) => {
     try {
         const { id } = req.params;
         let { amount, description, transaction_date } = req.body;
+
+        const check = await db.query('SELECT closing_id FROM cash_transactions WHERE id = $1', [id]);
+        if (check.rows[0]?.closing_id) {
+            return res.status(400).json({ message: 'Arşivlenmiş/kapatılmış dönem işlemlerini güncelleyemezsiniz.' });
+        }
 
         // Validation
         if (!amount || isNaN(parseFloat(amount))) amount = 0;
@@ -361,6 +554,12 @@ exports.updatePayment = async (req, res) => {
         await client.query('BEGIN');
         const { id } = req.params;
         let { title, store_name, waybill_info, payment_date, items, kdv_rate } = req.body;
+
+        const check = await client.query('SELECT closing_id FROM payments WHERE id = $1', [id]);
+        if (check.rows[0]?.closing_id) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ message: 'Arşivlenmiş/kapatılmış dönem işlemlerini güncelleyemezsiniz.' });
+        }
 
         if (typeof items === 'string') items = JSON.parse(items);
 

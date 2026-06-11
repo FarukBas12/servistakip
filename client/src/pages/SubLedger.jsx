@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { ArrowLeft, Download, Trash2, CheckSquare, Square, Eye, X, Edit2, Plus, Trash } from 'lucide-react';
+import { ArrowLeft, Download, Trash2, CheckSquare, Square, Eye, X, Edit2, Plus, Trash, Lock } from 'lucide-react';
 
 const SubLedger = () => {
     const { id } = useParams();
@@ -24,8 +24,16 @@ const SubLedger = () => {
     const [showEditPaymentModal, setShowEditPaymentModal] = useState(false);
     const [editPaymentData, setEditPaymentData] = useState(null);
 
+    // Period & Closing States
+    const [selectedPeriod, setSelectedPeriod] = useState('active');
+    const [startingBalance, setStartingBalance] = useState(0);
+    const [availablePeriods, setAvailablePeriods] = useState([]);
+    const [showClosingModal, setShowClosingModal] = useState(false);
+    const [closingPeriod, setClosingPeriod] = useState('');
+    const [closingDate, setClosingDate] = useState('');
+
     useEffect(() => {
-        fetchData();
+        fetchData('active');
         fetchSubInfo();
     }, []);
 
@@ -37,10 +45,12 @@ const SubLedger = () => {
         } catch (e) { console.error(e); }
     }
 
-    const fetchData = async () => {
+    const fetchData = async (periodVal = selectedPeriod) => {
         try {
-            const res = await api.get(`/subs/${id}/ledger`);
-            setTransactions(res.data);
+            const res = await api.get(`/subs/${id}/ledger?period=${periodVal}`);
+            setTransactions(res.data.transactions || []);
+            setStartingBalance(parseFloat(res.data.startingBalance) || 0);
+            setAvailablePeriods(res.data.availablePeriods || []);
             setSelectedIds(new Set());
         } catch (e) { console.error(e); }
     };
@@ -65,6 +75,14 @@ const SubLedger = () => {
     };
 
     const toggleSelect = (uniqId) => {
+        const [type, idStr] = uniqId.split('-');
+        const transId = parseInt(idStr);
+        const trans = transactions.find(t => t.id === transId && t.type === type);
+        if (trans?.closing_id) {
+            alert('Arşivlenmiş/kapatılmış dönem işlemlerini seçemezsiniz.');
+            return;
+        }
+
         const newSet = new Set(selectedIds);
         if (newSet.has(uniqId)) newSet.delete(uniqId);
         else newSet.add(uniqId);
@@ -72,10 +90,11 @@ const SubLedger = () => {
     };
 
     const toggleSelectAll = () => {
-        if (selectedIds.size === transactions.length) {
+        const activeTrans = transactions.filter(t => !t.closing_id);
+        if (selectedIds.size === activeTrans.length) {
             setSelectedIds(new Set());
         } else {
-            setSelectedIds(new Set(transactions.map(t => `${t.type}-${t.id}`)));
+            setSelectedIds(new Set(activeTrans.map(t => `${t.type}-${t.id}`)));
         }
     };
 
@@ -88,7 +107,44 @@ const SubLedger = () => {
                 await api.delete(`/subs/transaction/${type}/${id}`);
             } catch (err) { console.error(err); }
         }
-        fetchData();
+        fetchData(selectedPeriod);
+    };
+
+    const handlePeriodChange = (e) => {
+        const val = e.target.value;
+        setSelectedPeriod(val);
+        fetchData(val);
+    };
+
+    const handleExecuteClosing = async () => {
+        try {
+            await api.post(`/subs/${id}/closing`, {
+                period: closingPeriod,
+                closing_date: closingDate
+            });
+            setShowClosingModal(false);
+            alert('Dönem başarıyla kapatıldı ve bakiye sonraki döneme devredildi.');
+            setSelectedPeriod('active');
+            fetchData('active');
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.message || 'Dönem kapatılırken bir hata oluştu.');
+        }
+    };
+
+    const handleReopenClosing = async () => {
+        const lastPeriod = availablePeriods[0]?.period || '';
+        if (!window.confirm(`Son kapatılan dönemi (${lastPeriod}) yeniden açmak ve arşiv hareketlerini kilitten çıkarmak istediğinize emin misiniz?`)) return;
+
+        try {
+            const res = await api.post(`/subs/${id}/closing/reopen`);
+            alert(res.data.message || 'Dönem yeniden açıldı.');
+            setSelectedPeriod('active');
+            fetchData('active');
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.message || 'Dönem açılırken bir hata oluştu.');
+        }
     };
 
     const handleShowDetail = async (trans) => {
@@ -199,9 +255,11 @@ const SubLedger = () => {
         printWindow.document.close();
     };
 
-    const totalBalance = transactions.reduce((acc, t) => {
+    const totalBalance = startingBalance + transactions.reduce((acc, t) => {
         return acc + (t.type === 'hakedis' ? parseFloat(t.amount) : -parseFloat(t.amount));
     }, 0);
+
+    const activeTransactions = transactions.filter(t => !t.closing_id);
 
     return (
         <div className="dashboard">
@@ -225,9 +283,63 @@ const SubLedger = () => {
                 </div>
             </div>
 
+            {/* Period selector & closing actions bar */}
+            <div className="glass-panel" style={{ padding: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <label style={{ fontWeight: '500', fontSize: '0.9rem', opacity: 0.8 }}>Dönem Seçimi:</label>
+                    <select 
+                        value={selectedPeriod} 
+                        onChange={handlePeriodChange} 
+                        className="glass-input" 
+                        style={{ width: '220px', padding: '5px 10px', height: '38px' }}
+                    >
+                        <option value="active">Aktif Dönem (Güncel)</option>
+                        <option value="all">Tüm Zamanlar (Geçmiş + Aktif)</option>
+                        {availablePeriods.map(p => (
+                            <option key={p.id} value={p.id}>
+                                {p.period} (Arşiv - {new Date(p.closing_date).toLocaleDateString('tr-TR')})
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                
+                {selectedPeriod === 'active' && (
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        {availablePeriods.length > 0 && (
+                            <button 
+                                onClick={handleReopenClosing} 
+                                className="glass-btn" 
+                                style={{ background: 'rgba(244, 67, 54, 0.15)', border: '1px solid rgba(244, 67, 54, 0.4)', color: '#f44336' }}
+                            >
+                                Son Dönemi Yeniden Aç
+                            </button>
+                        )}
+                        <button 
+                            onClick={() => {
+                                const today = new Date();
+                                const prevMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                                const year = prevMonthDate.getFullYear();
+                                const month = String(prevMonthDate.getMonth() + 1).padStart(2, '0');
+                                setClosingPeriod(`${year}-${month}`);
+                                const lastDay = new Date(year, prevMonthDate.getMonth() + 1, 0).getDate();
+                                setClosingDate(`${year}-${month}-${lastDay}`);
+                                setShowClosingModal(true);
+                            }} 
+                            className="glass-btn" 
+                            style={{ background: '#ff9800', color: '#fff' }}
+                        >
+                            Dönem Kapat (Devir Yap)
+                        </button>
+                    </div>
+                )}
+            </div>
+
             <div className="glass-panel" style={{ padding: '20px' }}>
                 <div style={{ marginBottom: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                    Toplam Bakiye: <span style={{ color: totalBalance >= 0 ? '#ff9800' : '#4caf50' }}>{totalBalance.toLocaleString('tr-TR')} ₺</span>
+                    {selectedPeriod === 'active' && 'Aktif Dönem '}
+                    {selectedPeriod === 'all' && 'Tüm Zamanlar '}
+                    {selectedPeriod !== 'active' && selectedPeriod !== 'all' && `${availablePeriods.find(p => String(p.id) === String(selectedPeriod))?.period} Dönemi `}
+                    Bakiye: <span style={{ color: totalBalance >= 0 ? '#ff9800' : '#4caf50' }}>{totalBalance.toLocaleString('tr-TR')} ₺</span>
                 </div>
 
                 <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -235,7 +347,7 @@ const SubLedger = () => {
                         <tr style={{ textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
                             <th style={{ padding: '10px', width: '40px' }}>
                                 <div onClick={toggleSelectAll} style={{ cursor: 'pointer' }}>
-                                    {selectedIds.size === transactions.length && transactions.length > 0
+                                    {selectedIds.size === activeTransactions.length && activeTransactions.length > 0
                                         ? <CheckSquare size={20} color="#4caf50" />
                                         : <Square size={20} style={{ opacity: 0.5 }} />}
                                 </div>
@@ -249,15 +361,35 @@ const SubLedger = () => {
                         </tr>
                     </thead>
                     <tbody>
+                        {/* Carried Over Balance Row */}
+                        {selectedPeriod !== 'all' && startingBalance !== 0 && (
+                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255, 255, 255, 0.05)' }}>
+                                <td style={{ padding: '10px' }}></td>
+                                <td style={{ padding: '10px' }}>-</td>
+                                <td style={{ padding: '10px' }}>-</td>
+                                <td style={{ padding: '10px', fontWeight: 'bold', color: '#ff9800' }}>Önceki Dönemden Devreden Bakiye (Devir Bakiyesi)</td>
+                                <td style={{ padding: '10px', color: '#f44336' }}>
+                                    {startingBalance < 0 ? Math.abs(startingBalance).toLocaleString('tr-TR') + ' ₺' : '-'}
+                                </td>
+                                <td style={{ padding: '10px', color: '#4caf50' }}>
+                                    {startingBalance >= 0 ? startingBalance.toLocaleString('tr-TR') + ' ₺' : '-'}
+                                </td>
+                                <td style={{ padding: '10px' }}></td>
+                            </tr>
+                        )}
                         {transactions.map(t => {
                             const uniqId = `${t.type}-${t.id}`;
                             const isSelected = selectedIds.has(uniqId);
                             return (
                                 <tr key={uniqId} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: isSelected ? 'rgba(76, 175, 80, 0.1)' : 'transparent' }}>
                                     <td style={{ padding: '10px' }} data-label="Seç">
-                                        <div onClick={() => toggleSelect(uniqId)} style={{ cursor: 'pointer' }}>
-                                            {isSelected ? <CheckSquare size={20} color="#4caf50" /> : <Square size={20} style={{ opacity: 0.5 }} />}
-                                        </div>
+                                        {!t.closing_id ? (
+                                            <div onClick={() => toggleSelect(uniqId)} style={{ cursor: 'pointer' }}>
+                                                {isSelected ? <CheckSquare size={20} color="#4caf50" /> : <Square size={20} style={{ opacity: 0.5 }} />}
+                                            </div>
+                                        ) : (
+                                            <Lock size={16} style={{ opacity: 0.3, margin: '0 auto' }} title="Kilitli" />
+                                        )}
                                     </td>
                                     <td style={{ padding: '10px' }} data-label="Tarih">{t.date ? new Date(t.date).toLocaleDateString('tr-TR') : '-'}</td>
                                     <td style={{ padding: '10px' }} data-label="Mağaza">{t.store_name || '-'}</td>
@@ -270,9 +402,15 @@ const SubLedger = () => {
                                     </td>
                                     <td style={{ padding: '10px' }} data-label="İşlemler">
                                         <div style={{ display: 'flex', gap: '5px' }}>
-                                            <button onClick={() => handleEdit(t)} className="glass-btn" style={{ padding: '5px' }} title="Düzenle">
-                                                <Edit2 size={16} />
-                                            </button>
+                                            {t.closing_id ? (
+                                                <span style={{ padding: '5px', opacity: 0.5, display: 'inline-flex', alignItems: 'center' }} title="Bu işlem kilitlidir.">
+                                                    <Lock size={16} />
+                                                </span>
+                                            ) : (
+                                                <button onClick={() => handleEdit(t)} className="glass-btn" style={{ padding: '5px' }} title="Düzenle">
+                                                    <Edit2 size={16} />
+                                                </button>
+                                            )}
                                             {t.type === 'hakedis' && (
                                                 <button onClick={() => handleShowDetail(t)} className="glass-btn" style={{ padding: '5px' }} title="Detay">
                                                     <Eye size={16} />
@@ -383,7 +521,7 @@ const SubLedger = () => {
                                     try {
                                         await api.put(`/subs/cash/${editCashData.id}`, editCashData);
                                         setShowEditCashModal(false);
-                                        fetchData();
+                                        fetchData(selectedPeriod);
                                     } catch (e) { alert('Hata oluştu'); }
                                 }}
                                 className="glass-btn" style={{ background: '#4caf50', marginTop: '10px' }}>Güncelle</button>
@@ -507,10 +645,64 @@ const SubLedger = () => {
 
                                         await api.put(`/subs/payment/${editPaymentData.id}`, formData);
                                         setShowEditPaymentModal(false);
-                                        fetchData();
+                                        fetchData(selectedPeriod);
                                     } catch (e) { alert('Hata oluştu'); }
                                 }}
                                 className="glass-btn" style={{ background: '#4caf50' }}>Güncellemeleri Kaydet</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Period Closing Modal */}
+            {showClosingModal && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                    <div className="glass-panel" style={{ width: '100%', maxWidth: '400px', padding: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                            <h3 style={{ margin: 0 }}>Dönem Kapatma (Devir)</h3>
+                            <button onClick={() => setShowClosingModal(false)} style={{ background: 'none', border: 'none', color: '#fff' }}><X size={20} /></button>
+                        </div>
+                        <p style={{ fontSize: '0.85rem', opacity: 0.8, marginBottom: '15px' }}>
+                            Kapatılan dönemdeki tüm hareketler arşivlenecek ve kilitlenecektir. Kalan bakiye yeni dönem için devredecektir.
+                        </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7, marginBottom: '5px' }}>Dönem (Yıl-Ay)</label>
+                                <input 
+                                    type="month" 
+                                    className="glass-input" 
+                                    style={{ width: '100%' }}
+                                    value={closingPeriod} 
+                                    onChange={e => setClosingPeriod(e.target.value)} 
+                                />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7, marginBottom: '5px' }}>Kapanış Günü (Son Tarih)</label>
+                                <input 
+                                    type="date" 
+                                    className="glass-input" 
+                                    style={{ width: '100%' }}
+                                    value={closingDate} 
+                                    onChange={e => setClosingDate(e.target.value)} 
+                                />
+                            </div>
+                            
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+                                <button 
+                                    onClick={() => setShowClosingModal(false)} 
+                                    className="glass-btn" 
+                                    style={{ flex: 1 }}
+                                >
+                                    İptal
+                                </button>
+                                <button
+                                    onClick={handleExecuteClosing}
+                                    className="glass-btn" 
+                                    style={{ background: '#ff9800', color: '#fff', flex: 1 }}
+                                >
+                                    Dönemi Kapat
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
