@@ -3,6 +3,17 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { ArrowLeft, Download, Trash2, CheckSquare, Square, Eye, X, Edit2, Plus, Trash, Lock } from 'lucide-react';
 
+const formatPeriodName = (periodStr) => {
+    if (!periodStr) return '';
+    const [year, month] = periodStr.split('-');
+    const months = [
+        'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
+        'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+    ];
+    const monthIdx = parseInt(month, 10) - 1;
+    return `${months[monthIdx]} ${year}`;
+};
+
 const SubLedger = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -71,12 +82,24 @@ const SubLedger = () => {
             
             const exportRows = [];
             
+            // Determine which period the carry-over balance came from
+            let carryOverPeriodName = '';
+            if (selectedPeriod === 'active') {
+                carryOverPeriodName = availablePeriods[0]?.period || '';
+            } else if (selectedPeriod !== 'all') {
+                const currentIdx = availablePeriods.findIndex(p => String(p.id) === String(selectedPeriod));
+                if (currentIdx !== -1 && currentIdx + 1 < availablePeriods.length) {
+                    carryOverPeriodName = availablePeriods[currentIdx + 1].period;
+                }
+            }
+            const formattedCarryOverPeriod = carryOverPeriodName ? `${formatPeriodName(carryOverPeriodName)} Devri` : 'Devir Bakiyesi';
+            
             // 1. Add starting balance row if present
             if (selectedPeriod !== 'all' && startingBalance !== 0) {
                 exportRows.push({
                     Tarih: '-',
                     Mağaza: '-',
-                    Açıklama: 'Önceki Dönemden Devreden Bakiye (Devir Bakiyesi)',
+                    Açıklama: `Önceki Dönemden Devreden Bakiye (${formattedCarryOverPeriod})`,
                     'Borç (Ödeme)': startingBalance < 0 ? Math.abs(startingBalance) : 0,
                     'Alacak (Hakediş)': startingBalance >= 0 ? startingBalance : 0,
                     Bakiye: startingBalance
@@ -343,6 +366,18 @@ const SubLedger = () => {
         return tDate.getMonth() !== todayDate.getMonth() || tDate.getFullYear() !== todayDate.getFullYear();
     });
 
+    // Determine which period the carry-over balance came from
+    let carryOverPeriodName = '';
+    if (selectedPeriod === 'active') {
+        carryOverPeriodName = availablePeriods[0]?.period || '';
+    } else if (selectedPeriod !== 'all') {
+        const currentIdx = availablePeriods.findIndex(p => String(p.id) === String(selectedPeriod));
+        if (currentIdx !== -1 && currentIdx + 1 < availablePeriods.length) {
+            carryOverPeriodName = availablePeriods[currentIdx + 1].period;
+        }
+    }
+    const formattedCarryOverPeriod = carryOverPeriodName ? `${formatPeriodName(carryOverPeriodName)} Devri` : 'Devir Bakiyesi';
+
     return (
         <div className="dashboard">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
@@ -487,7 +522,7 @@ const SubLedger = () => {
                                 <td style={{ padding: '10px' }}></td>
                                 <td style={{ padding: '10px' }}>-</td>
                                 <td style={{ padding: '10px' }}>-</td>
-                                <td style={{ padding: '10px', fontWeight: 'bold', color: '#ff9800' }}>Önceki Dönemden Devreden Bakiye (Devir Bakiyesi)</td>
+                                <td style={{ padding: '10px', fontWeight: 'bold', color: '#ff9800' }}>{`Önceki Dönemden Devreden Bakiye (${formattedCarryOverPeriod})`}</td>
                                 <td style={{ padding: '10px', color: '#f44336' }}>
                                     {startingBalance < 0 ? Math.abs(startingBalance).toLocaleString('tr-TR') + ' ₺' : '-'}
                                 </td>
